@@ -1,0 +1,45 @@
+{
+  "colors": {
+    "dark": {
+      "primary": "#60A5FA",
+      "onPrimary": "#FFFFFF",
+      "surface": "#2D3748",
+      "background": "#1A202C",
+      "textMain": "#FFFFFF",
+      "textMuted": "#E2E8F0"
+    }
+  },
+  "contrastChecks": [
+    {
+      "name": "主要文本 on 卡片背景",
+      "ratio": "11.99",
+      "passes": true
+    },
+    {
+      "name": "次要文本 on 卡片背景",
+      "ratio": "9.73",
+      "passes": true
+    },
+    {
+      "name": "主要文本 on 页面背景",
+      "ratio": "16.32",
+      "passes": true
+    },
+    {
+      "name": "次要文本 on 页面背景",
+      "ratio": "13.24",
+      "passes": true
+    },
+    {
+      "name": "按钮文本 on 按钮背景",
+      "ratio": "2.54",
+      "passes": false
+    },
+    {
+      "name": "卡片背景 on 页面背景",
+      "ratio": "1.36",
+      "passes": false
+    }
+  ],
+  "surfaceOnBackground": "1.36"
+}

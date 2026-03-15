@@ -1,0 +1,73 @@
+/* 强制暗色模式修复 - 直接覆盖所有元素 */
+
+/* 全局暗色模式覆盖 */
+.dark {
+  background-color: #374151 !important;
+  color: #ffffff !important;
+}
+
+/* 卡片和容器 */
+.dark .bg-surface,
+.dark [class*="bg-surface"],
+.dark [class*="bg-gray-900"],
+.dark [class*="bg-gray-800"] {
+  background-color: #1E293B !important;
+  color: #ffffff !important;
+}
+
+/* 输入框 */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1E293B !important;
+  color: #ffffff !important;
+  border-color: #374151 !important;
+}
+
+/* 文本 */
+.dark .text-main,
+.dark [class*="text-gray-100"],
+.dark [class*="text-white"] {
+  color: #ffffff !important;
+}
+
+.dark .text-muted,
+.dark [class*="text-gray-300"],
+.dark [class*="text-gray-400"] {
+  color: #F8FAFC !important;
+}
+
+/* 按钮 */
+.dark button {
+  color: #ffffff !important;
+}
+
+/* 统计卡片 */
+.dark [class*="card"],
+.dark [class*="stat"],
+.dark [class*="bg-opacity"] {
+  background-color: #1E293B !important;
+  color: #ffffff !important;
+}
+
+/* 图表和可视化 */
+.dark [class*="chart"],
+.dark [class*="graph"],
+.dark [class*="svg"] {
+  color: #ffffff !important;
+}
+
+/* 滚动条 */
+.dark ::-webkit-scrollbar {
+  background-color: #1E293B !important;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #374151 !important;
+}
+
+/* 确保所有元素都继承 */
+.dark * {
+  color: inherit !important;
+  border-color: inherit !important;
+}

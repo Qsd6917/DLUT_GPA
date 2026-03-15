@@ -1,0 +1,71 @@
+{
+  "timestamp": "2026-02-20T09:29:36.644Z",
+  "currentColors": {
+    "light": {
+      "primary": "#005BAC",
+      "onPrimary": "#FFFFFF",
+      "surface": "#FFFFFF",
+      "background": "#F8FAFC",
+      "textMain": "#1E293B",
+      "textMuted": "#64748B"
+    },
+    "dark": {
+      "primary": "#60A5FA",
+      "onPrimary": "#1F2937",
+      "surface": "#1F2937",
+      "background": "#111827",
+      "textMain": "#F3F4F6",
+      "textMuted": "#9CA3AF"
+    }
+  },
+  "proposedColors": {
+    "light": {
+      "primary": "#005BAC",
+      "onPrimary": "#FFFFFF",
+      "surface": "#FFFFFF",
+      "background": "#F1F5F9",
+      "textMain": "#1E293B",
+      "textMuted": "#4B5563"
+    },
+    "dark": {
+      "primary": "#60A5FA",
+      "onPrimary": "#1F2937",
+      "surface": "#1F2937",
+      "background": "#111827",
+      "textMain": "#F3F4F6",
+      "textMuted": "#D1D5DB"
+    }
+  },
+  "improvements": {
+    "lightBackground": {
+      "original": "4.55",
+      "new": "6.90",
+      "improvement": "51.7"
+    },
+    "lightSurface": {
+      "original": "4.76",
+      "new": "7.56",
+      "improvement": "58.8"
+    },
+    "darkBackground": {
+      "original": "6.99",
+      "new": "12.04",
+      "improvement": "72.3"
+    },
+    "darkSurface": {
+      "original": "5.78",
+      "new": "9.96",
+      "improvement": "72.3"
+    }
+  },
+  "wcagCompliance": {
+    "light": {
+      "textMutedOnBackground": true,
+      "textMutedOnSurface": true
+    },
+    "dark": {
+      "textMutedOnBackground": true,
+      "textMutedOnSurface": true
+    }
+  }
+}

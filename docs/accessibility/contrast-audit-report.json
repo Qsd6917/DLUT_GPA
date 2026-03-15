@@ -1,0 +1,120 @@
+{
+  "timestamp": "2026-02-20T09:28:07.985Z",
+  "currentColors": {
+    "light": {
+      "primary": "#005BAC",
+      "onPrimary": "#FFFFFF",
+      "surface": "#FFFFFF",
+      "background": "#F8FAFC",
+      "textMain": "#1E293B",
+      "textMuted": "#64748B"
+    },
+    "dark": {
+      "primary": "#60A5FA",
+      "onPrimary": "#1F2937",
+      "surface": "#1F2937",
+      "background": "#111827",
+      "textMain": "#F3F4F6",
+      "textMuted": "#9CA3AF"
+    }
+  },
+  "combinations": [
+    {
+      "name": "亮色: text-main on background",
+      "foreground": "#1E293B",
+      "background": "#F8FAFC",
+      "contrast": "13.98",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "亮色: text-main on surface",
+      "foreground": "#1E293B",
+      "background": "#FFFFFF",
+      "contrast": "14.63",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "亮色: text-muted on background",
+      "foreground": "#64748B",
+      "background": "#F8FAFC",
+      "contrast": "4.55",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "亮色: text-muted on surface",
+      "foreground": "#64748B",
+      "background": "#FFFFFF",
+      "contrast": "4.76",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "亮色: primary on surface",
+      "foreground": "#005BAC",
+      "background": "#FFFFFF",
+      "contrast": "6.79",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "亮色: on-primary on primary",
+      "foreground": "#FFFFFF",
+      "background": "#005BAC",
+      "contrast": "6.79",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "暗色: text-main on background",
+      "foreground": "#F3F4F6",
+      "background": "#111827",
+      "contrast": "16.12",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "暗色: text-main on surface",
+      "foreground": "#F3F4F6",
+      "background": "#1F2937",
+      "contrast": "13.34",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "暗色: text-muted on background",
+      "foreground": "#9CA3AF",
+      "background": "#111827",
+      "contrast": "6.99",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "暗色: text-muted on surface",
+      "foreground": "#9CA3AF",
+      "background": "#1F2937",
+      "contrast": "5.78",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "暗色: primary on surface",
+      "foreground": "#60A5FA",
+      "background": "#1F2937",
+      "contrast": "5.77",
+      "passesNormal": true,
+      "passesLarge": true
+    },
+    {
+      "name": "暗色: on-primary on primary",
+      "foreground": "#1F2937",
+      "background": "#60A5FA",
+      "contrast": "5.77",
+      "passesNormal": true,
+      "passesLarge": true
+    }
+  ],
+  "issues": []
+}

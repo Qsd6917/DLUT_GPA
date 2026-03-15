@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 212 100% 34%; /* #005BAC */
+    --color-on-primary: 0 0% 100%; /* #FFFFFF */
+    --color-surface: 0 0% 100%; /* #FFFFFF */
+    --color-background: 210 40% 96%; /* #F1F5F9 */
+    --color-text-main: 215 28% 17%; /* #1E293B */
+    --color-text-muted: 215 25% 35%; /* #4B5563 */
+  }
+
+  .dark {
+    --color-primary: 212 80% 50%; /* #0077CC - Enhanced DLUT Blue for dark mode */
+    --color-on-primary: 0 0% 100%; /* #FFFFFF */
+    --color-surface: 215 28% 17%; /* #1E293B */
+    --color-background: 215 30% 12%; /* Darker background for better contrast */
+    --color-text-main: 0 0% 100%; /* #FFFFFF */
+    --color-text-muted: 210 40% 98%; /* #F8FAFC */
+  }
+  
+  .dlut-blue {
+    --color-primary: 212 100% 34%; /* #005BAC - Original DLUT Blue */
+    --color-on-primary: 0 0% 100%; /* #FFFFFF */
+    --color-surface: 215 28% 17%; /* #1E293B - Dark surface for contrast */
+    --color-background: 215 30% 15%; /* Slightly lighter than .dark for distinction */
+    --color-text-main: 0 0% 100%; /* #FFFFFF */
+    --color-text-muted: 210 40% 90%; /* Light gray text */
+  }
+}

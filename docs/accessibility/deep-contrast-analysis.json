@@ -1,0 +1,62 @@
+{
+  "currentColors": {
+    "primary": "#60A5FA",
+    "onPrimary": "#1F2937",
+    "surface": "#1F2937",
+    "background": "#111827",
+    "textMain": "#F3F4F6",
+    "textMuted": "#D1D5DB"
+  },
+  "proposedColors": {
+    "primary": "#93C5FD",
+    "onPrimary": "#111827",
+    "surface": "#1F2937",
+    "background": "#0F172A",
+    "textMain": "#FFFFFF",
+    "textMuted": "#E5E7EB"
+  },
+  "elements": [
+    {
+      "name": "卡片标题 (textMain on surface)",
+      "currentRatio": "13.34",
+      "proposedRatio": "14.68",
+      "improvement": "10.1"
+    },
+    {
+      "name": "卡片副标题 (textMuted on surface)",
+      "currentRatio": "9.96",
+      "proposedRatio": "11.86",
+      "improvement": "19.0"
+    },
+    {
+      "name": "输入框文本 (textMain on surface)",
+      "currentRatio": "13.34",
+      "proposedRatio": "14.68",
+      "improvement": "10.1"
+    },
+    {
+      "name": "按钮文本 (textMain on primary)",
+      "currentRatio": "2.31",
+      "proposedRatio": "1.80",
+      "improvement": "-21.9"
+    },
+    {
+      "name": "统计数字 (textMain on surface)",
+      "currentRatio": "13.34",
+      "proposedRatio": "14.68",
+      "improvement": "10.1"
+    },
+    {
+      "name": "图表标签 (textMuted on surface)",
+      "currentRatio": "9.96",
+      "proposedRatio": "11.86",
+      "improvement": "19.0"
+    },
+    {
+      "name": "页面背景文本 (textMain on background)",
+      "currentRatio": "16.12",
+      "proposedRatio": "17.85",
+      "improvement": "10.8"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+import React, { useMemo } from 'react';
+import { GpaStats } from '../../types';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { Sparkles, PieChart as PieChartIcon } from 'lucide-react';
+import { useTranslation } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
+
+interface ScoreDistributionChartProps {
+  stats: GpaStats;
+}
+
+export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({ stats }) => {
+  const { t } = useTranslation();
+  const { theme } = useTheme();
+
+  const primaryColor = theme === 'dark' ? '#60A5FA' : '#005BAC';
+  const mutedColor = theme === 'dark' ? '#94A3B8' : '#64748B';
+  const COLORS = useMemo(() => ['#10B981', primaryColor, '#F59E0B', '#EF4444', '#6B7280'], [primaryColor]);
+
+  return (
+    <div className="bg-surface p-6 rounded-2xl shadow-soft border border-primary/10 transition-all hover:shadow-md">
+      <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-bold text-main flex items-center gap-2">
+            <Sparkles size={18} className="text-yellow-500" />
+            {t('score_dist')}
+          </h3>
+      </div>
+      
+      <div className="h-64 w-full relative">
+        {stats.totalCredits > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+                <Pie
+                data={stats.scoreDistribution}
+                cx="50%"
+                cy="50%"
+                innerRadius={65}
+                outerRadius={85}
+                paddingAngle={4}
+                dataKey="value"
+                stroke="none"
+                cornerRadius={4}
+                >
+                {stats.scoreDistribution.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+                </Pie>
+                <RechartsTooltip 
+                     contentStyle={{ 
+                       borderRadius: '12px', 
+                       border: 'none', 
+                       boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                       backgroundColor: theme === 'dark' ? '#1E293B' : '#FFFFFF',
+                       color: theme === 'dark' ? '#F8FAFC' : '#1E293B'
+                     }}
+                />
+                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
+                    <tspan x="50%" dy="-0.6em" fontSize="28" fontWeight="800" fill={primaryColor} className="tracking-tighter">
+                        {stats.weightedGpa.toFixed(3)}
+                    </tspan>
+                    <tspan x="50%" dy="1.6em" fontSize="12" fontWeight="500" fill={mutedColor} className="uppercase tracking-widest">
+                        GPA
+                    </tspan>
+                </text>
+            </PieChart>
+            </ResponsiveContainer>
+        ) : (
+            <div className="h-full flex flex-col items-center justify-center text-muted text-sm gap-2">
+                <PieChartIcon size={32} className="opacity-20" />
+                {t('no_data')}
+            </div>
+        )}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 justify-center px-2">
+          {stats.scoreDistribution.map((entry, index) => (
+              <div key={entry.name} className="flex items-center gap-1.5 text-xs font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full ring-2 ring-surface shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                  <span className="text-muted">{entry.name}</span>
+                  <span className="text-muted/70 ml-0.5">({entry.value})</span>
+              </div>
+          ))}
+      </div>
+    </div>
+  );
+};
