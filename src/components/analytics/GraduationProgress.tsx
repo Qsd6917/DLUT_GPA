@@ -26,8 +26,8 @@ export const GraduationProgress: React.FC<GraduationProgressProps> = ({
     return (
       <div className="mb-4">
         <div className="flex justify-between items-end mb-1.5">
-          <span className="text-xs font-bold text-muted uppercase tracking-[0.24em]">{label}</span>
-          <span className="data-figure text-xs text-main">
+          <span className="type-label text-xs">{label}</span>
+          <span className="num-inline text-xs text-main">
             {current.toFixed(1)} / {target} ({percentage.toFixed(0)}%)
           </span>
         </div>
@@ -49,7 +49,7 @@ export const GraduationProgress: React.FC<GraduationProgressProps> = ({
         </div>
         <div>
           <div className="section-kicker">Progress Ledger</div>
-          <h3 className="text-2xl leading-none text-main sm:text-3xl">毕业进度概览</h3>
+          <h3 className="type-section-title text-main">毕业进度概览</h3>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ export const GraduationProgress: React.FC<GraduationProgressProps> = ({
         {renderProgressBar('选修学分', electiveCredits, requirements.elective, 'bg-gradient-to-r from-emerald-500 to-teal-500')}
       </div>
       
-      <div className="mt-6 flex items-center justify-center gap-2 border-t border-primary/10 pt-4 text-xs text-muted">
+      <div className="type-body-sm mt-6 flex items-center justify-center gap-2 border-t border-primary/10 pt-4">
         <CheckCircle2 size={14} />
         <span>仅供参考，具体要求请以培养方案为准</span>
       </div>

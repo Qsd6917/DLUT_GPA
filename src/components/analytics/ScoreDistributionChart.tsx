@@ -23,7 +23,7 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({ 
       <div className="mb-4 flex items-center justify-between">
         <div>
           <div className="section-kicker">Distribution Story</div>
-          <h3 className="mt-2 text-2xl leading-none text-main sm:text-3xl">{t('score_dist')}</h3>
+          <h3 className="type-section-title mt-2 text-main">{t('score_dist')}</h3>
         </div>
         <div className="rounded-[1.2rem] border border-primary/15 bg-primary/5 p-3 text-primary">
           <Sparkles size={18} className="text-[hsl(var(--color-accent))]" />
@@ -62,15 +62,23 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({ 
                     <tspan
                       x="50%"
                       dy="-0.6em"
-                      fontSize="26"
-                      fontWeight="700"
-                      fontFamily="Inter, var(--font-body)"
+                      fontSize="28"
+                      fontWeight="600"
+                      fontFamily="var(--font-numeric)"
                       fill={primaryColor}
-                      className="tracking-tighter"
+                      letterSpacing="0.02em"
                     >
                         {stats.weightedGpa.toFixed(3)}
                     </tspan>
-                    <tspan x="50%" dy="1.6em" fontSize="12" fontWeight="500" fill={mutedColor} className="uppercase tracking-widest">
+                    <tspan
+                      x="50%"
+                      dy="1.6em"
+                      fontSize="11"
+                      fontWeight="600"
+                      fontFamily="var(--font-body)"
+                      fill={mutedColor}
+                      letterSpacing="0.08em"
+                    >
                         GPA
                     </tspan>
                 </text>
@@ -89,7 +97,7 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({ 
               <div key={entry.name} className="flex items-center gap-1.5 text-xs font-medium">
                   <span className="w-2.5 h-2.5 rounded-full ring-2 ring-surface shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
                   <span className="text-muted">{entry.name}</span>
-                  <span className="text-muted/70 ml-0.5">({entry.value})</span>
+                  <span className="num-inline ml-0.5 text-muted/70">({entry.value})</span>
               </div>
           ))}
       </div>

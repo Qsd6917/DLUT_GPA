@@ -36,32 +36,32 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
         </div>
         <div>
           <div className="section-kicker">Projection</div>
-          <h3 className="text-2xl leading-none text-main sm:text-3xl">目标 GPA 计算器</h3>
+          <h3 className="type-section-title text-main">目标 GPA 计算器</h3>
         </div>
       </div>
       
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="target-gpa" className="block text-xs font-bold text-muted uppercase tracking-[0.24em] mb-1.5">目标 GPA</label>
+            <label htmlFor="target-gpa" className="type-label mb-1.5 block">目标 GPA</label>
             <input 
               id="target-gpa"
               type="number" 
               step="0.01"
               value={targetGpa}
               onChange={e => setTargetGpa(e.target.value)}
-              className="w-full rounded-2xl border border-primary/15 bg-background/70 px-3 py-2.5 text-sm font-semibold text-main outline-none focus:border-[hsl(var(--color-accent))] focus:ring-4 focus:ring-[hsla(var(--color-accent),0.12)]"
+              className="num-input w-full rounded-2xl border border-primary/15 bg-background/70 px-3 py-2.5 text-sm text-main outline-none focus:border-[hsl(var(--color-accent))] focus:ring-4 focus:ring-[hsla(var(--color-accent),0.12)]"
             />
           </div>
           <div>
-            <label htmlFor="future-credits" className="block text-xs font-bold text-muted uppercase tracking-[0.24em] mb-1.5">剩余学分</label>
+            <label htmlFor="future-credits" className="type-label mb-1.5 block">剩余学分</label>
             <input 
               id="future-credits"
               type="number" 
               step="0.5"
               value={futureCredits}
               onChange={e => setFutureCredits(e.target.value)}
-              className="w-full rounded-2xl border border-primary/15 bg-background/70 px-3 py-2.5 text-sm font-semibold text-main outline-none focus:border-[hsl(var(--color-accent))] focus:ring-4 focus:ring-[hsla(var(--color-accent),0.12)]"
+              className="num-input w-full rounded-2xl border border-primary/15 bg-background/70 px-3 py-2.5 text-sm text-main outline-none focus:border-[hsl(var(--color-accent))] focus:ring-4 focus:ring-[hsla(var(--color-accent),0.12)]"
             />
           </div>
         </div>
@@ -81,7 +81,7 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
               {result > 4.0 ? '> 4.0' : result < 0 ? '已达成' : result.toFixed(3)}
             </div>
             {result > 4.0 && (
-              <p className="mt-2 text-center text-[11px] font-semibold text-[hsl(var(--color-accent))]">目标过高，当前剩余学分内几乎无法达成</p>
+              <p className="type-body-sm mt-2 text-center text-[hsl(var(--color-accent))]">目标过高，当前剩余学分内几乎无法达成</p>
             )}
           </div>
         )}

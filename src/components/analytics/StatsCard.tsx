@@ -27,7 +27,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   const diffNode =
     isSandbox && diff !== undefined ? (
       <div
-        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+        className={`num-inline inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
           diff > 0.001
             ? 'bg-emerald-500/12 text-emerald-300'
             : diff < -0.001
@@ -56,7 +56,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           </div>
         </div>
 
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">{description}</p>
+        <p className="type-label text-xs text-muted">{description}</p>
       </div>
     </article>
   );

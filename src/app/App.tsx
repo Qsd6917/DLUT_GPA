@@ -254,8 +254,8 @@ function App() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="section-kicker">Courses</div>
-          <h2 className="text-3xl leading-none text-main sm:text-4xl">{t('course_workspace_title')}</h2>
-          <p className="mt-2 text-sm text-muted">{t('course_workspace_desc')}</p>
+          <h2 className="type-page-title text-main">{t('course_workspace_title')}</h2>
+          <p className="type-body-sm mt-2">{t('course_workspace_desc')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <button type="button" onClick={() => setIsCourseEntryOpen(true)} className="primary-button" aria-label={t('new_course')}>
@@ -312,8 +312,8 @@ function App() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="section-kicker">Analysis</div>
-          <h2 className="text-3xl leading-none text-main sm:text-4xl">{t('analysis_title')}</h2>
-          <p className="mt-2 text-sm text-muted">{t('analysis_desc')}</p>
+          <h2 className="type-page-title text-main">{t('analysis_title')}</h2>
+          <p className="type-body-sm mt-2">{t('analysis_desc')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <span className="status-chip">{currentMethodLabel}</span>
@@ -419,8 +419,8 @@ function App() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="section-kicker">Entry</div>
-                  <h3 className="mt-3 text-3xl leading-none text-main">{t('course_entry')}</h3>
-                  <p className="mt-2 text-sm text-muted">{t('course_entry_desc')}</p>
+                  <h3 className="type-page-title mt-3 text-main">{t('course_entry')}</h3>
+                  <p className="type-body-sm mt-2">{t('course_entry_desc')}</p>
                 </div>
                 <button type="button" onClick={() => setIsCourseEntryOpen(false)} className="ghost-button px-3 py-2" aria-label={t('close_entry')}>
                   {t('close_entry')}

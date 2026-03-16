@@ -40,12 +40,12 @@ const VirtualCourseList: React.FC<VirtualCourseListProps> = ({ courses, onRemove
                 {course.isActive ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-muted" />}
               </button>
               <div className="min-w-0">
-                <div className="truncate font-medium text-main">{course.name}</div>
+                <div className="truncate text-sm font-semibold text-main">{course.name}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
                   <span className={`table-chip ${getTypeBadgeClass(course.type)}`}>{course.type}</span>
                   <span className="table-chip">{course.semester}</span>
-                  <span>{course.credits} 学分</span>
-                  <span>{course.score} 分</span>
+                  <span className="num-inline">{course.credits} 学分</span>
+                  <span className="num-inline">{course.score} 分</span>
                   <span className="data-figure text-primary">{course.gpa.toFixed(2)} GPA</span>
                 </div>
               </div>

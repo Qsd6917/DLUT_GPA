@@ -54,8 +54,8 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targ
             <Brain className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-main">智能学业建议</h2>
-            <p className="text-sm text-muted">基于当前课程表现的本地规则分析，不会上传个人数据</p>
+            <h2 className="type-section-title text-main">智能学业建议</h2>
+            <p className="type-body-sm">基于当前课程表现的本地规则分析，不会上传个人数据</p>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@ const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({ r
                   成功率 {(recommendation.successProbability * 100).toFixed(0)}%
                 </span>
                 <div className="mt-1 text-xs text-muted">
-                  预计成绩 <span className="font-bold text-main">{recommendation.predictedGrade.toFixed(1)}</span>
+                  预计成绩 <span className="num-inline text-main">{recommendation.predictedGrade.toFixed(1)}</span>
                 </div>
               </div>
             </div>
@@ -191,12 +191,12 @@ const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({ r
             <div className="mt-3 pt-3 border-t border-primary/10 flex justify-between text-sm">
               <div>
                 <span className="text-muted">置信度</span>{' '}
-                <span className="font-medium text-main">{(recommendation.confidence * 100).toFixed(0)}%</span>
+                <span className="num-inline text-main">{(recommendation.confidence * 100).toFixed(0)}%</span>
               </div>
               <div>
                 <Clock size={14} className="inline mr-1" />
                 <span className="text-muted">建议投入</span>{' '}
-                <span className="font-medium text-main">{recommendation.suggestedStudyTime} 小时/周</span>
+                <span className="num-inline text-main">{recommendation.suggestedStudyTime} 小时/周</span>
               </div>
             </div>
           </div>

@@ -52,8 +52,8 @@ export const CourseList: React.FC<CourseListProps> = ({
             <SearchX size={32} />
           </div>
           <div>
-            <h3 className="text-3xl leading-none text-main">{t('empty_filtered_courses_title')}</h3>
-            <p className="mt-2 max-w-md text-sm text-muted">{t('empty_filtered_courses_desc')}</p>
+            <h3 className="type-page-title text-main">{t('empty_filtered_courses_title')}</h3>
+            <p className="type-body-sm mt-2 max-w-md">{t('empty_filtered_courses_desc')}</p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button type="button" onClick={onClearFilters} className="primary-button" disabled={!onClearFilters}>
@@ -74,8 +74,8 @@ export const CourseList: React.FC<CourseListProps> = ({
           <BookOpen size={32} />
         </div>
         <div>
-          <h3 className="text-3xl leading-none text-main">{t('empty_courses_title')}</h3>
-          <p className="mt-2 max-w-md text-sm text-muted">{t('empty_courses_desc')}</p>
+          <h3 className="type-page-title text-main">{t('empty_courses_title')}</h3>
+          <p className="type-body-sm mt-2 max-w-md">{t('empty_courses_desc')}</p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button type="button" onClick={onOpenCreate} className="primary-button" disabled={!onOpenCreate}>
@@ -100,7 +100,7 @@ export const CourseList: React.FC<CourseListProps> = ({
       <div className="flex flex-col gap-4 border-b border-primary/10 px-5 py-5 lg:flex-row lg:items-end lg:justify-between lg:px-6">
         <div>
           <div className="section-kicker">Ledger</div>
-          <h3 className="mt-2 text-3xl leading-none text-main">课程档案</h3>
+          <h3 className="type-section-title mt-2 text-main">课程档案</h3>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="metric-card min-w-[10rem]">
@@ -117,7 +117,7 @@ export const CourseList: React.FC<CourseListProps> = ({
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-left">
           <thead>
-            <tr className="border-b border-primary/10 bg-slate-900/5 text-[11px] uppercase tracking-[0.22em] text-muted dark:bg-white/[0.03]">
+            <tr className="border-b border-primary/10 bg-slate-900/5 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted dark:bg-white/[0.03]">
               <th className="w-14 p-4 text-center">
                 <button
                   type="button"
@@ -157,7 +157,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                 </td>
                 <td className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className="data-figure min-w-7 pt-1 text-[10px] tracking-[0.2em] text-muted">
+                    <div className="data-figure min-w-7 pt-1 text-[10px] tracking-[0.08em] text-muted">
                       {String(index + 1).padStart(2, '0')}
                     </div>
                     <div className="space-y-1">
@@ -228,7 +228,7 @@ export const CourseList: React.FC<CourseListProps> = ({
           共 {courses.length} 门课程
           {someSelected ? <span className="ml-2 text-primary">计入 {activeCount} 门</span> : null}
         </div>
-        <div className="data-figure text-xs tracking-[0.16em]">LEDGER READY</div>
+        <div className="type-label text-xs tracking-[0.1em]">LEDGER READY</div>
       </div>
     </section>
   );

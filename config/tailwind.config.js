@@ -15,6 +15,11 @@ export default {
         'main': 'hsl(var(--color-text-main) / <alpha-value>)',
         'muted': 'hsl(var(--color-text-muted) / <alpha-value>)',
       },
+      fontFamily: {
+        body: ['var(--font-body)'],
+        heading: ['var(--font-heading)'],
+        numeric: ['var(--font-numeric)'],
+      },
     },
   },
   plugins: [],

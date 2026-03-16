@@ -53,8 +53,8 @@ export const GpaSimulationMode: React.FC<GpaSimulationModeProps> = ({ courses, m
       <div className="mb-6 flex flex-col gap-4 border-b border-primary/10 pb-5 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="section-kicker">Simulation</div>
-          <h3 className="mt-2 text-2xl leading-none text-main sm:text-3xl">{t('simulation_mode_title')}</h3>
-          <p className="mt-2 text-sm text-muted">{t('simulation_instructions')}</p>
+          <h3 className="type-section-title mt-2 text-main">{t('simulation_mode_title')}</h3>
+          <p className="type-body-sm mt-2">{t('simulation_instructions')}</p>
         </div>
         <div className="rounded-[1.2rem] border border-primary/10 bg-primary/10 p-3 text-primary">
           <SlidersHorizontal size={18} />
@@ -84,11 +84,11 @@ export const GpaSimulationMode: React.FC<GpaSimulationModeProps> = ({ courses, m
                 <div className="mb-3 flex items-start justify-between gap-4">
                   <div>
                     <div className="text-sm font-semibold text-main">{course.name}</div>
-                    <div className="mt-1 text-xs text-muted">
+                    <div className="type-body-sm mt-1">
                       {t('credits')}: {course.credits} · GPA {calculateCourseGpa(currentScore, method).toFixed(2)}
                     </div>
                   </div>
-                  <div className="rounded-full border border-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+                  <div className="num-inline rounded-full border border-primary/15 px-3 py-1 text-xs text-primary">
                     <Sigma size={12} className="mr-1 inline" />
                     {currentScore.toFixed(1)}
                   </div>
@@ -96,10 +96,10 @@ export const GpaSimulationMode: React.FC<GpaSimulationModeProps> = ({ courses, m
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted">
+                    <span className="type-body-sm">
                       {t('current_score')}: {course.score}
                     </span>
-                    <span className={delta > 0 ? 'text-emerald-300' : delta < 0 ? 'text-[hsl(var(--color-accent))]' : 'text-muted'}>
+                    <span className={`num-inline ${delta > 0 ? 'text-emerald-300' : delta < 0 ? 'text-[hsl(var(--color-accent))]' : 'text-muted'}`}>
                       {delta > 0 ? '+' : ''}
                       {delta.toFixed(1)}
                     </span>

@@ -112,7 +112,7 @@ export const AcademicRadar: React.FC<AcademicRadarProps> = ({ courses }) => {
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="section-kicker">Radar</div>
-          <h3 className="mt-2 text-2xl leading-none text-main sm:text-3xl">{t('academic_radar_title')}</h3>
+          <h3 className="type-section-title mt-2 text-main">{t('academic_radar_title')}</h3>
         </div>
         <div className="rounded-[1.2rem] border border-primary/10 bg-primary/10 p-3 text-primary">
           <Trophy size={18} />
@@ -124,8 +124,16 @@ export const AcademicRadar: React.FC<AcademicRadarProps> = ({ courses }) => {
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
               <PolarGrid stroke={theme === 'dark' ? '#334155' : '#CBD5E1'} />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: theme === 'dark' ? '#CBD5E1' : '#475569', fontSize: 12 }} />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tickCount={6} tick={{ fill: theme === 'dark' ? '#94A3B8' : '#64748B', fontSize: 11 }} />
+              <PolarAngleAxis
+                dataKey="subject"
+                tick={{ fill: theme === 'dark' ? '#CBD5E1' : '#475569', fontSize: 12, fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 100]}
+                tickCount={6}
+                tick={{ fill: theme === 'dark' ? '#94A3B8' : '#64748B', fontSize: 11, fontFamily: 'var(--font-numeric)', fontWeight: 500 }}
+              />
               <Radar name={t('scores')} dataKey="score" stroke={secondaryColor} fill={primaryColor} fillOpacity={0.28} strokeWidth={2} />
             </RadarChart>
           </ResponsiveContainer>
@@ -142,7 +150,7 @@ export const AcademicRadar: React.FC<AcademicRadarProps> = ({ courses }) => {
           <div key={item.category} className="flex items-center gap-1.5 text-xs font-medium">
             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: secondaryColor }} />
             <span className="text-muted">{getCategoryLabel(item.category, t)}</span>
-            <span className="text-muted/70">({item.score})</span>
+            <span className="num-inline text-muted/70">({item.score})</span>
           </div>
         ))}
       </div>

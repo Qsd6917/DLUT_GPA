@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { TrendingUp, BarChart3 } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -15,6 +15,7 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
 
   // 定义颜色方案
   const primaryColor = theme === 'dark' ? '#60A5FA' : '#005BAC';
+  const axisColor = theme === 'dark' ? '#A8B3C7' : '#5B6B80';
   const barColors = [
     '#10B981', // 90-100 range (green)
     primaryColor, // 80-89 range (blue)
@@ -33,8 +34,10 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
             ? 'bg-gray-800 border-gray-700 text-white' 
             : 'bg-white border-gray-200 text-gray-800'
         }`}>
-          <p className="font-bold">{data.name}</p>
-          <p className="text-sm">{t('course_count')}: {data.value}</p>
+          <p className="type-label text-main dark:text-white">{data.name}</p>
+          <p className="type-body-sm mt-1">
+            {t('course_count')}: <span className="num-inline text-main dark:text-white">{data.value}</span>
+          </p>
         </div>
       );
     }
@@ -46,7 +49,7 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
       <div className="mb-4 flex items-center justify-between">
         <div>
           <div className="section-kicker">Histogram View</div>
-          <h3 className="mt-2 text-2xl leading-none text-main sm:text-3xl">
+          <h3 className="type-section-title mt-2 text-main">
             {t('score_dist')} - {t('histogram')}
           </h3>
         </div>
@@ -73,14 +76,15 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
               />
               <XAxis 
                 dataKey="name" 
-                stroke={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+                stroke={axisColor}
+                tick={{ fill: axisColor, fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 500 }}
               />
               <YAxis 
-                stroke={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+                stroke={axisColor}
+                tick={{ fill: axisColor, fontFamily: 'var(--font-numeric)', fontSize: 12, fontWeight: 500 }}
                 allowDecimals={false}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
               <Bar 
                 dataKey="value" 
                 name={t('course_count')}
@@ -109,7 +113,7 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
               style={{ backgroundColor: barColors[index % barColors.length] }}
             ></div>
             <span className="text-muted">{entry.name}</span>
-            <span className="text-muted/70">({entry.value})</span>
+            <span className="num-inline text-muted/70">({entry.value})</span>
           </div>
         ))}
       </div>

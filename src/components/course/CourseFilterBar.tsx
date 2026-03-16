@@ -138,7 +138,7 @@ export const CourseFilterBar: React.FC<CourseFilterBarProps> = ({
             className="w-full rounded-full border border-primary/15 bg-background/55 py-3 pl-11 pr-12 text-sm text-main outline-none transition-all placeholder:text-muted focus:border-primary focus:ring-4 focus:ring-primary/10"
           />
           {debouncedSearchTerm !== searchTerm ? (
-            <span className="data-figure absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-muted">SYNC</span>
+            <span className="type-label absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-muted">SYNC</span>
           ) : null}
         </div>
       </div>

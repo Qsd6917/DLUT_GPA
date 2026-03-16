@@ -84,14 +84,14 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-3">
             <div className="min-w-0">
-              <div className="hidden text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500/70 sm:block dark:text-white/50">
+              <div className="section-kicker hidden text-slate-500/70 sm:block dark:text-white/45">
                 Dalian University of Technology
               </div>
               <div className="flex flex-wrap items-end gap-2 sm:mt-2 sm:gap-3">
-                <h1 className="text-[1.55rem] leading-none text-slate-950 sm:text-[1.95rem] dark:text-white">
-                  <span className="font-bold">DLUT</span>
+                <h1 className="font-heading text-[1.62rem] leading-none tracking-[-0.03em] text-slate-950 sm:text-[2rem] dark:text-white">
+                  <span className="font-semibold">DLUT</span>
                   <span className="mx-1.5 font-medium text-slate-400 dark:text-white/35">-</span>
-                  <span className="font-medium text-primary">GPA</span>
+                  <span className="font-semibold text-primary">GPA</span>
                 </h1>
                 <span
                   className={`status-chip ${
@@ -173,11 +173,11 @@ export const Header: React.FC<HeaderProps> = ({
                 type="button"
                 onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
                 className={actionButton}
-              title={t('language_toggle')}
+                title={t('language_toggle')}
               aria-label={t('language_toggle')}
             >
               <Languages size={14} />
-              <span className="data-figure text-[11px] uppercase">{language}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.08em]">{language}</span>
             </button>
 
             <div className="relative" ref={methodRef}>
@@ -189,8 +189,8 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-expanded={isMethodOpen}
               >
                 <Settings size={14} />
-                <span className="data-figure hidden text-[11px] sm:inline">{currentMethodLabel}</span>
-                <span className="data-figure text-[11px] sm:hidden">GPA</span>
+                <span className="hidden text-[11px] font-semibold tracking-[0.04em] sm:inline">{currentMethodLabel}</span>
+                <span className="text-[11px] font-semibold tracking-[0.08em] sm:hidden">GPA</span>
                 <ChevronDown size={14} className={`transition-transform ${isMethodOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -215,7 +215,7 @@ export const Header: React.FC<HeaderProps> = ({
                           }`}
                         >
                           <span>{option.label}</span>
-                          {active ? <span className="data-figure text-[11px]">SET</span> : null}
+                          {active ? <span className="type-label text-[11px] text-primary dark:text-white">SET</span> : null}
                         </button>
                       );
                     })}

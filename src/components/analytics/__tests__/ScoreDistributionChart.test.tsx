@@ -45,8 +45,8 @@ describe('ScoreDistributionChart', () => {
 
     const centerValue = screen.getByText('3.500');
     expect(centerValue.tagName.toLowerCase()).toBe('tspan');
-    expect(centerValue).toHaveAttribute('font-family', 'Inter, var(--font-body)');
-    expect(centerValue).toHaveAttribute('font-weight', '700');
+    expect(centerValue).toHaveAttribute('font-family', 'var(--font-numeric)');
+    expect(centerValue).toHaveAttribute('font-weight', '600');
     expect(container.querySelector('text tspan')).toBe(centerValue);
   });
 });

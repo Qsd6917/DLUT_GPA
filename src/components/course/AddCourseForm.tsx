@@ -127,7 +127,7 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
             step="0.5"
             value={credits}
             onChange={(e) => setCredits(e.target.value)}
-            className={fieldClassName}
+            className={`${fieldClassName} num-input`}
             placeholder="0.0"
           />
         </label>
@@ -141,7 +141,7 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
             type="number"
             value={score}
             onChange={(e) => setScore(e.target.value)}
-            className={fieldClassName}
+            className={`${fieldClassName} num-input`}
             placeholder="0-100"
           />
         </label>
@@ -203,8 +203,8 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
       <div className="relative z-10 space-y-6">
         <div>
           <div className="section-kicker">Entry</div>
-          <h3 className="mt-3 text-3xl leading-none text-main">{t('course_entry')}</h3>
-          <p className="mt-2 text-sm text-muted">{t('course_entry_desc')}</p>
+          <h3 className="type-page-title mt-3 text-main">{t('course_entry')}</h3>
+          <p className="type-body-sm mt-2">{t('course_entry_desc')}</p>
         </div>
         {content}
       </div>
