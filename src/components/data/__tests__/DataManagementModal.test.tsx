@@ -1,11 +1,15 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import * as XLSX from 'xlsx';
 import { DataManagementModal } from '../DataManagementModal';
 import { Course } from '../../../types';
 import { LanguageProvider } from '../../../contexts/LanguageContext';
 
 describe('DataManagementModal', () => {
+  afterEach(() => {
+    document.body.style.overflow = '';
+  });
+
   test('renders as dialog with visible close button and 2x2 action grid shell', () => {
     const { container } = render(
       <LanguageProvider>
@@ -73,5 +77,35 @@ describe('DataManagementModal', () => {
     });
 
     expect(screen.queryByText(/导入失败/u)).not.toBeInTheDocument();
+  });
+
+  test('keeps the existing body scroll lock when the modal closes', () => {
+    document.body.style.overflow = 'hidden';
+
+    const { rerender } = render(
+      <LanguageProvider>
+        <DataManagementModal
+          isOpen={true}
+          onClose={() => {}}
+          courses={[]}
+          onImport={() => {}}
+        />
+      </LanguageProvider>
+    );
+
+    expect(document.body.style.overflow).toBe('hidden');
+
+    rerender(
+      <LanguageProvider>
+        <DataManagementModal
+          isOpen={false}
+          onClose={() => {}}
+          courses={[]}
+          onImport={() => {}}
+        />
+      </LanguageProvider>
+    );
+
+    expect(document.body.style.overflow).toBe('hidden');
   });
 });

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Course } from '../../types';
 import { X, Upload, FileJson, AlertTriangle, FileSpreadsheet } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import { OcrScanner } from '../common/OcrScanner';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface DataManagementModalProps {
   isOpen: boolean;
@@ -10,6 +10,16 @@ interface DataManagementModalProps {
   courses: Course[];
   onImport: (courses: Course[], mode: 'replace' | 'merge') => void;
 }
+
+let xlsxModulePromise: Promise<typeof import('xlsx')> | null = null;
+
+const loadXlsxModule = () => {
+  if (!xlsxModulePromise) {
+    xlsxModulePromise = import('xlsx');
+  }
+
+  return xlsxModulePromise;
+};
 
 export const DataManagementModal: React.FC<DataManagementModalProps> = ({
   isOpen,
@@ -23,6 +33,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
   const [message, setMessage] = useState('');
   const [importMode, setImportMode] = useState<'replace' | 'merge'>('replace');
   const [isProcessing, setIsProcessing] = useState(false);
+  useBodyScrollLock(isOpen);
 
   useEffect(() => {
     if (isOpen) {
@@ -44,11 +55,9 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       }
     };
 
-    document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -72,7 +81,8 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     downloadBlob(blob, `dlut_gpa_backup_${new Date().toISOString().slice(0, 10)}.json`);
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
+    const XLSX = await loadXlsxModule();
     const header = ['课程名', '学分', '成绩', '学期', '属性', '是否核心', '是否计入'];
     const rows = courses.map((c) => [
       c.name ?? '',
@@ -205,6 +215,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     setMessage('');
 
     try {
+      const XLSX = await loadXlsxModule();
       const buffer = await file.arrayBuffer();
       const workbook = XLSX.read(buffer, { type: 'array' });
       const firstSheetName = workbook.SheetNames[0];

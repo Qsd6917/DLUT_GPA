@@ -2,11 +2,20 @@ import React, { useState, useRef } from 'react';
 import { Upload, Camera, Scan, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { Course } from '../../types';
-import { recognize } from 'tesseract.js';
 
 interface OcrScannerProps {
   onCoursesParsed: (courses: Course[]) => void;
 }
+
+let tesseractModulePromise: Promise<typeof import('tesseract.js')> | null = null;
+
+const loadTesseractModule = () => {
+  if (!tesseractModulePromise) {
+    tesseractModulePromise = import('tesseract.js');
+  }
+
+  return tesseractModulePromise;
+};
 
 const parseOcrResult = (text: string): Course[] => {
   const lineRegex = /^(.+?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)$/;
@@ -75,13 +84,14 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    event.target.value = '';
 
     setError(null);
     setIsScanning(true);
     setProgress(0);
 
     try {
-      // 使用 Tesseract.js 识别图像中的文字
+      const { recognize } = await loadTesseractModule();
       const result = await recognize(file, 'chi_sim+eng', {
         logger: (message) => {
           if (message.status === 'recognizing text') {
@@ -90,9 +100,8 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
         },
       });
 
-      // 解析识别结果
       const parsedCourses = parseOcrResult(result.data.text);
-      
+
       if (parsedCourses.length === 0) {
         setError(t('ocr_no_courses_found'));
       } else {

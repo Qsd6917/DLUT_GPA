@@ -13,12 +13,11 @@ import { EditCourseModal } from '../components/course/EditCourseModal';
 import { StatsCard } from '../components/analytics/StatsCard';
 import { TargetGpaCalculator } from '../components/analytics/TargetGpaCalculator';
 import { GraduationProgress } from '../components/analytics/GraduationProgress';
-import { ScoreDistributionChart } from '../components/analytics/ScoreDistributionChart';
-import { ScoreDistributionHistogram } from '../components/analytics/ScoreDistributionHistogram';
 import { DashboardModeToggleBar } from '../components/analytics/DashboardModeToggleBar';
 import { ReloadPrompt } from '../components/common/ReloadPrompt';
 import { Course } from '../types';
 import useDebounce from '../hooks/useDebounce';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 const DataManagementModal = lazy(() =>
   import('../components/data/DataManagementModal').then((module) => ({ default: module.DataManagementModal }))
@@ -33,6 +32,12 @@ const AcademicRadar = lazy(() =>
   import('../components/analytics/AcademicRadar').then((module) => ({ default: module.AcademicRadar }))
 );
 const AIAdvisorPanel = lazy(() => import('../components/analytics/AIAdvisorPanel'));
+const ScoreDistributionChart = lazy(() =>
+  import('../components/analytics/ScoreDistributionChart').then((module) => ({ default: module.ScoreDistributionChart }))
+);
+const ScoreDistributionHistogram = lazy(() =>
+  import('../components/analytics/ScoreDistributionHistogram').then((module) => ({ default: module.ScoreDistributionHistogram }))
+);
 
 type Section = 'overview' | 'courses' | 'analysis';
 type AnalysisView = 'overview' | 'simulation' | 'radar' | 'advisor';
@@ -82,6 +87,7 @@ function App() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCourseEntryOpen, setIsCourseEntryOpen] = useState(false);
   const [simulatedStats, setSimulatedStats] = useState(stats);
+  useBodyScrollLock(isCourseEntryOpen);
 
   useEffect(() => {
     setSearchTerm(debouncedSearchTerm);
@@ -98,11 +104,9 @@ function App() {
       }
     };
 
-    document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isCourseEntryOpen]);
@@ -324,8 +328,12 @@ function App() {
       ) : (
         <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
-            <ScoreDistributionChart stats={stats} />
-            <ScoreDistributionHistogram stats={stats} />
+            <Suspense fallback={panelFallback}>
+              <ScoreDistributionChart stats={stats} />
+            </Suspense>
+            <Suspense fallback={panelFallback}>
+              <ScoreDistributionHistogram stats={stats} />
+            </Suspense>
           </div>
           <div className="space-y-6">
             <TargetGpaCalculator currentGpa={stats.weightedGpa} currentCredits={stats.totalCredits} />

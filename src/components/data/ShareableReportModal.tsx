@@ -1,7 +1,7 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Course, GpaStats } from '../../types';
 import { X, Share2, Download } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface ShareableReportModalProps {
   isOpen: boolean;
@@ -9,6 +9,17 @@ interface ShareableReportModalProps {
   stats: GpaStats;
   courses: Course[];
 }
+
+let html2CanvasModulePromise: Promise<typeof import('html2canvas')> | null = null;
+
+const loadHtml2Canvas = async () => {
+  if (!html2CanvasModulePromise) {
+    html2CanvasModulePromise = import('html2canvas');
+  }
+
+  const module = await html2CanvasModulePromise;
+  return module.default;
+};
 
 export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
   isOpen,
@@ -19,6 +30,25 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
   const reportRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  useBodyScrollLock(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const getExportFileName = useCallback(() => {
     const now = new Date();
@@ -40,6 +70,7 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
     setIsExporting(true);
 
     try {
+      const html2canvas = await loadHtml2Canvas();
       const rect = element.getBoundingClientRect();
       const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 1));
 
@@ -98,9 +129,14 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(2,6,23,0.68)] p-4 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-lg overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/90 shadow-[0_28px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl animate-in zoom-in-95 duration-200 dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_32px_90px_rgba(2,6,23,0.56)]">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shareable-report-modal-title"
+        className="w-full max-w-lg overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/90 shadow-[0_28px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl animate-in zoom-in-95 duration-200 dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_32px_90px_rgba(2,6,23,0.56)]"
+      >
         <div className="flex items-center justify-between border-b border-primary/10 px-6 py-5">
-          <h3 className="text-lg font-bold text-main flex items-center gap-2">
+          <h3 id="shareable-report-modal-title" className="text-lg font-bold text-main flex items-center gap-2">
             <Share2 size={20} className="text-primary" />
             成绩报告
           </h3>
