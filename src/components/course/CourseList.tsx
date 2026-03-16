@@ -1,27 +1,33 @@
 import React from 'react';
-import { BookOpen, CheckSquare, Edit, Plus, Square, Trash2, Upload } from 'lucide-react';
+import { BookOpen, CheckSquare, Edit, Plus, SearchX, Square, Trash2, Upload } from 'lucide-react';
 import { Course } from '../../types';
 import { useTranslation } from '../../contexts/LanguageContext';
 import VirtualCourseList from './VirtualCourseList';
 
 interface CourseListProps {
   courses: Course[];
+  totalCourses: number;
+  isFiltered: boolean;
   onRemove: (id: string) => void;
   onEdit: (course: Course) => void;
   onToggle: (id: string) => void;
   onToggleAll: (checked: boolean) => void;
   onOpenCreate?: () => void;
   onOpenImport?: () => void;
+  onClearFilters?: () => void;
 }
 
 export const CourseList: React.FC<CourseListProps> = ({
   courses,
+  totalCourses,
+  isFiltered,
   onRemove,
   onEdit,
   onToggle,
   onToggleAll,
   onOpenCreate,
   onOpenImport,
+  onClearFilters,
 }) => {
   const { t } = useTranslation();
   const getTypeBadgeClass = (type: Course['type']) => {
@@ -39,6 +45,29 @@ export const CourseList: React.FC<CourseListProps> = ({
   const activeCredits = courses.filter((course) => course.isActive).reduce((sum, course) => sum + course.credits, 0);
 
   if (courses.length === 0) {
+    if (totalCourses > 0 && isFiltered) {
+      return (
+        <section className="paper-panel flex min-h-[20rem] flex-col items-center justify-center gap-5 p-8 text-center sm:p-12">
+          <div className="rounded-[1.6rem] border border-primary/15 bg-primary/10 p-4 text-primary">
+            <SearchX size={32} />
+          </div>
+          <div>
+            <h3 className="text-3xl leading-none text-main">{t('empty_filtered_courses_title')}</h3>
+            <p className="mt-2 max-w-md text-sm text-muted">{t('empty_filtered_courses_desc')}</p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button type="button" onClick={onClearFilters} className="primary-button" disabled={!onClearFilters}>
+              {t('clear_filters')}
+            </button>
+            <button type="button" onClick={onOpenCreate} className="ghost-button" disabled={!onOpenCreate}>
+              <Plus size={16} />
+              {t('new_course')}
+            </button>
+          </div>
+        </section>
+      );
+    }
+
     return (
       <section className="paper-panel flex min-h-[20rem] flex-col items-center justify-center gap-5 p-8 text-center sm:p-12">
         <div className="rounded-[1.6rem] border border-primary/15 bg-primary/10 p-4 text-primary">

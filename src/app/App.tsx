@@ -72,10 +72,13 @@ function App() {
     filterCore,
     setFilterCore,
     semesters,
+    semesterOptions,
     filteredCourses,
     activeCourses,
     stats,
     originalStats,
+    clearFilters,
+    hasActiveFilters,
   } = useCourseFilter(courses, originalCourses, isSandboxMode);
 
   const [localSearchTerm, setLocalSearchTerm] = useState(rawSearchTerm);
@@ -113,7 +116,6 @@ function App() {
 
   const analysisInSimulation = activeSection === 'analysis' && activeAnalysisView === 'simulation';
   const visibleStats = analysisInSimulation ? simulatedStats : stats;
-  const isFiltered = rawSearchTerm || selectedSemesters.length > 0 || filterType !== 'ALL' || filterCore;
   const currentMethodLabel = useMemo(() => {
     switch (method) {
       case 'STD_4_0':
@@ -141,16 +143,13 @@ function App() {
   const handleReset = () => {
     if (window.confirm(t('confirm_reset'))) {
       resetData();
-      setSearchTerm('');
       setLocalSearchTerm('');
-      setSelectedSemesters([]);
-      setFilterType('ALL');
-      setFilterCore(false);
+      clearFilters();
     }
   };
 
   const handleToggleAll = (checked: boolean) => {
-    if (isFiltered) {
+    if (hasActiveFilters) {
       const visibleIds = new Set(filteredCourses.map((course) => course.id));
       setAllActive(checked, visibleIds);
       return;
@@ -281,18 +280,29 @@ function App() {
         setFilterCore={setFilterCore}
         searchTerm={localSearchTerm}
         onSearchChange={setLocalSearchTerm}
-        semesters={semesters}
+        semesterOptions={semesterOptions}
         isSandboxMode={isSandboxMode}
+        isFiltered={hasActiveFilters}
+        onClearFilters={() => {
+          clearFilters();
+          setLocalSearchTerm('');
+        }}
       />
 
       <CourseList
         courses={filteredCourses}
+        totalCourses={courses.length}
+        isFiltered={hasActiveFilters}
         onRemove={removeCourse}
         onEdit={setEditingCourse}
         onToggle={toggleCourse}
         onToggleAll={handleToggleAll}
         onOpenCreate={() => setIsCourseEntryOpen(true)}
         onOpenImport={() => setIsDataModalOpen(true)}
+        onClearFilters={() => {
+          clearFilters();
+          setLocalSearchTerm('');
+        }}
       />
     </section>
   );
@@ -307,7 +317,7 @@ function App() {
         </div>
         <div className="flex flex-wrap gap-2">
           <span className="status-chip">{currentMethodLabel}</span>
-          <span className="status-chip">{isFiltered ? t('filter_state_filtered') : t('filter_state_all')}</span>
+          <span className="status-chip">{hasActiveFilters ? t('filter_state_filtered') : t('filter_state_all')}</span>
         </div>
       </div>
 
@@ -397,7 +407,7 @@ function App() {
       </Suspense>
 
       {isCourseEntryOpen ? (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-[120]">
           <button
             type="button"
             className="absolute inset-0 bg-[rgba(2,6,23,0.72)] backdrop-blur-sm"

@@ -1,6 +1,7 @@
 import { CalculationMethod, CourseType } from '../types';
 
 export const DEFAULT_CALCULATION_METHOD = CalculationMethod.SUBTRACTIVE;
+export const DEFAULT_SEMESTER_FILTER_OPTIONS = ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3', '3-1', '3-2', '3-3'] as const;
 
 // Helper to handle "通过" or "0" scores by default inactive
 // Updated to include 'type' with default '必修'

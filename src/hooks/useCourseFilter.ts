@@ -1,6 +1,28 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Course, CourseType } from '../types';
 import { calculateStats } from '../services/gpaService';
+import { DEFAULT_SEMESTER_FILTER_OPTIONS } from '../utils/constants';
+
+const semesterOrder = new Map<string, number>(DEFAULT_SEMESTER_FILTER_OPTIONS.map((semester, index) => [semester, index]));
+
+const sortSemesters = (left: string, right: string) => {
+  const leftOrder = semesterOrder.get(left);
+  const rightOrder = semesterOrder.get(right);
+
+  if (leftOrder !== undefined && rightOrder !== undefined) {
+    return leftOrder - rightOrder;
+  }
+
+  if (leftOrder !== undefined) {
+    return -1;
+  }
+
+  if (rightOrder !== undefined) {
+    return 1;
+  }
+
+  return left.localeCompare(right, 'zh-CN', { numeric: true });
+};
 
 export const useCourseFilter = (courses: Course[], originalCourses: Course[], isSandboxMode: boolean) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -10,8 +32,18 @@ export const useCourseFilter = (courses: Course[], originalCourses: Course[], is
 
   const semesters = useMemo(() => {
     const s = new Set(courses.map(c => c.semester));
-    return Array.from(s).sort();
+    return Array.from(s).sort(sortSemesters);
   }, [courses]);
+
+  const semesterOptions = useMemo(() => {
+    const options = new Set<string>(DEFAULT_SEMESTER_FILTER_OPTIONS);
+
+    semesters.forEach((semester) => {
+      options.add(semester);
+    });
+
+    return Array.from(options).sort(sortSemesters);
+  }, [semesters]);
 
   const filteredCourses = useMemo(() => {
     let result = courses;
@@ -41,6 +73,7 @@ export const useCourseFilter = (courses: Course[], originalCourses: Course[], is
 
   const activeCourses = useMemo(() => filteredCourses.filter(c => c.isActive), [filteredCourses]);
   const stats = useMemo(() => calculateStats(activeCourses), [activeCourses]);
+  const hasActiveFilters = Boolean(searchTerm.trim()) || selectedSemesters.length > 0 || filterType !== 'ALL' || filterCore;
 
   const originalStats = useMemo(() => {
       if (!isSandboxMode) return null;
@@ -64,15 +97,25 @@ export const useCourseFilter = (courses: Course[], originalCourses: Course[], is
       return calculateStats(activeOriginal);
   }, [isSandboxMode, originalCourses, selectedSemesters, searchTerm, filterType, filterCore]);
 
+  const clearFilters = useCallback(() => {
+    setSearchTerm('');
+    setSelectedSemesters([]);
+    setFilterType('ALL');
+    setFilterCore(false);
+  }, []);
+
   return {
     searchTerm, setSearchTerm,
     selectedSemesters, setSelectedSemesters,
     filterType, setFilterType,
     filterCore, setFilterCore,
     semesters,
+    semesterOptions,
     filteredCourses,
     activeCourses,
     stats,
-    originalStats
+    originalStats,
+    clearFilters,
+    hasActiveFilters,
   };
 };
