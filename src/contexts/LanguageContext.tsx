@@ -63,7 +63,6 @@ const translations: Record<Language, TranslationMap> = {
     academic_radar_title: '学业雷达图',
     theme_light: '浅色主题',
     theme_dark: '深色主题',
-    theme_dlut_blue: '大工蓝主题',
     category_math: '数学类',
     category_english: '英语类',
     category_major: '专业核心',
@@ -85,7 +84,6 @@ const translations: Record<Language, TranslationMap> = {
     analysis_radar: '学业雷达',
     analysis_advisor: '智能建议',
     overview_title: '学业控制台',
-    overview_desc: '保留关键数字，把录入和分析拆成更清晰的工作区。',
     overview_primary_cta: '进入课程',
     overview_secondary_cta: '查看分析',
     overview_state_live: '本地自动保存',
@@ -112,8 +110,7 @@ const translations: Record<Language, TranslationMap> = {
     language_toggle: '切换语言',
     chart_loading: '模块加载中...',
     theme_light_short: '亮',
-    theme_dark_short: '暗',
-    theme_dlut_short: '蓝'
+    theme_dark_short: '暗'
   },
   en: {
     app_title: 'DLUT-GPA',
@@ -167,7 +164,6 @@ const translations: Record<Language, TranslationMap> = {
     academic_radar_title: 'Academic Radar',
     theme_light: 'Light Theme',
     theme_dark: 'Dark Theme',
-    theme_dlut_blue: 'DLUT Blue Theme',
     category_math: 'Math',
     category_english: 'English',
     category_major: 'Major Core',
@@ -189,7 +185,6 @@ const translations: Record<Language, TranslationMap> = {
     analysis_radar: 'Radar',
     analysis_advisor: 'Advisor',
     overview_title: 'Academic Control Center',
-    overview_desc: 'Keep the key numbers visible and split input and analysis into cleaner work areas.',
     overview_primary_cta: 'Open Courses',
     overview_secondary_cta: 'Open Analysis',
     overview_state_live: 'Local autosave',
@@ -216,8 +211,7 @@ const translations: Record<Language, TranslationMap> = {
     language_toggle: 'Switch language',
     chart_loading: 'Loading module...',
     theme_light_short: 'Light',
-    theme_dark_short: 'Dark',
-    theme_dlut_short: 'DLUT'
+    theme_dark_short: 'Dark'
   }
 };
 

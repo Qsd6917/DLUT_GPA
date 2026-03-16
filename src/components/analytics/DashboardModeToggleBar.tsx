@@ -20,8 +20,8 @@ export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({ 
   ];
 
   return (
-    <div className="paper-panel p-2">
-      <div className="flex gap-2 overflow-x-auto">
+    <div className="paper-panel px-4 py-3 sm:px-5">
+      <div className="flex gap-5 overflow-x-auto">
         {items.map((item) => {
           const Icon = item.icon;
           const active = activeView === item.id;
@@ -31,22 +31,33 @@ export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({ 
               key={item.id}
               type="button"
               onClick={() => onChange(item.id)}
-              className={`min-w-fit flex-1 rounded-[1.1rem] px-4 py-3 text-left transition-all ${
+              className={`group relative min-w-fit flex-1 px-1 py-2 text-left transition-colors ${
                 active
-                  ? 'bg-primary text-on-primary shadow-[0_18px_34px_hsla(var(--color-primary),0.24)]'
-                  : 'bg-transparent text-main hover:bg-background/60'
+                  ? 'text-primary dark:text-white'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-white/55 dark:hover:text-white/85'
               }`}
               aria-pressed={active}
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className={`figure-label ${active ? 'text-on-primary/70' : ''}`}>{item.sublabel}</div>
+                  <div className={`figure-label ${active ? 'text-primary/70 dark:text-white/55' : ''}`}>{item.sublabel}</div>
                   <div className="mt-1 text-sm font-semibold sm:text-base">{item.label}</div>
                 </div>
-                <div className={`rounded-2xl p-2 ${active ? 'bg-white/10' : 'bg-primary/10 text-primary'}`}>
+                <div
+                  className={`rounded-2xl p-2 ${
+                    active
+                      ? 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'
+                      : 'bg-slate-900/5 text-slate-500 group-hover:bg-slate-900/10 group-hover:text-primary dark:bg-white/5 dark:text-white/45 dark:group-hover:text-white'
+                  }`}
+                >
                   <Icon size={16} />
                 </div>
               </div>
+              <span
+                className={`absolute inset-x-0 -bottom-1 h-[3px] rounded-full bg-primary transition-opacity ${
+                  active ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+                }`}
+              />
             </button>
           );
         })}

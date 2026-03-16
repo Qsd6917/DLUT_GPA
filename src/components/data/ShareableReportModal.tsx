@@ -97,19 +97,22 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-6 border-b border-primary/10 bg-background/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(2,6,23,0.68)] p-4 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="w-full max-w-lg overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/90 shadow-[0_28px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl animate-in zoom-in-95 duration-200 dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_32px_90px_rgba(2,6,23,0.56)]">
+        <div className="flex items-center justify-between border-b border-primary/10 px-6 py-5">
           <h3 className="text-lg font-bold text-main flex items-center gap-2">
             <Share2 size={20} className="text-primary" />
             成绩报告
           </h3>
-          <button onClick={onClose} className="p-2 hover:bg-muted/10 rounded-full transition-colors">
-            <X size={20} className="text-muted" />
+          <button
+            onClick={onClose}
+            className="rounded-full border border-slate-200/80 bg-white/80 p-2 text-slate-500 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
+          >
+            <X size={20} />
           </button>
         </div>
-        
-        <div className="p-8 space-y-6 text-center">
+
+        <div className="space-y-6 p-8 text-center">
           {exportError && (
             <div className="p-3 bg-red-500/10 text-red-600 rounded-xl text-sm">
               {exportError}
@@ -119,14 +122,14 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
           <div
             ref={reportRef}
             id="shareable-report-content"
-            className="space-y-6 text-center bg-surface rounded-2xl p-4"
+            className="space-y-6 rounded-2xl border border-primary/10 bg-white/50 p-4 text-center dark:bg-white/[0.03]"
           >
             <div
               data-shareable-report-card="1"
-              className="bg-gradient-to-br from-primary to-primary/80 text-on-primary p-8 rounded-3xl shadow-xl transform hover:scale-[1.02] transition-transform"
+              className="rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-8 text-on-primary shadow-[0_10px_30px_rgba(59,130,246,0.3)] transition-transform hover:scale-[1.02]"
             >
               <p className="text-on-primary/80 font-medium mb-2 uppercase tracking-widest text-xs">Weighted GPA</p>
-              <h1 className="text-6xl font-black tracking-tighter mb-4">{stats.weightedGpa.toFixed(3)}</h1>
+              <h1 className="data-figure mb-4 text-6xl font-semibold tracking-tighter">{stats.weightedGpa.toFixed(3)}</h1>
               <div className="flex justify-center gap-4 text-sm font-medium opacity-90">
                 <span>{stats.totalCredits} 学分</span>
                 <span>{stats.weightedAverageScore.toFixed(2)} 分</span>

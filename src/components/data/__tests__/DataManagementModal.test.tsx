@@ -6,6 +6,27 @@ import { Course } from '../../../types';
 import { LanguageProvider } from '../../../contexts/LanguageContext';
 
 describe('DataManagementModal', () => {
+  test('renders as dialog with visible close button and 2x2 action grid shell', () => {
+    const { container } = render(
+      <LanguageProvider>
+        <DataManagementModal
+          isOpen={true}
+          onClose={() => {}}
+          courses={[]}
+          onImport={() => {}}
+        />
+      </LanguageProvider>
+    );
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '关闭数据管理' })).toBeInTheDocument();
+
+    const actionGrid = Array.from(container.querySelectorAll('div')).find((element) =>
+      element.className.includes('grid grid-cols-2 gap-3')
+    );
+    expect(actionGrid).toBeTruthy();
+  });
+
   test('imports zero-credit rows from exported excel files', async () => {
     const onImport = vi.fn();
     const courses: Course[] = [];

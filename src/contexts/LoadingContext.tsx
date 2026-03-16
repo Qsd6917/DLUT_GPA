@@ -33,8 +33,8 @@ export const LoadingProvider: React.FC<{ children: ReactNode }> = ({ children })
       {children}
       {/* Loading overlay */}
       {loadingTasks.size > 0 && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl border border-primary/20">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(2,6,23,0.38)] backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-slate-200/70 bg-white/85 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.12)] backdrop-blur-md dark:border-white/10 dark:bg-slate-950/78 dark:shadow-[0_28px_70px_rgba(2,6,23,0.48)]">
             <div className="flex flex-col items-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
               {Array.from(loadingTasks.values()).map((message, index) => (

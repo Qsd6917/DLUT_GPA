@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Course } from '../../types';
-import { X, Upload, FileJson, AlertTriangle, FileSpreadsheet, Scan } from 'lucide-react';
+import { X, Upload, FileJson, AlertTriangle, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { OcrScanner } from '../common/OcrScanner';
 
@@ -32,6 +32,26 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       setImportMode('replace');
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -328,137 +348,149 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-6 border-b border-primary/10 bg-background/50">
-          <h3 className="text-lg font-bold text-main">数据管理</h3>
-          <button onClick={onClose} className="p-2 hover:bg-muted/10 rounded-full transition-colors">
-            <X size={20} className="text-muted" />
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(2,6,23,0.68)] p-4 backdrop-blur-md animate-in fade-in duration-200">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="data-management-modal-title"
+        className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/90 shadow-[0_28px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl animate-in zoom-in-95 duration-200 dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_32px_90px_rgba(2,6,23,0.56)]"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="关闭数据管理"
+          className="absolute right-4 top-4 z-10 rounded-full border border-slate-200/80 bg-white/80 p-2 text-slate-500 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="border-b border-primary/10 px-6 pb-5 pt-6 sm:px-7">
+          <h3 id="data-management-modal-title" className="pr-12 text-lg font-bold text-main sm:text-xl">
+            数据管理
+          </h3>
+          <p className="mt-2 pr-10 text-sm text-muted">导入、导出和 OCR 识别都在同一个工作台完成。</p>
         </div>
-        
-        <div className="p-6 space-y-6">
-          {message && (
-            <div className="p-3 bg-emerald-500/10 text-emerald-700 rounded-xl text-sm">
-              {message}
-            </div>
-          )}
-          {error && (
-            <div className="p-3 bg-red-500/10 text-red-600 rounded-xl text-sm flex items-center gap-2">
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 sm:px-7">
+          <div className="space-y-5 pr-1">
+            {message && (
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-300">
+                {message}
+              </div>
+            )}
+
+            {error && (
+              <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-300">
                 <AlertTriangle size={16} />
                 <span className="whitespace-pre-line">{error}</span>
-            </div>
-          )}
+              </div>
+            )}
 
-          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 space-y-3">
-            <div className="text-xs font-bold text-muted uppercase tracking-wider">导入模式</div>
+            <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 dark:bg-white/[0.03]">
+              <div className="text-xs font-bold uppercase tracking-wider text-muted">导入模式</div>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setImportMode('replace')}
+                  disabled={isProcessing}
+                  className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition-colors ${
+                    importMode === 'replace'
+                      ? 'border-primary bg-primary text-on-primary'
+                      : 'border-primary/20 bg-white/65 text-main hover:bg-slate-900/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]'
+                  }`}
+                >
+                  覆盖
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setImportMode('merge')}
+                  disabled={isProcessing}
+                  className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition-colors ${
+                    importMode === 'merge'
+                      ? 'border-primary bg-primary text-on-primary'
+                      : 'border-primary/20 bg-white/65 text-main hover:bg-slate-900/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]'
+                  }`}
+                >
+                  追加
+                </button>
+              </div>
+              <div className="mt-3 text-xs text-muted">
+                覆盖模式若发现格式问题将直接取消导入，避免数据丢失；追加模式会跳过有问题的行。
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <button
-                type="button"
-                onClick={() => setImportMode('replace')}
+                onClick={handleExportJson}
                 disabled={isProcessing}
-                className={`px-4 py-2.5 rounded-xl border text-sm font-bold transition-colors ${
-                  importMode === 'replace'
-                    ? 'bg-primary text-on-primary border-primary'
-                    : 'bg-background text-main border-primary/20 hover:bg-muted/10'
-                }`}
+                className="group flex min-h-[8.75rem] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 p-5 transition-all hover:-translate-y-1 hover:border-primary/25 hover:bg-primary/10 dark:bg-white/[0.03]"
               >
-                覆盖
+                <div className="rounded-full bg-white/80 p-3 text-primary shadow-sm transition-transform group-hover:scale-110 dark:bg-white/5">
+                  <FileJson size={20} />
+                </div>
+                <span className="font-bold text-main">导出 JSON</span>
               </button>
+
               <button
-                type="button"
-                onClick={() => setImportMode('merge')}
+                onClick={() => jsonFileInputRef.current?.click()}
                 disabled={isProcessing}
-                className={`px-4 py-2.5 rounded-xl border text-sm font-bold transition-colors ${
-                  importMode === 'merge'
-                    ? 'bg-primary text-on-primary border-primary'
-                    : 'bg-background text-main border-primary/20 hover:bg-muted/10'
-                }`}
+                className="group flex min-h-[8.75rem] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 p-5 transition-all hover:-translate-y-1 hover:border-primary/25 hover:bg-primary/10 dark:bg-white/[0.03]"
               >
-                追加
+                <div className="rounded-full bg-white/80 p-3 text-primary shadow-sm transition-transform group-hover:scale-110 dark:bg-white/5">
+                  <Upload size={20} />
+                </div>
+                <span className="font-bold text-main">导入 JSON</span>
+                <input
+                  type="file"
+                  ref={jsonFileInputRef}
+                  onChange={handleJsonFileChange}
+                  accept=".json"
+                  className="hidden"
+                />
+              </button>
+
+              <button
+                onClick={handleExportExcel}
+                disabled={isProcessing}
+                className="group flex min-h-[8.75rem] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 p-5 transition-all hover:-translate-y-1 hover:border-primary/25 hover:bg-primary/10 dark:bg-white/[0.03]"
+              >
+                <div className="rounded-full bg-white/80 p-3 text-primary shadow-sm transition-transform group-hover:scale-110 dark:bg-white/5">
+                  <FileSpreadsheet size={20} />
+                </div>
+                <span className="font-bold text-main">导出 Excel</span>
+              </button>
+
+              <button
+                onClick={() => excelFileInputRef.current?.click()}
+                disabled={isProcessing}
+                className="group flex min-h-[8.75rem] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 p-5 transition-all hover:-translate-y-1 hover:border-primary/25 hover:bg-primary/10 dark:bg-white/[0.03]"
+              >
+                <div className="rounded-full bg-white/80 p-3 text-primary shadow-sm transition-transform group-hover:scale-110 dark:bg-white/5">
+                  <Upload size={20} />
+                </div>
+                <span className="font-bold text-main">{isProcessing ? '正在导入...' : '导入 Excel'}</span>
+                <input
+                  type="file"
+                  ref={excelFileInputRef}
+                  onChange={handleExcelFileChange}
+                  accept=".xlsx"
+                  className="hidden"
+                />
               </button>
             </div>
-            <div className="text-xs text-muted">
-              覆盖模式若发现格式问题将直接取消导入，避免数据丢失；追加模式会跳过有问题的行。
+
+            <div className="border-t border-primary/10 pt-4">
+              <OcrScanner
+                onCoursesParsed={(courses) => {
+                  onImport(courses, importMode);
+                  setMessage(`通过OCR成功导入 ${courses.length} 门课程`);
+                }}
+              />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={handleExportJson}
-              disabled={isProcessing}
-              className="flex flex-col items-center justify-center gap-3 p-6 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-2xl transition-all group"
-            >
-              <div className="p-3 bg-surface rounded-full text-primary shadow-sm group-hover:scale-110 transition-transform">
-                <FileJson size={24} />
-              </div>
-              <span className="font-bold text-main">导出 JSON</span>
-            </button>
-
-            <button
-              onClick={() => jsonFileInputRef.current?.click()}
-              disabled={isProcessing}
-              className="flex flex-col items-center justify-center gap-3 p-6 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-2xl transition-all group"
-            >
-              <div className="p-3 bg-surface rounded-full text-primary shadow-sm group-hover:scale-110 transition-transform">
-                <Upload size={24} />
-              </div>
-              <span className="font-bold text-main">导入 JSON</span>
-              <input
-                type="file"
-                ref={jsonFileInputRef}
-                onChange={handleJsonFileChange}
-                accept=".json"
-                className="hidden"
-              />
-            </button>
-
-            <button
-              onClick={handleExportExcel}
-              disabled={isProcessing}
-              className="flex flex-col items-center justify-center gap-3 p-6 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-2xl transition-all group"
-            >
-              <div className="p-3 bg-surface rounded-full text-primary shadow-sm group-hover:scale-110 transition-transform">
-                <FileSpreadsheet size={24} />
-              </div>
-              <span className="font-bold text-main">导出 Excel</span>
-            </button>
-
-            <button
-              onClick={() => excelFileInputRef.current?.click()}
-              disabled={isProcessing}
-              className="flex flex-col items-center justify-center gap-3 p-6 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-2xl transition-all group"
-            >
-              <div className="p-3 bg-surface rounded-full text-primary shadow-sm group-hover:scale-110 transition-transform">
-                <Upload size={24} />
-              </div>
-              <span className="font-bold text-main">{isProcessing ? '正在导入...' : '导入 Excel'}</span>
-              <input
-                type="file"
-                ref={excelFileInputRef}
-                onChange={handleExcelFileChange}
-                accept=".xlsx"
-                className="hidden"
-              />
-            </button>
-          </div>
-
-          {/* OCR Scanner Section */}
-          <div className="pt-4 border-t border-primary/10">
-            <h4 className="font-bold text-main mb-3 flex items-center gap-2">
-              <Scan size={18} className="text-blue-500" />
-              OCR 成绩导入
-            </h4>
-            <OcrScanner 
-              onCoursesParsed={(courses) => {
-                onImport(courses, importMode);
-                setMessage(`通过OCR成功导入 ${courses.length} 门课程`);
-              }} 
-            />
-          </div>
-
-          <div className="text-center text-xs text-muted">
-            支持 .json（完整备份）、.xlsx（表格）和 OCR（截图）导入导出
+            <div className="pb-1 text-center text-xs text-muted">
+              支持 .json（完整备份）、.xlsx（表格）和 OCR（截图）导入导出
+            </div>
           </div>
         </div>
       </div>

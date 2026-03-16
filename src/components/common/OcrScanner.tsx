@@ -111,17 +111,20 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
   };
 
   return (
-    <div className="bg-surface p-6 rounded-2xl shadow-soft border border-primary/10 transition-all hover:shadow-md">
+    <div className="rounded-2xl border border-primary/10 bg-white/55 p-5 shadow-[0_16px_42px_rgba(15,23,42,0.06)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-primary/20 dark:bg-white/[0.03] dark:shadow-none">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-main flex items-center gap-2">
-          <Scan size={18} className="text-blue-500" />
+          <Scan size={18} className="text-primary" />
           {t('ocr_import_title')}
         </h3>
       </div>
 
       <div 
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors
-          ${isScanning ? 'border-blue-500 bg-blue-50/20' : 'border-gray-300 hover:border-primary/50'}`}
+        className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+          isScanning
+            ? 'border-primary/40 bg-primary/10'
+            : 'border-slate-300/80 bg-white/45 hover:border-primary/40 dark:border-white/10 dark:bg-white/[0.02]'
+        }`}
         onClick={triggerFileSelect}
       >
         <input
@@ -134,7 +137,7 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
         />
         
         <div className="flex flex-col items-center justify-center gap-3">
-          <Camera size={48} className={`mx-auto ${isScanning ? 'text-blue-500' : 'text-muted'}`} />
+          <Camera size={48} className={`mx-auto ${isScanning ? 'text-primary' : 'text-muted'}`} />
           
           {isScanning ? (
             <div className="w-full max-w-xs">
@@ -142,9 +145,9 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
                 <span>{t('ocr_scanning')}...</span>
                 <span>{progress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="h-2.5 w-full rounded-full bg-slate-200/80 dark:bg-white/10">
                 <div 
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                  className="h-2.5 rounded-full bg-primary transition-all duration-300" 
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
@@ -154,7 +157,7 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
               <p className="font-medium text-main">{t('ocr_upload_prompt')}</p>
               <p className="text-sm text-muted">{t('ocr_supported_formats')}</p>
               <button 
-                className="mt-4 px-4 py-2 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+                className="mt-4 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-on-primary transition-opacity hover:opacity-90"
                 onClick={(e) => {
                   e.stopPropagation();
                   triggerFileSelect();
@@ -169,7 +172,7 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
       </div>
 
       {error && (
-        <div className="mt-4 p-3 bg-red-100/50 border border-red-300 rounded-lg flex items-start gap-2 text-red-700">
+        <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-red-700 dark:text-red-300">
           <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>

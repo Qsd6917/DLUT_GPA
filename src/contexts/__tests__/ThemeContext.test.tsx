@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ThemeProvider, useTheme } from '../ThemeContext';
 
 const ThemeProbe = () => {
-  const { theme } = useTheme();
-  return <span>{theme}</span>;
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <>
+      <span>{theme}</span>
+      <button type="button" onClick={toggleTheme}>
+        toggle
+      </button>
+    </>
+  );
 };
 
 describe('ThemeProvider', () => {
@@ -20,6 +27,22 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
 
+    expect(screen.getByText('dark')).toBeInTheDocument();
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+  });
+
+  test('toggles between dark and light only', () => {
+    render(
+      <ThemeProvider>
+        <ThemeProbe />
+      </ThemeProvider>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'toggle' }));
+    expect(screen.getByText('light')).toBeInTheDocument();
+    expect(document.documentElement.classList.contains('light')).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'toggle' }));
     expect(screen.getByText('dark')).toBeInTheDocument();
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });

@@ -24,6 +24,15 @@ export const CourseList: React.FC<CourseListProps> = ({
   onOpenImport,
 }) => {
   const { t } = useTranslation();
+  const getTypeBadgeClass = (type: Course['type']) => {
+    if (type === '必修') {
+      return 'border-red-500/20 bg-red-500/10 text-red-600 dark:border-red-500/20 dark:bg-red-500/15 dark:text-red-400';
+    }
+    if (type === '选修') {
+      return 'border-sky-500/20 bg-sky-500/10 text-sky-700 dark:border-blue-500/20 dark:bg-blue-500/15 dark:text-blue-400';
+    }
+    return 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-200';
+  };
   const allSelected = courses.length > 0 && courses.every((course) => course.isActive);
   const someSelected = courses.some((course) => course.isActive);
   const activeCount = courses.filter((course) => course.isActive).length;
@@ -79,7 +88,7 @@ export const CourseList: React.FC<CourseListProps> = ({
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-left">
           <thead>
-            <tr className="border-b border-primary/10 bg-background/50 text-[11px] uppercase tracking-[0.22em] text-muted">
+            <tr className="border-b border-primary/10 bg-slate-900/5 text-[11px] uppercase tracking-[0.22em] text-muted dark:bg-white/[0.03]">
               <th className="w-14 p-4 text-center">
                 <button
                   type="button"
@@ -103,8 +112,8 @@ export const CourseList: React.FC<CourseListProps> = ({
             {courses.map((course, index) => (
               <tr
                 key={course.id}
-                className={`border-b border-primary/5 transition-colors hover:bg-white/5 ${
-                  course.isActive ? '' : 'bg-background/35 opacity-55'
+                className={`group border-b border-primary/5 transition-colors hover:bg-slate-900/[0.05] dark:hover:bg-white/[0.05] ${
+                  course.isActive ? '' : 'bg-slate-900/[0.03] opacity-55 dark:bg-white/[0.02]'
                 }`}
               >
                 <td className="p-4 text-center">
@@ -128,7 +137,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                         <span className="line-clamp-1">{course.name}</span>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-                        {course.isCore ? <span className="table-chip border-amber-400/30 bg-amber-500/10 text-amber-100">核心</span> : null}
+                        {course.isCore ? <span className="table-chip border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-200">核心</span> : null}
                         {!course.isActive ? <span className="table-chip">未计入</span> : null}
                       </div>
                     </div>
@@ -140,7 +149,11 @@ export const CourseList: React.FC<CourseListProps> = ({
                 <td className="p-4 text-center">
                   <span
                     className={`data-figure text-sm ${
-                      course.score >= 90 ? 'text-emerald-300' : course.score < 60 ? 'text-[hsl(var(--color-accent))]' : 'text-main'
+                      course.score >= 90
+                        ? 'text-emerald-600 dark:text-emerald-300'
+                        : course.score < 60
+                          ? 'text-[hsl(var(--color-accent))]'
+                          : 'text-main'
                     }`}
                   >
                     {course.score}
@@ -150,7 +163,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                   <span className="data-figure text-sm text-primary">{course.gpa.toFixed(2)}</span>
                 </td>
                 <td className="p-4 text-center">
-                  <span className="table-chip">{course.type}</span>
+                  <span className={`table-chip ${getTypeBadgeClass(course.type)}`}>{course.type}</span>
                 </td>
                 <td className="p-4 text-center">
                   <span className="table-chip">{course.semester}</span>
@@ -160,7 +173,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                     <button
                       type="button"
                       onClick={() => onEdit(course)}
-                      className="rounded-full border border-primary/10 p-2 text-muted transition-colors hover:border-primary/30 hover:text-primary"
+                      className="rounded-full border border-primary/10 p-2 text-muted opacity-35 transition-all hover:border-primary/30 hover:text-primary group-hover:opacity-100"
                       title="编辑"
                     >
                       <Edit size={15} />
@@ -168,7 +181,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                     <button
                       type="button"
                       onClick={() => onRemove(course.id)}
-                      className="rounded-full border border-primary/10 p-2 text-muted transition-colors hover:border-[hsl(var(--color-accent))] hover:text-[hsl(var(--color-accent))]"
+                      className="rounded-full border border-primary/10 p-2 text-muted opacity-35 transition-all hover:border-[hsl(var(--color-accent))] hover:text-[hsl(var(--color-accent))] group-hover:opacity-100"
                       title="删除"
                     >
                       <Trash2 size={15} />
@@ -181,7 +194,7 @@ export const CourseList: React.FC<CourseListProps> = ({
         </table>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-primary/10 bg-background/45 px-5 py-4 text-sm text-muted md:flex-row md:items-center md:justify-between lg:px-6">
+      <div className="flex flex-col gap-2 border-t border-primary/10 bg-slate-900/[0.03] px-5 py-4 text-sm text-muted dark:bg-white/[0.02] md:flex-row md:items-center md:justify-between lg:px-6">
         <div>
           共 {courses.length} 门课程
           {someSelected ? <span className="ml-2 text-primary">计入 {activeCount} 门</span> : null}

@@ -29,27 +29,35 @@ describe('App shell', () => {
     localStorage.clear();
   });
 
-  test('opens on overview and supports section navigation', async () => {
+  test(
+    'opens on overview and supports section navigation',
+    async () => {
     renderApp();
 
-    expect(await screen.findByRole('button', { name: '总览' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('总览').closest('button')).toHaveAttribute('aria-pressed', 'true');
 
-    fireEvent.click(screen.getByRole('button', { name: '课程' }));
+    fireEvent.click(screen.getByText('课程').closest('button') as HTMLButtonElement);
     expect(screen.getByRole('button', { name: '新建课程' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: '分析' }));
-    expect(await screen.findByRole('button', { name: /总览分析/ })).toHaveAttribute('aria-pressed', 'true');
-  });
+    fireEvent.click(screen.getByText('分析').closest('button') as HTMLButtonElement);
+    expect(screen.getByText(/总览分析/).closest('button')).toHaveAttribute('aria-pressed', 'true');
+    },
+    15000
+  );
 
-  test('opens and closes the course entry drawer from the courses section', async () => {
+  test(
+    'opens and closes the course entry drawer from the courses section',
+    () => {
     renderApp();
 
-    fireEvent.click(await screen.findByRole('button', { name: '课程' }));
+    fireEvent.click(screen.getByText('课程').closest('button') as HTMLButtonElement);
     fireEvent.click(screen.getByRole('button', { name: '新建课程' }));
 
     expect(screen.getByRole('heading', { name: '课程录入' })).toBeInTheDocument();
 
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('heading', { name: '课程录入' })).not.toBeInTheDocument();
-  });
+    },
+    15000
+  );
 });

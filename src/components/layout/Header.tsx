@@ -72,24 +72,32 @@ export const Header: React.FC<HeaderProps> = ({
 
   const currentMethodLabel = methodOptions.find((item) => item.value === method)?.label ?? 'DLUT 5.0';
   const actionButton =
-    'inline-flex h-10 items-center gap-2 rounded-full border border-primary/15 bg-background/55 px-3 text-[11px] font-semibold text-main transition-colors hover:border-primary/40 hover:text-primary sm:h-auto sm:px-3.5 sm:py-2.5 sm:text-xs';
+    'inline-flex h-10 items-center gap-2 rounded-full border border-slate-200/45 bg-white/60 px-3 text-[11px] font-semibold text-slate-600 shadow-[0_8px_24px_rgba(15,23,42,0.04)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-white/80 hover:text-slate-900 sm:h-auto sm:px-3.5 sm:py-2.5 sm:text-xs dark:border-white/6 dark:bg-slate-950/34 dark:text-white/60 dark:shadow-none dark:hover:border-primary/20 dark:hover:bg-white/[0.06] dark:hover:text-white';
+  const tertiaryActionButton =
+    'inline-flex h-10 items-center gap-2 rounded-full border border-slate-200/35 bg-white/45 px-2.5 text-[11px] font-semibold text-slate-500 shadow-[0_8px_24px_rgba(15,23,42,0.03)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-slate-300/40 hover:bg-white/72 hover:text-slate-900 sm:h-auto sm:px-3 sm:py-2.5 sm:text-xs dark:border-white/5 dark:bg-white/[0.03] dark:text-white/52 dark:shadow-none dark:hover:border-white/10 dark:hover:bg-white/[0.06] dark:hover:text-white';
+  const navButton =
+    'group relative inline-flex min-w-fit items-center gap-2 px-1 py-2 text-sm font-semibold transition-colors sm:px-2 sm:text-[0.95rem]';
 
   return (
-    <header className="app-header sticky top-0 z-40">
+    <header className="sticky top-0 z-40 border-b border-slate-200/50 bg-white/70 shadow-[0_18px_40px_rgba(15,23,42,0.05)] backdrop-blur-md dark:border-white/10 dark:bg-slate-950/55 dark:shadow-[0_22px_54px_rgba(2,8,23,0.36)]">
       <div className="mx-auto flex max-w-[94rem] flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-3">
-            <div className="paper-panel flex h-11 w-11 items-center justify-center rounded-[1.1rem] bg-background/65 p-2 sm:h-12 sm:w-12">
-              <img src="/icons/pwa-192x192.png" alt="DLUT GPA" className="h-7 w-7 object-contain sm:h-8 sm:w-8" />
-            </div>
-
             <div className="min-w-0">
-              <div className="section-kicker hidden sm:inline-flex">Dalian University of Technology</div>
-              <div className="flex flex-wrap items-center gap-2 sm:mt-1 sm:gap-3">
-                <h1 className="text-[1.55rem] leading-none text-main sm:text-[1.9rem]">{t('app_title')}</h1>
+              <div className="hidden text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500/70 sm:block dark:text-white/50">
+                Dalian University of Technology
+              </div>
+              <div className="flex flex-wrap items-end gap-2 sm:mt-2 sm:gap-3">
+                <h1 className="text-[1.55rem] leading-none text-slate-950 sm:text-[1.95rem] dark:text-white">
+                  <span className="font-bold">DLUT</span>
+                  <span className="mx-1.5 font-medium text-slate-400 dark:text-white/35">-</span>
+                  <span className="font-medium text-primary">GPA</span>
+                </h1>
                 <span
                   className={`status-chip ${
-                    isSandboxMode ? 'border-amber-400/30 bg-amber-500/10 text-amber-200' : 'border-primary/20 bg-primary/10 text-primary'
+                    isSandboxMode
+                      ? 'border-amber-400/30 bg-amber-500/10 text-amber-700 dark:text-amber-200'
+                      : 'border-primary/15 bg-primary/10 text-primary'
                   }`}
                 >
                   {isSandboxMode ? t('sandbox_mode') : currentMethodLabel}
@@ -109,11 +117,15 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             {!isSandboxMode ? (
               <>
-                <button type="button" onClick={onEnterSandbox} className={`${actionButton} border-amber-400/30 bg-amber-500/10 text-amber-200`}>
+                <button
+                  type="button"
+                  onClick={onEnterSandbox}
+                  className={`${tertiaryActionButton} border-amber-400/18 bg-amber-500/8 text-amber-700 dark:text-amber-200`}
+                >
                   <FlaskConical size={14} />
                   <span className="hidden sm:inline">{t('enter_sandbox')}</span>
                 </button>
-                <button type="button" onClick={onReset} className={actionButton}>
+                <button type="button" onClick={onReset} className={tertiaryActionButton}>
                   <RotateCcw size={14} />
                   <span className="hidden sm:inline">{t('reset')}</span>
                 </button>
@@ -123,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
-          <nav className="flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-1" aria-label="Primary">
+          <nav className="flex flex-nowrap items-center gap-5 overflow-x-auto pb-1" aria-label="Primary">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = activeSection === item.id;
@@ -133,12 +145,22 @@ export const Header: React.FC<HeaderProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => onSectionChange(item.id)}
-                  className="nav-pill"
+                  className={`${navButton} ${
+                    active
+                      ? 'text-primary dark:text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-white/50 dark:hover:text-white/85'
+                  }`}
+                  aria-label={t(item.labelKey)}
                   data-active={active}
                   aria-pressed={active}
                 >
                   <Icon size={15} />
                   {t(item.labelKey)}
+                  <span
+                    className={`absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-primary transition-opacity ${
+                      active ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+                    }`}
+                  />
                 </button>
               );
             })}
@@ -147,10 +169,10 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-wrap items-center gap-1.5 xl:justify-end">
             <ThemeSelector />
 
-            <button
-              type="button"
-              onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
-              className={actionButton}
+              <button
+                type="button"
+                onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+                className={actionButton}
               title={t('language_toggle')}
               aria-label={t('language_toggle')}
             >
@@ -173,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {isMethodOpen ? (
-                <div className="paper-panel absolute right-0 top-full z-30 mt-3 w-48 p-2">
+                <div className="paper-panel absolute right-0 top-full z-30 mt-3 w-52 p-2">
                   <div role="listbox" aria-label="GPA Mode" className="space-y-1">
                     {methodOptions.map((option) => {
                       const active = option.value === method;
@@ -187,7 +209,9 @@ export const Header: React.FC<HeaderProps> = ({
                             setIsMethodOpen(false);
                           }}
                           className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm transition-colors ${
-                            active ? 'bg-primary/12 font-semibold text-primary' : 'text-main hover:bg-background/60'
+                            active
+                              ? 'bg-primary/10 font-semibold text-primary dark:bg-primary/15 dark:text-white'
+                              : 'text-slate-600 hover:bg-slate-900/5 hover:text-slate-900 dark:text-white/70 dark:hover:bg-white/5 dark:hover:text-white'
                           }`}
                         >
                           <span>{option.label}</span>

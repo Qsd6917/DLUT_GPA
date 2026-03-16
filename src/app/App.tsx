@@ -163,7 +163,6 @@ function App() {
             <div>
               <div className="section-kicker">Overview</div>
               <h2 className="section-heading mt-4 text-main">{t('overview_title')}</h2>
-              <p className="section-subtitle mt-3 text-sm sm:text-base">{t('overview_desc')}</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -191,7 +190,7 @@ function App() {
             </div>
           </div>
 
-          <div className="rounded-[1.45rem] border border-primary/10 bg-background/35 p-3 sm:p-4">
+          <div className="xl:border-l xl:border-white/10 xl:pl-8">
             <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
               <div className="metric-card">
                 <div className="figure-label">{t('credits')}</div>

@@ -48,9 +48,9 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targ
 
   return (
     <div className="paper-panel overflow-hidden">
-      <div className="border-b border-primary/10 bg-gradient-to-r from-primary/10 to-transparent p-5 sm:p-6">
+      <div className="border-b border-primary/10 p-5 sm:p-6">
         <div className="flex items-center gap-3">
-          <div className="rounded-[1rem] border border-primary/10 bg-primary/10 p-2.5">
+          <div className="rounded-[1rem] border border-primary/10 bg-primary/10 p-2.5 dark:bg-white/5">
             <Brain className="h-6 w-6 text-primary" />
           </div>
           <div>
@@ -60,8 +60,8 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targ
         </div>
       </div>
 
-      <div className="border-b border-primary/10 px-2 py-2">
-        <div className="flex gap-2 overflow-x-auto">
+      <div className="border-b border-primary/10 px-5 py-2">
+        <div className="flex gap-5 overflow-x-auto">
           <TabButton
             active={activeTab === 'recommendations'}
             icon={<Target size={16} />}
@@ -116,8 +116,10 @@ const TabButton: React.FC<{
 }> = ({ active, icon, label, onClick }) => (
   <button
     type="button"
-    className={`min-w-fit flex-1 rounded-[1rem] px-4 py-3 text-center text-sm font-medium transition-colors ${
-      active ? 'bg-primary text-on-primary shadow-[0_16px_32px_hsla(var(--color-primary),0.18)]' : 'text-muted hover:bg-background/60 hover:text-main'
+    className={`group relative min-w-fit flex-1 px-1 py-3 text-center text-sm font-medium transition-colors ${
+      active
+        ? 'text-primary dark:text-white'
+        : 'text-slate-500 hover:text-slate-900 dark:text-white/55 dark:hover:text-white/85'
     }`}
     onClick={onClick}
   >
@@ -125,6 +127,11 @@ const TabButton: React.FC<{
       {icon}
       {label}
     </div>
+    <span
+      className={`absolute inset-x-0 bottom-0 h-[3px] rounded-full bg-primary transition-opacity ${
+        active ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+      }`}
+    />
   </button>
 );
 
@@ -147,8 +154,8 @@ const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({ r
             key={recommendation.courseId}
             className={`p-4 rounded-xl border ${
               index === 0
-                ? 'border-primary/30 bg-primary/5 ring-1 ring-primary/20'
-                : 'border-primary/10 bg-background/50'
+                ? 'border-primary/20 bg-primary/5'
+                : 'border-primary/10 bg-white/45 dark:bg-white/[0.02]'
             }`}
           >
             <div className="flex justify-between items-start gap-4">
@@ -156,26 +163,26 @@ const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({ r
                 <h4 className="font-bold text-main flex items-center gap-2">
                   {recommendation.courseName}
                   {index === 0 && (
-                    <span className="text-xs bg-yellow-500/10 text-yellow-700 px-2 py-1 rounded-full">
+                    <span className="rounded-full bg-amber-500/10 px-2 py-1 text-xs text-amber-700 dark:text-amber-200">
                       最佳匹配
                     </span>
                   )}
                 </h4>
                 <p className="text-sm text-muted mt-1">{recommendation.reason}</p>
               </div>
-              <div className="text-right">
+              <div className="flex min-w-[6.75rem] flex-col items-end text-right">
                 <span
                   className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                     recommendation.successProbability > 0.8
-                      ? 'bg-emerald-500/10 text-emerald-700'
+                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
                       : recommendation.successProbability > 0.6
-                        ? 'bg-amber-500/10 text-amber-700'
-                        : 'bg-red-500/10 text-red-700'
+                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-200'
+                        : 'bg-red-500/10 text-red-700 dark:text-red-300'
                   }`}
                 >
                   成功率 {(recommendation.successProbability * 100).toFixed(0)}%
                 </span>
-                <div className="text-xs text-muted mt-1">
+                <div className="mt-1 text-xs text-muted">
                   预计成绩 <span className="font-bold text-main">{recommendation.predictedGrade.toFixed(1)}</span>
                 </div>
               </div>
@@ -220,7 +227,7 @@ const LearningStrategiesTab: React.FC<{
         const courseName = recommendation?.courseName ?? strategy.courseId;
 
         return (
-          <div key={strategy.courseId} className="p-5 bg-background/50 rounded-xl border border-primary/10">
+          <div key={strategy.courseId} className="rounded-xl border border-primary/10 bg-white/45 p-5 dark:bg-white/[0.02]">
             <h4 className="font-bold text-main flex items-center gap-2 mb-3">
               <Lightbulb size={18} className="text-primary" />
               {courseName}
@@ -254,10 +261,10 @@ const LearningStrategiesTab: React.FC<{
               <span
                 className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                   strategy.difficultyAssessment === 'high'
-                    ? 'bg-red-500/10 text-red-700'
+                    ? 'bg-red-500/10 text-red-700 dark:text-red-300'
                     : strategy.difficultyAssessment === 'medium'
-                      ? 'bg-amber-500/10 text-amber-700'
-                      : 'bg-emerald-500/10 text-emerald-700'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-200'
+                      : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
                 }`}
               >
                 {strategy.difficultyAssessment === 'high'
@@ -297,8 +304,8 @@ const AnalysisTab: React.FC<{
         </div>
 
         {targetGPA > currentGPA && (
-          <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-            <div className="flex items-center gap-2 text-amber-700">
+          <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
+            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-200">
               <AlertTriangle size={16} />
               <span className="text-sm font-medium">
                 要达到目标 GPA，后续课程平均分需要约{' '}
@@ -320,15 +327,15 @@ const AnalysisTab: React.FC<{
             {academicRisks.map((risk, index) => (
               <div
                 key={`risk-${index}`}
-                className="p-3 bg-red-500/5 border border-red-500/20 rounded-lg flex items-start"
+                className="flex items-start rounded-lg border border-red-500/20 bg-red-500/5 p-3"
               >
-                <AlertTriangle size={16} className="text-red-500 mt-0.5 mr-2 flex-shrink-0" />
+                <AlertTriangle size={16} className="mt-0.5 mr-2 flex-shrink-0 text-red-500" />
                 <span className="text-sm text-main">{risk}</span>
               </div>
             ))}
           </div>
         ) : (
-          <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-lg text-center text-emerald-700">
+          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 text-center text-emerald-700 dark:text-emerald-300">
             当前没有明显学术风险
           </div>
         )}
@@ -343,16 +350,16 @@ const AnalysisTab: React.FC<{
         {sortedSkills.length > 0 ? (
           <div className="space-y-3">
             {sortedSkills.map((skill) => (
-              <div key={skill.skill} className="p-3 bg-background/50 border border-primary/10 rounded-lg">
+              <div key={skill.skill} className="rounded-lg border border-primary/10 bg-white/45 p-3 dark:bg-white/[0.02]">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-main">{skill.skill}</span>
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
                       skill.improvementPriority >= 4
-                        ? 'bg-red-500/10 text-red-700'
+                        ? 'bg-red-500/10 text-red-700 dark:text-red-300'
                         : skill.improvementPriority >= 3
-                          ? 'bg-amber-500/10 text-amber-700'
-                          : 'bg-emerald-500/10 text-emerald-700'
+                          ? 'bg-amber-500/10 text-amber-700 dark:text-amber-200'
+                          : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
                     }`}
                   >
                     {skill.improvementPriority >= 4
@@ -390,7 +397,7 @@ const ProgressCard: React.FC<{
   barWidth: number;
   accent?: boolean;
 }> = ({ label, value, barWidth, accent = false }) => (
-  <div className="bg-background/50 p-4 rounded-xl border border-primary/10">
+  <div className="rounded-xl border border-primary/10 bg-white/45 p-4 dark:bg-white/[0.02]">
     <div className="text-sm text-muted mb-1">{label}</div>
     <div className={`text-2xl font-bold ${accent ? 'text-primary' : 'text-main'}`}>{value.toFixed(2)}</div>
     <div className="w-full bg-primary/10 rounded-full h-2 mt-2">
