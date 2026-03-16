@@ -158,14 +158,14 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
           <div
             ref={reportRef}
             id="shareable-report-content"
-            className="space-y-6 rounded-2xl border border-primary/10 bg-white/50 p-4 text-center dark:bg-white/[0.03]"
+            className="space-y-7 rounded-2xl border border-primary/10 bg-white/50 p-5 text-center dark:bg-white/[0.03]"
           >
             <div
               data-shareable-report-card="1"
-              className="rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-8 text-on-primary shadow-[0_10px_30px_rgba(59,130,246,0.3)] transition-transform hover:scale-[1.02]"
+              className="rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-9 text-on-primary shadow-[0_10px_30px_rgba(59,130,246,0.3)] transition-transform hover:scale-[1.02]"
             >
               <p className="text-on-primary/80 font-medium mb-2 uppercase tracking-widest text-xs">Weighted GPA</p>
-              <h1 className="data-figure mb-4 text-6xl font-semibold tracking-tighter">{stats.weightedGpa.toFixed(3)}</h1>
+              <h1 className="report-value mb-5">{stats.weightedGpa.toFixed(3)}</h1>
               <div className="flex justify-center gap-4 text-sm font-medium opacity-90">
                 <span>{stats.totalCredits} 学分</span>
                 <span>{stats.weightedAverageScore.toFixed(2)} 分</span>

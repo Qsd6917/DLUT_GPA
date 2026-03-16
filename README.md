@@ -74,6 +74,7 @@ dlut-gpa/
 ## 文档
 
 - [项目说明](./docs/README.md)
+- [自我改进记忆](./docs/self-improvement/README.md)
 - [API 文档](./docs/API.md)
 - [贡献指南](./docs/CONTRIBUTING.md)
 - [变更记录](./docs/CHANGELOG.md)

@@ -59,7 +59,15 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({ 
                      }}
                 />
                 <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
-                    <tspan x="50%" dy="-0.6em" fontSize="28" fontWeight="800" fill={primaryColor} className="tracking-tighter">
+                    <tspan
+                      x="50%"
+                      dy="-0.6em"
+                      fontSize="26"
+                      fontWeight="700"
+                      fontFamily="Inter, var(--font-body)"
+                      fill={primaryColor}
+                      className="tracking-tighter"
+                    >
                         {stats.weightedGpa.toFixed(3)}
                     </tspan>
                     <tspan x="50%" dy="1.6em" fontSize="12" fontWeight="500" fill={mutedColor} className="uppercase tracking-widest">

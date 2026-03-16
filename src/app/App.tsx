@@ -163,7 +163,7 @@ function App() {
     <section className="space-y-5 sm:space-y-6">
       <article className="paper-panel p-6 sm:p-7 lg:p-9">
         <div className="relative z-10 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] xl:items-end">
-          <div className="space-y-5 sm:space-y-6">
+          <div className="space-y-6 sm:space-y-7">
             <div>
               <div className="section-kicker">Overview</div>
               <h2 className="section-heading mt-4 text-main">{t('overview_title')}</h2>
@@ -179,7 +179,7 @@ function App() {
 
             <div>
               <div className="figure-label">{t('total_gpa')}</div>
-              <div className="hero-value mt-2 text-primary">{visibleStats.weightedGpa.toFixed(3)}</div>
+              <div className="hero-value mt-4 text-primary">{visibleStats.weightedGpa.toFixed(3)}</div>
             </div>
 
             <div className="flex flex-wrap gap-2.5">
@@ -198,15 +198,15 @@ function App() {
             <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
               <div className="metric-card">
                 <div className="figure-label">{t('credits')}</div>
-                <div className="mt-3 data-figure text-2xl text-main">{visibleStats.totalCredits.toFixed(1)}</div>
+                <div className="mt-4 data-figure text-2xl text-main">{visibleStats.totalCredits.toFixed(1)}</div>
               </div>
               <div className="metric-card">
                 <div className="figure-label">{t('avg_score')}</div>
-                <div className="mt-3 data-figure text-2xl text-main">{visibleStats.weightedAverageScore.toFixed(2)}</div>
+                <div className="mt-4 data-figure text-2xl text-main">{visibleStats.weightedAverageScore.toFixed(2)}</div>
               </div>
               <div className="metric-card">
                 <div className="figure-label">{t('overview_active')}</div>
-                <div className="mt-3 data-figure text-2xl text-main">
+                <div className="mt-4 data-figure text-2xl text-main">
                   {activeCourses.length} / {courses.length}
                 </div>
               </div>

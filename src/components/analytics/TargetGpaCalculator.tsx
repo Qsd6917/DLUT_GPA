@@ -77,7 +77,7 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
         {result !== null && (
           <div className="mt-4 rounded-[1.4rem] border border-primary/10 bg-background/55 p-4 animate-in fade-in slide-in-from-top-2">
             <p className="figure-label mb-2 text-center">后续课程平均绩点需达到</p>
-            <div className={`text-center text-4xl font-black ${result > 4.0 ? 'text-[hsl(var(--color-accent))]' : result < 0 ? 'text-muted' : 'text-emerald-600'}`}>
+            <div className={`result-value text-center ${result > 4.0 ? 'text-[hsl(var(--color-accent))]' : result < 0 ? 'text-muted' : 'text-emerald-600'}`}>
               {result > 4.0 ? '> 4.0' : result < 0 ? '已达成' : result.toFixed(3)}
             </div>
             {result > 4.0 && (

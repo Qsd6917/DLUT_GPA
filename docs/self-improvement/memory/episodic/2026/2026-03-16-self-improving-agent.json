@@ -1,0 +1,24 @@
+{
+  "id": "ep-2026-03-16-001",
+  "timestamp": "2026-03-16T12:00:00+08:00",
+  "skill": "self-improving-agent",
+  "situation": "User explicitly invoked the self-improving-agent skill in a frontend project that had no existing memory scaffold.",
+  "task": "Establish a minimal, repo-local self-improvement structure and record the first session.",
+  "outcome": "success",
+  "what_went_well": [
+    "Repository was clean, so bootstrap changes were low risk",
+    "No existing self-improvement files meant there was no migration burden",
+    "Documentation-first placement fit the current project organization"
+  ],
+  "what_went_wrong": [
+    "The repository had no prior conventions for agent memory or hook integration"
+  ],
+  "root_cause": "Self-improvement capability was invoked before any project-local persistence model existed.",
+  "solution": "Created docs/self-improvement with semantic, episodic, and working memory files plus a docs entry point.",
+  "lesson": "For first adoption, prefer a visible documentation scaffold over hidden automation.",
+  "related_pattern": "pat-2026-03-16-001",
+  "user_feedback": {
+    "rating": null,
+    "comments": null
+  }
+}

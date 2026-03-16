@@ -399,7 +399,7 @@ const ProgressCard: React.FC<{
 }> = ({ label, value, barWidth, accent = false }) => (
   <div className="rounded-xl border border-primary/10 bg-white/45 p-4 dark:bg-white/[0.02]">
     <div className="text-sm text-muted mb-1">{label}</div>
-    <div className={`text-2xl font-bold ${accent ? 'text-primary' : 'text-main'}`}>{value.toFixed(2)}</div>
+    <div className={`result-value ${accent ? 'text-primary' : 'text-main'}`}>{value.toFixed(2)}</div>
     <div className="w-full bg-primary/10 rounded-full h-2 mt-2">
       <div
         className={`${accent ? 'bg-sky-500' : 'bg-primary'} h-2 rounded-full`}

@@ -60,4 +60,18 @@ describe('ShareableReportModal', () => {
 
     expect(document.body.style.overflow).toBe('hidden');
   });
+
+  test('uses the shared report numeric styling for the preview GPA', () => {
+    render(
+      <ShareableReportModal
+        isOpen={true}
+        onClose={() => {}}
+        stats={stats}
+        courses={[]}
+      />
+    );
+
+    const previewValue = screen.getByRole('heading', { level: 1, name: '3.520' });
+    expect(previewValue).toHaveClass('report-value');
+  });
 });

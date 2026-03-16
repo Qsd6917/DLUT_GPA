@@ -1,0 +1,31 @@
+{
+  "patterns": {
+    "pat-2026-03-16-001": {
+      "id": "pat-2026-03-16-001",
+      "name": "Bootstrap Memory Under Docs",
+      "source": "retrospective",
+      "confidence": 0.62,
+      "applications": 1,
+      "created": "2026-03-16",
+      "category": "agent_workflow",
+      "pattern": "Initialize self-improvement memory under docs/ before automating deeper hooks.",
+      "problem": "A product repository may not have an obvious place for agent memory artifacts.",
+      "solution": {
+        "location": "docs/self-improvement/",
+        "rationale": [
+          "Keeps artifacts visible to contributors",
+          "Avoids coupling memory files to runtime source",
+          "Allows gradual adoption before hook automation"
+        ]
+      },
+      "quality_rules": [
+        "Prefer documentation-space storage for first-time setup",
+        "Record at least one semantic pattern, one episode, and one working-memory file",
+        "Use low-to-medium confidence for single-session patterns"
+      ],
+      "target_skills": [
+        "self-improving-agent"
+      ]
+    }
+  }
+}

@@ -41,12 +41,12 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     ) : null;
 
   return (
-    <article className={`paper-panel p-5 sm:p-6 ${colorClass}`}>
-      <div className="relative z-10 flex h-full flex-col justify-between gap-6">
+    <article className={`paper-panel p-6 sm:p-7 ${colorClass}`}>
+      <div className="relative z-10 flex h-full flex-col justify-between gap-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="figure-label">{title}</div>
-            <div className="mt-3 flex flex-wrap items-end gap-3">
+            <div className="mt-4 flex flex-wrap items-end gap-3.5">
               <div className="figure-value text-main">{value}</div>
               {diffNode}
             </div>
