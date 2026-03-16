@@ -1,18 +1,16 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// 定义支持的语言类型
 type Language = 'zh' | 'en';
 
-// Context 的类型定义
+type TranslationMap = Record<string, string>;
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string, ...args: any[]) => string;
+  t: (key: string, ...args: Array<string | number>) => string;
 }
 
-// 翻译字典
-// 哈基米根据 App.tsx 里的 key 帮您整理好了！
-const translations = {
+const translations: Record<Language, TranslationMap> = {
   zh: {
     app_title: 'DLUT-GPA',
     app_desc: 'DLUT-GPA',
@@ -79,6 +77,43 @@ const translations = {
     sandbox_banner: '您正在沙盒模式中，所有更改都不会保存到本地存储，除非您选择保存退出。',
     exit_sandbox_discard: '放弃更改退出',
     exit_sandbox_save: '保存更改退出',
+    nav_overview: '总览',
+    nav_courses: '课程',
+    nav_analysis: '分析',
+    analysis_overview: '总览分析',
+    analysis_simulation: '成绩仿真',
+    analysis_radar: '学业雷达',
+    analysis_advisor: '智能建议',
+    overview_title: '学业控制台',
+    overview_desc: '保留关键数字，把录入和分析拆成更清晰的工作区。',
+    overview_primary_cta: '进入课程',
+    overview_secondary_cta: '查看分析',
+    overview_state_live: '本地自动保存',
+    overview_state_sandbox: '沙盒演算中',
+    overview_terms: '已覆盖学期',
+    overview_active: '计入课程',
+    section_method: '计算方式',
+    section_status: '当前状态',
+    quick_metrics: '核心指标',
+    course_workspace_title: '课程控制台',
+    course_workspace_desc: '录入、筛选和档案表在同一工作区。',
+    new_course: '新建课程',
+    close_entry: '关闭录入',
+    course_entry: '课程录入',
+    course_entry_desc: '输入课程信息后立即重算 GPA。',
+    analysis_title: '分析中心',
+    analysis_desc: '切换总览、仿真、雷达和建议。',
+    filter_state_filtered: '筛选中',
+    filter_state_all: '全部课程',
+    empty_courses_title: '暂无课程',
+    empty_courses_desc: '添加第一门课程或导入现有成绩单。',
+    import_courses: '导入数据',
+    close_panel: '关闭面板',
+    language_toggle: '切换语言',
+    chart_loading: '模块加载中...',
+    theme_light_short: '亮',
+    theme_dark_short: '暗',
+    theme_dlut_short: '蓝'
   },
   en: {
     app_title: 'DLUT-GPA',
@@ -143,39 +178,67 @@ const translations = {
     no_data_for_radar: 'No data to draw radar chart',
     no_data: 'No Data',
     app_calc_title: 'Application Calculator',
-    sandbox_banner: 'You are in Sandbox Mode. Changes will not be saved to local storage unless you choose to save & exit.',
-    exit_sandbox_discard: 'Discard & Exit',
-    exit_sandbox_save: 'Save & Exit',
+    sandbox_banner: 'You are in Sandbox Mode. Changes will not be saved to local storage unless you choose to save and exit.',
+    exit_sandbox_discard: 'Discard and Exit',
+    exit_sandbox_save: 'Save and Exit',
+    nav_overview: 'Overview',
+    nav_courses: 'Courses',
+    nav_analysis: 'Analysis',
+    analysis_overview: 'Analysis Overview',
+    analysis_simulation: 'Simulation',
+    analysis_radar: 'Radar',
+    analysis_advisor: 'Advisor',
+    overview_title: 'Academic Control Center',
+    overview_desc: 'Keep the key numbers visible and split input and analysis into cleaner work areas.',
+    overview_primary_cta: 'Open Courses',
+    overview_secondary_cta: 'Open Analysis',
+    overview_state_live: 'Local autosave',
+    overview_state_sandbox: 'Sandbox running',
+    overview_terms: 'Terms Covered',
+    overview_active: 'Active Courses',
+    section_method: 'Method',
+    section_status: 'Status',
+    quick_metrics: 'Core Metrics',
+    course_workspace_title: 'Course Console',
+    course_workspace_desc: 'Input, filters, and the ledger live in one operational space.',
+    new_course: 'New Course',
+    close_entry: 'Close Entry',
+    course_entry: 'Course Entry',
+    course_entry_desc: 'Enter a course and recalculate GPA immediately.',
+    analysis_title: 'Analysis Hub',
+    analysis_desc: 'Switch between overview, simulation, radar, and advisor.',
+    filter_state_filtered: 'Filtered',
+    filter_state_all: 'All Courses',
+    empty_courses_title: 'No Courses Yet',
+    empty_courses_desc: 'Add the first course or import an existing record.',
+    import_courses: 'Import Data',
+    close_panel: 'Close panel',
+    language_toggle: 'Switch language',
+    chart_loading: 'Loading module...',
+    theme_light_short: 'Light',
+    theme_dark_short: 'Dark',
+    theme_dlut_short: 'DLUT'
   }
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // 默认语言设置为中文
   const [language, setLanguage] = useState<Language>('zh');
 
-  // 翻译函数，支持简单的参数替换 {0}, {1} 等
-  const t = (key: string, ...args: any[]) => {
-    let translation = translations[language][key as keyof typeof translations['zh']] || key;
-    
-    if (args.length > 0) {
-      args.forEach((arg, index) => {
-        translation = translation.replace(`{${index}}`, String(arg));
-      });
-    }
-    
+  const t = (key: string, ...args: Array<string | number>) => {
+    let translation = translations[language][key] ?? key;
+
+    args.forEach((arg, index) => {
+      translation = translation.replace(`{${index}}`, String(arg));
+    });
+
     return translation;
   };
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>;
 };
 
-// 自定义 Hook 以便在组件中轻松使用
 export const useTranslation = () => {
   const context = useContext(LanguageContext);
   if (!context) {

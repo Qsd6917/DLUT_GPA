@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
 import { TrendingUp, BarChart3 } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -42,15 +42,20 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
   };
 
   return (
-    <div className="bg-surface p-6 rounded-2xl shadow-soft border border-primary/10 transition-all hover:shadow-md">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-main flex items-center gap-2">
-          <TrendingUp size={18} className="text-green-500" />
-          {t('score_dist')} - {t('histogram')}
-        </h3>
+    <div className="paper-panel p-5 sm:p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <div className="section-kicker">Histogram View</div>
+          <h3 className="mt-2 text-2xl leading-none text-main sm:text-3xl">
+            {t('score_dist')} - {t('histogram')}
+          </h3>
+        </div>
+        <div className="rounded-[1.2rem] border border-primary/15 bg-primary/5 p-3 text-primary">
+          <TrendingUp size={18} className="text-emerald-500" />
+        </div>
       </div>
 
-      <div className="h-72 w-full">
+      <div className="h-72 w-full sm:h-80">
         {stats.totalCredits > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -82,10 +87,7 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
                 radius={[4, 4, 0, 0]}
               >
                 {stats.scoreDistribution.map((_, index) => (
-                  <rect 
-                    key={`bar-${index}`} 
-                    fill={barColors[index % barColors.length]} 
-                  />
+                  <Cell key={`bar-${index}`} fill={barColors[index % barColors.length]} />
                 ))}
               </Bar>
             </BarChart>
@@ -98,6 +100,7 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
         )}
       </div>
       
+      <div className="editorial-divider my-4" />
       <div className="mt-4 flex flex-wrap gap-3 justify-center">
         {stats.scoreDistribution.map((entry, index) => (
           <div key={entry.name} className="flex items-center gap-2 text-xs font-medium">

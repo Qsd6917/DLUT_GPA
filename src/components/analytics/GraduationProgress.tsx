@@ -26,12 +26,12 @@ export const GraduationProgress: React.FC<GraduationProgressProps> = ({
     return (
       <div className="mb-4">
         <div className="flex justify-between items-end mb-1.5">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{label}</span>
-          <span className="text-xs font-bold text-gray-700">
+          <span className="text-xs font-bold text-muted uppercase tracking-[0.24em]">{label}</span>
+          <span className="data-figure text-xs text-main">
             {current.toFixed(1)} / {target} ({percentage.toFixed(0)}%)
           </span>
         </div>
-        <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-background/90">
           <div 
             className={`h-full rounded-full transition-all duration-1000 ease-out ${color}`} 
             style={{ width: `${percentage}%` }}
@@ -42,12 +42,15 @@ export const GraduationProgress: React.FC<GraduationProgressProps> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-soft border border-gray-100 transition-all hover:shadow-md">
-      <div className="flex items-center gap-2 mb-6">
-        <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+    <div className="paper-panel p-5 sm:p-6">
+      <div className="mb-6 flex items-center gap-3">
+        <div className="rounded-[1.2rem] border border-primary/15 bg-primary/5 p-3 text-primary">
           <Award size={20} />
         </div>
-        <h3 className="text-lg font-bold text-gray-800">毕业进度概览</h3>
+        <div>
+          <div className="section-kicker">Progress Ledger</div>
+          <h3 className="text-2xl leading-none text-main sm:text-3xl">毕业进度概览</h3>
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -56,7 +59,7 @@ export const GraduationProgress: React.FC<GraduationProgressProps> = ({
         {renderProgressBar('选修学分', electiveCredits, requirements.elective, 'bg-gradient-to-r from-emerald-500 to-teal-500')}
       </div>
       
-      <div className="mt-6 pt-4 border-t border-gray-50 flex items-center justify-center gap-2 text-xs text-gray-400">
+      <div className="mt-6 flex items-center justify-center gap-2 border-t border-primary/10 pt-4 text-xs text-muted">
         <CheckCircle2 size={14} />
         <span>仅供参考，具体要求请以培养方案为准</span>
       </div>

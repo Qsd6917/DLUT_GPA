@@ -11,35 +11,30 @@ export const SandboxBanner: React.FC<SandboxBannerProps> = ({ onDiscard, onSave 
   const { t } = useTranslation();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 z-50 animate-in slide-in-from-bottom-20">
-      <div className="max-w-4xl mx-auto bg-amber-900/90 text-white backdrop-blur-md rounded-2xl shadow-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-amber-700/50">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-amber-500 rounded-xl text-white shadow-sm animate-pulse">
-            <FlaskConical size={20} />
-          </div>
-          <div>
-            <h4 className="font-bold text-sm">{t('sandbox_active')}</h4>
-            <p className="text-xs text-amber-200">{t('sandbox_banner')}</p>
-          </div>
+    <div className="mx-auto flex max-w-[94rem] flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <div className="flex items-center gap-3 rounded-full border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-amber-100">
+        <div className="rounded-full bg-amber-400/20 p-2 text-amber-200">
+          <FlaskConical size={16} />
         </div>
-        <div className="flex gap-3 w-full sm:w-auto">
-          <button
-            type="button"
-            onClick={onDiscard}
-            className="flex-1 sm:flex-none px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            <XCircle size={16} />
-            {t('exit_sandbox_discard')}
-          </button>
-          <button
-            type="button"
-            onClick={onSave}
-            className="flex-1 sm:flex-none px-6 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-bold shadow-lg shadow-amber-900/50 transition-colors flex items-center justify-center gap-2"
-          >
-            <Save size={16} />
-            {t('exit_sandbox_save')}
-          </button>
+        <div>
+          <div className="text-sm font-semibold text-amber-50">{t('sandbox_active')}</div>
+          <p className="text-xs text-amber-100/80">{t('sandbox_banner')}</p>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+        <button
+          type="button"
+          onClick={onDiscard}
+          className="ghost-button border-amber-400/25 bg-amber-500/10 text-amber-100 hover:border-amber-300/40 hover:text-amber-50"
+        >
+          <XCircle size={14} />
+          {t('exit_sandbox_discard')}
+        </button>
+        <button type="button" onClick={onSave} className="primary-button bg-amber-300 px-4 py-2.5 text-xs text-amber-950 shadow-[0_16px_32px_rgba(251,191,36,0.24)]">
+          <Save size={14} />
+          {t('exit_sandbox_save')}
+        </button>
       </div>
     </div>
   );

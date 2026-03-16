@@ -13,35 +13,28 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('dlut_gpa_theme');
-    if (saved === 'dark' || saved === 'light' || saved === 'dlut-blue') return saved as Theme;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    if (saved === 'dark' || saved === 'light' || saved === 'dlut-blue') {
+      return saved;
+    }
+    return 'dark';
   });
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
-    // 移除所有主题类
     root.classList.remove('light', 'dark', 'dlut-blue');
-    
-    // 添加当前主题类
     root.classList.add(theme);
-    
     localStorage.setItem('dlut_gpa_theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => {
-      if (prev === 'light') return 'dark';
+    setTheme((prev) => {
       if (prev === 'dark') return 'dlut-blue';
-      return 'light';
+      if (prev === 'dlut-blue') return 'light';
+      return 'dark';
     });
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>{children}</ThemeContext.Provider>;
 };
 
 export const useTheme = () => {

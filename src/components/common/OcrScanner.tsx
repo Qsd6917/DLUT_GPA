@@ -8,6 +8,63 @@ interface OcrScannerProps {
   onCoursesParsed: (courses: Course[]) => void;
 }
 
+const parseOcrResult = (text: string): Course[] => {
+  const lineRegex = /^(.+?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)$/;
+  const courses: Course[] = [];
+  const keys = new Set<string>();
+
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  lines.forEach((line) => {
+    const match = line.match(lineRegex);
+    if (!match) return;
+
+    const [, name, creditsStr, scoreStr] = match;
+    const cleanName = name.trim().replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s/-]/g, '');
+    const credits = parseFloat(creditsStr);
+    const score = parseFloat(scoreStr);
+
+    if (!cleanName || Number.isNaN(credits) || Number.isNaN(score) || credits < 0 || score < 0 || score > 100) {
+      return;
+    }
+
+    const dedupeKey = `${cleanName}|${credits}|${score}`;
+    if (keys.has(dedupeKey)) return;
+    keys.add(dedupeKey);
+
+    let type: '必修' | '选修' | '任选' = '选修';
+    if (cleanName.includes('必修') || cleanName.includes('数学') || cleanName.includes('英语') || cleanName.includes('政治')) {
+      type = '必修';
+    } else if (cleanName.includes('任选') || cleanName.includes('讲座')) {
+      type = '任选';
+    }
+
+    const isCore =
+      cleanName.includes('数学') ||
+      cleanName.includes('专业') ||
+      cleanName.includes('核心') ||
+      cleanName.includes('程序') ||
+      cleanName.includes('算法');
+
+    courses.push({
+      id: globalThis.crypto?.randomUUID?.() ?? `${cleanName}-${credits}-${score}`,
+      name: cleanName,
+      credits,
+      score,
+      gpa: score,
+      isActive: true,
+      semester: '未知学期',
+      type,
+      isCore,
+    });
+  });
+
+  return courses;
+};
+
 export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
   const { t } = useTranslation();
   const [isScanning, setIsScanning] = useState(false);
@@ -47,65 +104,6 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
     } finally {
       setIsScanning(false);
     }
-  };
-
-  const parseOcrResult = (text: string): Course[] => {
-    // 正则表达式匹配教务处成绩单格式
-    // 模式：课程名、学分、成绩
-    const courseRegex = /([^\d\n]{5,})\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?|\d+)/g;
-    const courses: Course[] = [];
-    const ids = new Set<string>(); // 避免重复课程
-    
-    let match;
-    while ((match = courseRegex.exec(text)) !== null) {
-      const [, name, creditsStr, scoreStr] = match;
-      
-      // 清理课程名称（移除可能的额外字符）
-      const cleanName = name.trim().replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s]/g, '');
-      
-      // 验证数据有效性
-      const credits = parseFloat(creditsStr);
-      const score = parseFloat(scoreStr);
-      
-      if (isNaN(credits) || isNaN(score) || credits <= 0 || score < 0 || score > 100) {
-        continue; // 跳过无效数据
-      }
-      
-      // 生成唯一 ID（基于名称避免重复）
-      const id = `${cleanName.substring(0, 10).replace(/\s+/g, '_')}_${Date.now()}`;
-      
-      if (ids.has(id)) continue; // 跳过重复
-      ids.add(id);
-      
-      // 确定课程类型（根据关键词判断）
-      let type: '必修' | '选修' | '任选' = '选修';
-      if (cleanName.includes('必修') || cleanName.includes('数学') || cleanName.includes('英语') || cleanName.includes('政治')) {
-        type = '必修';
-      } else if (cleanName.includes('任选') || cleanName.includes('讲座')) {
-        type = '任选';
-      }
-      
-      // 判断是否为核心课程（根据关键词）
-      const isCore = cleanName.includes('数学') || 
-                     cleanName.includes('专业') || 
-                     cleanName.includes('核心') ||
-                     cleanName.includes('程序') ||
-                     cleanName.includes('算法');
-      
-      courses.push({
-        id,
-        name: cleanName,
-        credits,
-        score,
-        gpa: score, // GPA 将由父组件重新计算
-        isActive: true,
-        semester: '未知学期', // 需要从其他地方解析或让用户指定
-        type,
-        isCore
-      });
-    }
-
-    return courses;
   };
 
   const triggerFileSelect = () => {

@@ -1,12 +1,12 @@
 import React from 'react';
-import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 
 interface StatsCardProps {
   title: string;
   value: string | number;
   icon: React.ReactNode;
   description: string;
-  colorClass: string;
+  colorClass?: string;
   comparisonValue?: string | number;
   isSandbox?: boolean;
 }
@@ -16,70 +16,48 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   value,
   icon,
   description,
-  colorClass,
+  colorClass = '',
   comparisonValue,
   isSandbox = false,
 }) => {
-  const numValue = parseFloat(value.toString());
-  const numComparison = comparisonValue ? parseFloat(comparisonValue.toString()) : undefined;
-  
-  let diff = 0;
-  let diffNode = null;
+  const numValue = Number(value);
+  const numComparison = comparisonValue !== undefined ? Number(comparisonValue) : undefined;
+  const diff = numComparison !== undefined && !Number.isNaN(numComparison) ? numValue - numComparison : undefined;
 
-  if (isSandbox && numComparison !== undefined && !isNaN(numComparison)) {
-    diff = numValue - numComparison;
-    const absDiff = Math.abs(diff);
-    const formattedDiff = absDiff.toFixed(3); // Assuming GPA precision
-    
-    if (diff > 0.001) {
-      diffNode = (
-        <span className="flex items-center text-emerald-500 text-xs font-bold bg-white/90 px-1.5 py-0.5 rounded-md shadow-sm">
-          <ArrowUp size={12} strokeWidth={3} />
-          {formattedDiff}
-        </span>
-      );
-    } else if (diff < -0.001) {
-      diffNode = (
-        <span className="flex items-center text-rose-500 text-xs font-bold bg-white/90 px-1.5 py-0.5 rounded-md shadow-sm">
-          <ArrowDown size={12} strokeWidth={3} />
-          {formattedDiff}
-        </span>
-      );
-    } else {
-        diffNode = (
-        <span className="flex items-center text-muted text-xs font-bold bg-white/90 px-1.5 py-0.5 rounded-md shadow-sm">
-          <Minus size={12} strokeWidth={3} />
-        </span>
-      );
-    }
-  }
+  const diffNode =
+    isSandbox && diff !== undefined ? (
+      <div
+        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+          diff > 0.001
+            ? 'bg-emerald-500/12 text-emerald-300'
+            : diff < -0.001
+              ? 'bg-rose-500/12 text-rose-300'
+              : 'bg-white/8 text-muted'
+        }`}
+      >
+        {diff > 0.001 ? <ArrowUp size={12} /> : diff < -0.001 ? <ArrowDown size={12} /> : <Minus size={12} />}
+        {Math.abs(diff).toFixed(typeof value === 'number' && Number.isInteger(value) ? 0 : 3)}
+      </div>
+    ) : null;
 
   return (
-    <div className={`p-6 rounded-2xl transition-all duration-300 relative overflow-hidden group dark:border dark:border-white/10 ${colorClass}`}>
-      <div className="flex justify-between items-start mb-4 relative z-10">
-        <div>
-          <p className={`text-sm font-bold tracking-wide mb-1 opacity-90`}>{title}</p>
-          <div className="flex items-end gap-2">
-             <h3 className="text-3xl font-extrabold tracking-tight leading-none">
-                {value}
-             </h3>
-             {diffNode}
+    <article className={`paper-panel p-5 sm:p-6 ${colorClass}`}>
+      <div className="relative z-10 flex h-full flex-col justify-between gap-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="figure-label">{title}</div>
+            <div className="mt-3 flex flex-wrap items-end gap-3">
+              <div className="figure-value text-main">{value}</div>
+              {diffNode}
+            </div>
+          </div>
+          <div className="rounded-[1.2rem] border border-primary/10 bg-primary/10 p-3 text-primary shadow-[0_10px_28px_hsla(var(--color-primary),0.08)]">
+            {icon}
           </div>
         </div>
-        <div className={`p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-inner dark:bg-black/20`}>
-          {icon}
-        </div>
+
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">{description}</p>
       </div>
-      
-      <div className="relative z-10">
-        <p className={`text-xs font-medium opacity-80 flex items-center gap-1`}>
-            {description}
-        </p>
-      </div>
-      
-      {/* Decorative background elements */}
-      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
-      <div className="absolute -left-6 -top-6 w-20 h-20 bg-white opacity-5 rounded-full blur-lg"></div>
-    </div>
+    </article>
   );
 };

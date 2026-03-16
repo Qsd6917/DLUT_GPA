@@ -251,7 +251,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
         const rowErrors: string[] = [];
         if (!name) rowErrors.push('课程名为空');
         if (credits === null) rowErrors.push('学分不是数字');
-        if (credits !== null && credits <= 0) rowErrors.push('学分需大于 0');
+        if (credits !== null && credits < 0) rowErrors.push('学分不能小于 0');
         if (score === null) rowErrors.push('成绩不是数字');
         if (score !== null && (score < 0 || score > 100)) rowErrors.push('成绩需在 0-100 之间');
 

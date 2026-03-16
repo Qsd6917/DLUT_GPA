@@ -47,10 +47,10 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targ
   const recommendationData = useMemo(() => getAIRecommendations(studentProfile), [studentProfile]);
 
   return (
-    <div className="bg-surface rounded-2xl shadow-soft border border-primary/10 overflow-hidden">
-      <div className="bg-gradient-to-r from-primary/5 to-sky-500/5 p-6 border-b border-primary/10">
+    <div className="paper-panel overflow-hidden">
+      <div className="border-b border-primary/10 bg-gradient-to-r from-primary/10 to-transparent p-5 sm:p-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
+          <div className="rounded-[1rem] border border-primary/10 bg-primary/10 p-2.5">
             <Brain className="h-6 w-6 text-primary" />
           </div>
           <div>
@@ -60,8 +60,8 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targ
         </div>
       </div>
 
-      <div className="p-1 bg-primary/5">
-        <div className="flex border-b border-primary/10">
+      <div className="border-b border-primary/10 px-2 py-2">
+        <div className="flex gap-2 overflow-x-auto">
           <TabButton
             active={activeTab === 'recommendations'}
             icon={<Target size={16} />}
@@ -83,7 +83,7 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targ
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-5 sm:p-6">
         {activeTab === 'recommendations' && (
           <RecommendationsTab recommendations={recommendationData.recommendations} />
         )}
@@ -116,8 +116,8 @@ const TabButton: React.FC<{
 }> = ({ active, icon, label, onClick }) => (
   <button
     type="button"
-    className={`flex-1 py-3 px-4 text-center font-medium text-sm ${
-      active ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted hover:text-main'
+    className={`min-w-fit flex-1 rounded-[1rem] px-4 py-3 text-center text-sm font-medium transition-colors ${
+      active ? 'bg-primary text-on-primary shadow-[0_16px_32px_hsla(var(--color-primary),0.18)]' : 'text-muted hover:bg-background/60 hover:text-main'
     }`}
     onClick={onClick}
   >

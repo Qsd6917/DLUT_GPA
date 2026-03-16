@@ -1,14 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Database, FlaskConical, GraduationCap, Languages, RotateCcw, Settings, Share2 } from 'lucide-react';
+import {
+  BookText,
+  ChevronDown,
+  Database,
+  FlaskConical,
+  Languages,
+  LayoutDashboard,
+  LineChart,
+  RotateCcw,
+  Settings,
+  Share2,
+} from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import { CalculationMethod } from '../../types';
 import { ThemeSelector } from '../common/ThemeSelector';
 
+type Section = 'overview' | 'courses' | 'analysis';
+
 interface HeaderProps {
+  activeSection: Section;
+  onSectionChange: (section: Section) => void;
   isSandboxMode: boolean;
-  logoError: boolean;
-  setLogoError: (error: boolean) => void;
   onReset: () => void;
   onDataMgmt: () => void;
   onShare: () => void;
@@ -17,10 +29,16 @@ interface HeaderProps {
   setMethod: (method: CalculationMethod) => void;
 }
 
+const navItems: Array<{ id: Section; labelKey: 'nav_overview' | 'nav_courses' | 'nav_analysis'; icon: React.ComponentType<any> }> = [
+  { id: 'overview', labelKey: 'nav_overview', icon: LayoutDashboard },
+  { id: 'courses', labelKey: 'nav_courses', icon: BookText },
+  { id: 'analysis', labelKey: 'nav_analysis', icon: LineChart },
+];
+
 export const Header: React.FC<HeaderProps> = ({
+  activeSection,
+  onSectionChange,
   isSandboxMode,
-  logoError,
-  setLogoError,
   onReset,
   onDataMgmt,
   onShare,
@@ -29,13 +47,8 @@ export const Header: React.FC<HeaderProps> = ({
   setMethod,
 }) => {
   const { t, language, setLanguage } = useTranslation();
-  useTheme();
   const [isMethodOpen, setIsMethodOpen] = useState(false);
   const methodRef = useRef<HTMLDivElement>(null);
-
-  const toggleLanguage = () => {
-    setLanguage(language === 'zh' ? 'en' : 'zh');
-  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -43,6 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
         setIsMethodOpen(false);
       }
     }
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -56,145 +70,138 @@ export const Header: React.FC<HeaderProps> = ({
     { value: CalculationMethod.WES, label: 'WES 5.0' },
   ];
 
-  const currentMethodLabel = methodOptions.find((m) => m.value === method)?.label ?? 'DLUT 5.0';
+  const currentMethodLabel = methodOptions.find((item) => item.value === method)?.label ?? 'DLUT 5.0';
+  const actionButton =
+    'inline-flex h-10 items-center gap-2 rounded-full border border-primary/15 bg-background/55 px-3 text-[11px] font-semibold text-main transition-colors hover:border-primary/40 hover:text-primary sm:h-auto sm:px-3.5 sm:py-2.5 sm:text-xs';
 
   return (
-    <header className={`bg-white/95 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-40 transition-all duration-300 dark:bg-gray-900/90 dark:border-gray-800 ${isSandboxMode ? 'border-b-amber-200 bg-amber-50/90 dark:bg-amber-900/90' : ''}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4 group cursor-default min-w-0">
-            <div className="flex-shrink-0 relative overflow-hidden rounded-full p-1 bg-white border border-primary/20 shadow-sm transition-transform group-hover:scale-105 duration-300 w-12 h-12 flex items-center justify-center dark:bg-gray-800 dark:border-gray-700">
-               {!logoError ? (
-                   <img 
-                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Dalian_University_of_Technology_logo.png/240px-Dalian_University_of_Technology_logo.png" 
-                     alt="DLUT Logo" 
-                     className="w-10 h-10 object-contain"
-                     onError={() => setLogoError(true)}
-                   />
-               ) : (
-                   <div className="w-10 h-10 flex items-center justify-center bg-primary/10 rounded-full">
-                        <GraduationCap className="text-primary w-6 h-6" />
-                   </div>
-               )}
+    <header className="app-header sticky top-0 z-40">
+      <div className="mx-auto flex max-w-[94rem] flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="paper-panel flex h-11 w-11 items-center justify-center rounded-[1.1rem] bg-background/65 p-2 sm:h-12 sm:w-12">
+              <img src="/icons/pwa-192x192.png" alt="DLUT GPA" className="h-7 w-7 object-contain sm:h-8 sm:w-8" />
             </div>
+
             <div className="min-w-0">
-                <h1 className="text-2xl font-extrabold text-main tracking-tight flex items-center gap-2 min-w-0">
-                  <span className="truncate">{t('app_title')}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border hidden sm:inline-block ${isSandboxMode ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/50 dark:text-amber-200' : 'bg-primary/10 text-primary border-primary/20 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'}`}>
-                    {isSandboxMode ? t('sandbox_mode') : 'Pro'}
-                  </span>
-                </h1>
-                <p className="text-xs text-muted font-medium tracking-wide truncate">{t('app_desc')}</p>
+              <div className="section-kicker hidden sm:inline-flex">Dalian University of Technology</div>
+              <div className="flex flex-wrap items-center gap-2 sm:mt-1 sm:gap-3">
+                <h1 className="text-[1.55rem] leading-none text-main sm:text-[1.9rem]">{t('app_title')}</h1>
+                <span
+                  className={`status-chip ${
+                    isSandboxMode ? 'border-amber-400/30 bg-amber-500/10 text-amber-200' : 'border-primary/20 bg-primary/10 text-primary'
+                  }`}
+                >
+                  {isSandboxMode ? t('sandbox_mode') : currentMethodLabel}
+                </span>
+              </div>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="hidden md:flex items-center gap-2">
-                 {!isSandboxMode ? (
-                     <>
-                        <button 
-                            onClick={onReset}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-red-500 px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-all duration-200"
-                        >
-                            <RotateCcw size={14} />
-                            {t('reset')}
-                        </button>
-                        <div className="w-px h-4 bg-gray-200 dark:bg-gray-700"></div>
-                        <button 
-                            onClick={onDataMgmt}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-primary px-3 py-2 rounded-xl hover:bg-primary/10 dark:hover:bg-blue-900/20 dark:hover:text-blue-400 transition-all duration-200"
-                        >
-                            <Database size={14} />
-                            {t('data_mgmt')}
-                        </button>
-                        <button 
-                            onClick={onShare}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-xl transition-all duration-200 shadow-md shadow-indigo-200 dark:shadow-none"
-                        >
-                            <Share2 size={14} />
-                            {t('share')}
-                        </button>
-                        <button 
-                            onClick={onEnterSandbox}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-2 rounded-xl transition-all duration-200 border border-amber-200 ml-2 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800"
-                        >
-                            <FlaskConical size={14} />
-                            {t('enter_sandbox')}
-                        </button>
-                     </>
-                 ) : (
-                     <div className="flex items-center gap-2 bg-amber-100 px-2 py-1 rounded-xl border border-amber-200 dark:bg-amber-900/30 dark:border-amber-800">
-                         <FlaskConical size={14} className="text-amber-600 dark:text-amber-400 animate-pulse" />
-                         <span className="text-xs font-bold text-amber-800 dark:text-amber-200">{t('sandbox_active')}</span>
-                     </div>
-                 )}
-            </div>
-            
-            {/* Mobile Share Button (Only Icon) */}
-            {!isSandboxMode && (
-                <button 
-                    onClick={onShare}
-                    className="md:hidden flex items-center justify-center text-indigo-600 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-xl transition-all dark:bg-indigo-900/30 dark:text-indigo-300"
-                    aria-label={t('share')}
-                >
-                    <Share2 size={18} />
+
+          <div className="flex flex-wrap items-center gap-1.5 xl:justify-end">
+            <button type="button" onClick={onDataMgmt} className={actionButton}>
+              <Database size={14} />
+              <span className="hidden sm:inline">{t('data_mgmt')}</span>
+            </button>
+            <button type="button" onClick={onShare} className="primary-button h-10 px-3 text-[11px] sm:h-auto sm:px-4 sm:py-2.5 sm:text-xs">
+              <Share2 size={14} />
+              <span className="hidden sm:inline">{t('share')}</span>
+            </button>
+            {!isSandboxMode ? (
+              <>
+                <button type="button" onClick={onEnterSandbox} className={`${actionButton} border-amber-400/30 bg-amber-500/10 text-amber-200`}>
+                  <FlaskConical size={14} />
+                  <span className="hidden sm:inline">{t('enter_sandbox')}</span>
                 </button>
-            )}
+                <button type="button" onClick={onReset} className={actionButton}>
+                  <RotateCcw size={14} />
+                  <span className="hidden sm:inline">{t('reset')}</span>
+                </button>
+              </>
+            ) : null}
+          </div>
+        </div>
 
-            {/* Theme Selector */}
-            <div className="flex items-center justify-center p-2 rounded-xl text-muted hover:bg-gray-100 hover:text-main dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
-                <ThemeSelector />
-            </div>
+        <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+          <nav className="flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-1" aria-label="Primary">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = activeSection === item.id;
 
-            {/* Language Switcher */}
-            <button 
-                onClick={toggleLanguage}
-                className="flex items-center justify-center p-2 rounded-xl text-muted hover:bg-gray-100 hover:text-main dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
-                title="Switch Language"
-                aria-label="Switch language"
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSectionChange(item.id)}
+                  className="nav-pill"
+                  data-active={active}
+                  aria-pressed={active}
+                >
+                  <Icon size={15} />
+                  {t(item.labelKey)}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="flex flex-wrap items-center gap-1.5 xl:justify-end">
+            <ThemeSelector />
+
+            <button
+              type="button"
+              onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+              className={actionButton}
+              title={t('language_toggle')}
+              aria-label={t('language_toggle')}
             >
-                <Languages size={18} />
-                <span className="text-xs font-bold ml-1 uppercase">{language}</span>
+              <Languages size={14} />
+              <span className="data-figure text-[11px] uppercase">{language}</span>
             </button>
 
             <div className="relative" ref={methodRef}>
               <button
                 type="button"
-                onClick={() => setIsMethodOpen((v) => !v)}
-                className="flex items-center gap-2 bg-gray-100/80 hover:bg-white border border-transparent hover:border-gray-200 rounded-xl px-2 py-2 transition-all duration-200 shadow-sm dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700"
+                onClick={() => setIsMethodOpen((value) => !value)}
+                className={actionButton}
                 aria-haspopup="listbox"
                 aria-expanded={isMethodOpen}
               >
-                <Settings size={16} className="text-muted" />
-                <span className="text-sm font-semibold text-main w-[90px] sm:w-auto text-left">{currentMethodLabel}</span>
-                <ChevronDown size={14} className={`text-muted transition-transform duration-200 ${isMethodOpen ? 'rotate-180' : ''}`} />
+                <Settings size={14} />
+                <span className="data-figure hidden text-[11px] sm:inline">{currentMethodLabel}</span>
+                <span className="data-figure text-[11px] sm:hidden">GPA</span>
+                <ChevronDown size={14} className={`transition-transform ${isMethodOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {isMethodOpen && (
-                <div className="absolute right-0 top-full mt-2 w-44 bg-surface rounded-2xl shadow-xl border border-primary/10 p-2 z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5">
-                  <div role="listbox" aria-label="GPA 模式">
-                    {methodOptions.map((opt) => {
-                      const active = opt.value === method;
+              {isMethodOpen ? (
+                <div className="paper-panel absolute right-0 top-full z-30 mt-3 w-48 p-2">
+                  <div role="listbox" aria-label="GPA Mode" className="space-y-1">
+                    {methodOptions.map((option) => {
+                      const active = option.value === method;
+
                       return (
                         <button
-                          key={opt.value}
+                          key={option.value}
                           type="button"
                           onClick={() => {
-                            setMethod(opt.value);
+                            setMethod(option.value);
                             setIsMethodOpen(false);
                           }}
-                          className={`w-full text-left flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors ${active ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-background text-main'}`}
+                          className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm transition-colors ${
+                            active ? 'bg-primary/12 font-semibold text-primary' : 'text-main hover:bg-background/60'
+                          }`}
                         >
-                          <span>{opt.label}</span>
-                          {active && <span className="text-xs font-bold">✓</span>}
+                          <span>{option.label}</span>
+                          {active ? <span className="data-figure text-[11px]">SET</span> : null}
                         </button>
                       );
                     })}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
+      </div>
     </header>
   );
 };

@@ -5,6 +5,7 @@ import { SAMPLE_COURSES, DEFAULT_CALCULATION_METHOD } from '../utils/constants';
 
 const STORAGE_KEY = 'dlut_gpa_courses_v3';
 const USER_DEFAULT_KEY = 'dlut_gpa_user_default';
+const createCourseId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 export const useCourseData = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -16,17 +17,19 @@ export const useCourseData = () => {
   // Initialize data
   useEffect(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
+    const hasSavedData = savedData !== null;
     let initialCourses: Course[] = [];
 
-    if (savedData) {
+    if (hasSavedData) {
       try {
-        initialCourses = JSON.parse(savedData);
+        const parsed = JSON.parse(savedData as string);
+        initialCourses = Array.isArray(parsed) ? parsed : [];
       } catch (e) {
         initialCourses = [];
       }
     }
 
-    if (initialCourses.length === 0) {
+    if (!hasSavedData) {
       const userDefault = localStorage.getItem(USER_DEFAULT_KEY);
       if (userDefault) {
         try {
@@ -58,7 +61,7 @@ export const useCourseData = () => {
 
   // Persist courses
   useEffect(() => {
-    if (hydrated && courses.length > 0 && !isSandboxMode) {
+    if (hydrated && !isSandboxMode) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
     }
   }, [courses, hydrated, isSandboxMode]);
@@ -74,7 +77,7 @@ export const useCourseData = () => {
 
   const addCourse = useCallback((name: string, credits: number, score: number, semester: string, type: CourseType, isCore: boolean) => {
     const newCourse: Course = {
-      id: Date.now().toString(),
+      id: createCourseId(),
       name,
       credits,
       score,
@@ -120,11 +123,11 @@ export const useCourseData = () => {
   const importData = useCallback((importedCourses: Course[], mode: 'replace' | 'merge') => {
     const processedCourses = importedCourses.map(c => ({
       ...c,
-      id: c.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: c.id || createCourseId(),
       isActive: c.isActive !== undefined ? c.isActive : true,
       semester: c.semester || '未知学期',
       type: c.type || '必修',
-      isCore: c.isCore || false,
+      isCore: c.isCore ?? false,
       gpa: calculateCourseGpa(c.score, method)
     }));
 
@@ -133,7 +136,7 @@ export const useCourseData = () => {
     } else {
       const newCourses = processedCourses.map(c => ({ 
         ...c, 
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9) 
+        id: createCourseId()
       }));
       setCourses(prev => [...prev, ...newCourses]);
     }
