@@ -13,14 +13,21 @@ import { CourseType } from '../../types';
 import { useTranslation } from '../../contexts/LanguageContext';
 
 interface AddCourseFormProps {
-  onAdd: (name: string, credits: number, score: number, semester: string, type: CourseType, isCore: boolean) => void;
+  onAdd: (
+    name: string,
+    credits: number,
+    score: number,
+    semester: string,
+    type: CourseType,
+    isCore: boolean
+  ) => void;
   existingNames: string[];
   existingSemesters: string[];
   variant?: 'panel' | 'drawer';
 }
 
 const fieldClassName =
-  'w-full rounded-[1.15rem] border border-primary/15 bg-background/55 px-4 py-3 text-sm text-main outline-none transition-all placeholder:text-muted focus:border-primary focus:bg-background/75 focus:ring-4 focus:ring-primary/10';
+  'w-full rounded-[0.95rem] border border-primary/10 bg-[hsl(var(--surface-2))] px-3.5 py-2.5 text-sm text-main outline-none transition-all placeholder:text-muted focus:border-primary focus:bg-surface';
 
 export const AddCourseForm: React.FC<AddCourseFormProps> = ({
   onAdd,
@@ -47,7 +54,12 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
     }
 
     const numScore = Number(score);
-    if (score === '' || Number.isNaN(numScore) || numScore < 0 || numScore > 100) {
+    if (
+      score === '' ||
+      Number.isNaN(numScore) ||
+      numScore < 0 ||
+      numScore > 100
+    ) {
       setError('请输入有效的成绩 (0-100)');
       return;
     }
@@ -84,7 +96,7 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
             type="text"
             list="course-names"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             className={fieldClassName}
             placeholder="例如：自动控制原理A"
           />
@@ -104,7 +116,7 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
             type="text"
             list="semesters"
             value={semester}
-            onChange={(e) => setSemester(e.target.value)}
+            onChange={e => setSemester(e.target.value)}
             className={fieldClassName}
             placeholder="例如：3-1"
           />
@@ -126,7 +138,7 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
             type="number"
             step="0.5"
             value={credits}
-            onChange={(e) => setCredits(e.target.value)}
+            onChange={e => setCredits(e.target.value)}
             className={`${fieldClassName} num-input`}
             placeholder="0.0"
           />
@@ -140,7 +152,7 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
             id="course-score"
             type="number"
             value={score}
-            onChange={(e) => setScore(e.target.value)}
+            onChange={e => setScore(e.target.value)}
             className={`${fieldClassName} num-input`}
             placeholder="0-100"
           />
@@ -151,7 +163,12 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
             <Hash size={14} /> 属性
           </span>
           <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-            <select id="course-type" value={type} onChange={(e) => setType(e.target.value as CourseType)} className={fieldClassName}>
+            <select
+              id="course-type"
+              value={type}
+              onChange={e => setType(e.target.value as CourseType)}
+              className={fieldClassName}
+            >
               <option value="必修">必修</option>
               <option value="选修">选修</option>
               <option value="任选">任选</option>
@@ -159,22 +176,31 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
 
             <button
               type="button"
-              onClick={() => setIsCore((value) => !value)}
-              className={`inline-flex items-center justify-center gap-2 rounded-[1.15rem] border px-4 py-3 text-sm font-semibold transition-colors ${
+              onClick={() => setIsCore(value => !value)}
+              className={`inline-flex items-center justify-center gap-2 rounded-[0.95rem] border px-4 py-2.5 text-sm font-semibold transition-colors ${
                 isCore
-                  ? 'border-amber-400/30 bg-amber-500/10 text-amber-200'
-                  : 'border-primary/15 bg-background/55 text-muted hover:border-primary/30 hover:text-main'
+                  ? 'border-amber-400/30 bg-amber-500/10 text-amber-800 dark:text-amber-200'
+                  : 'border-primary/10 bg-[hsl(var(--surface-2))] text-muted hover:border-primary/30 hover:text-main'
               }`}
               title="是否为核心/主干课程"
             >
-              <CheckCircle2 size={16} className={isCore ? 'fill-current' : ''} />
+              <CheckCircle2
+                size={16}
+                className={isCore ? 'fill-current' : ''}
+              />
               核心
             </button>
           </div>
         </label>
       </div>
 
-      <div className={`flex flex-col gap-4 border-t border-primary/10 pt-5 ${variant === 'drawer' ? 'sticky bottom-0 bg-[hsl(var(--color-background))] pb-2' : ''}`}>
+      <div
+        className={`flex flex-col gap-4 border-t border-primary/10 pt-5 ${
+          variant === 'drawer'
+            ? 'sticky bottom-0 bg-[hsl(var(--surface-1))] pb-2 backdrop-blur-sm'
+            : ''
+        }`}
+      >
         <div className="flex min-h-6 items-center gap-2 text-sm text-[hsl(var(--color-accent))]">
           {error ? (
             <>
@@ -182,7 +208,7 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
               {error}
             </>
           ) : (
-            <span className="text-muted">保存后自动重算绩点。</span>
+            <span className="text-muted">保存后会自动同步刷新绩点统计。</span>
           )}
         </div>
 
@@ -203,7 +229,9 @@ export const AddCourseForm: React.FC<AddCourseFormProps> = ({
       <div className="relative z-10 space-y-6">
         <div>
           <div className="section-kicker">Entry</div>
-          <h3 className="type-page-title mt-3 text-main">{t('course_entry')}</h3>
+          <h3 className="type-page-title mt-3 text-main">
+            {t('course_entry')}
+          </h3>
           <p className="type-body-sm mt-2">{t('course_entry_desc')}</p>
         </div>
         {content}

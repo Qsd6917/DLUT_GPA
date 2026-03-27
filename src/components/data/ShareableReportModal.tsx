@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Download, Share2, X } from 'lucide-react';
 import { Course, GpaStats } from '../../types';
-import { X, Share2, Download } from 'lucide-react';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 interface ShareableReportModalProps {
   isOpen: boolean;
@@ -10,7 +11,8 @@ interface ShareableReportModalProps {
   courses: Course[];
 }
 
-let html2CanvasModulePromise: Promise<typeof import('html2canvas')> | null = null;
+let html2CanvasModulePromise: Promise<typeof import('html2canvas')> | null =
+  null;
 
 const loadHtml2Canvas = async () => {
   if (!html2CanvasModulePromise) {
@@ -27,6 +29,7 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
   stats,
   courses,
 }) => {
+  const { language } = useTranslation();
   const reportRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -44,10 +47,7 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   const getExportFileName = useCallback(() => {
@@ -64,7 +64,9 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
 
   const handleExportPng = async () => {
     const element = reportRef.current;
-    if (!element || isExporting) return;
+    if (!element || isExporting) {
+      return;
+    }
 
     setExportError(null);
     setIsExporting(true);
@@ -84,30 +86,16 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
         height: Math.ceil(rect.height),
         windowWidth: document.documentElement.clientWidth,
         windowHeight: document.documentElement.clientHeight,
-        onclone: (clonedDocument) => {
-          const clonedElement = clonedDocument.getElementById('shareable-report-content');
-          if (clonedElement) {
-            (clonedElement as HTMLElement).style.transform = 'none';
-            (clonedElement as HTMLElement).style.overflow = 'visible';
-
-            const clonedCard = clonedElement.querySelector('[data-shareable-report-card="1"]');
-            if (clonedCard) {
-              (clonedCard as HTMLElement).style.transform = 'none';
-            }
-          }
-        },
       });
 
-      const blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      const blob: Blob | null = await new Promise(resolve =>
+        canvas.toBlob(resolve, 'image/png')
+      );
+
       if (!blob) {
-        const dataUrl = canvas.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = getExportFileName();
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
+        throw new Error(
+          language === 'zh' ? '图片生成失败' : 'Failed to generate image'
+        );
       }
 
       const url = URL.createObjectURL(blob);
@@ -118,72 +106,187 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (e) {
-      setExportError(e instanceof Error ? e.message : '导出失败');
+    } catch (error) {
+      setExportError(
+        error instanceof Error
+          ? error.message
+          : language === 'zh'
+            ? '导出失败'
+            : 'Export failed'
+      );
     } finally {
       setIsExporting(false);
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-[rgba(2,6,23,0.68)] p-4 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-[rgba(2,6,23,0.5)] p-4 backdrop-blur-sm">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="shareable-report-modal-title"
-        className="w-full max-w-lg overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white/90 shadow-[0_28px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl animate-in zoom-in-95 duration-200 dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_32px_90px_rgba(2,6,23,0.56)]"
+        className="paper-panel flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden"
       >
-        <div className="flex items-center justify-between border-b border-primary/10 px-6 py-5">
-          <h3 id="shareable-report-modal-title" className="text-lg font-bold text-main flex items-center gap-2">
-            <Share2 size={20} className="text-primary" />
-            成绩报告
-          </h3>
-          <button
-            onClick={onClose}
-            className="rounded-full border border-slate-200/80 bg-white/80 p-2 text-slate-500 transition-colors hover:bg-slate-900/5 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="space-y-6 p-8 text-center">
-          {exportError && (
-            <div className="p-3 bg-red-500/10 text-red-600 rounded-xl text-sm">
-              {exportError}
+        <div className="flex items-center justify-between border-b border-primary/10 px-6 py-4">
+          <div>
+            <div className="section-kicker">
+              {language === 'zh' ? '分享导出' : 'Share Export'}
             </div>
-          )}
-
-          <div
-            ref={reportRef}
-            id="shareable-report-content"
-            className="space-y-7 rounded-2xl border border-primary/10 bg-white/50 p-5 text-center dark:bg-white/[0.03]"
-          >
-            <div
-              data-shareable-report-card="1"
-              className="rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-9 text-on-primary shadow-[0_10px_30px_rgba(59,130,246,0.3)] transition-transform hover:scale-[1.02]"
+            <h3
+              id="shareable-report-modal-title"
+              className="mt-1 text-lg font-extrabold tracking-[-0.04em] text-main"
             >
-              <p className="text-on-primary/80 font-medium mb-2 uppercase tracking-widest text-xs">Weighted GPA</p>
-              <h1 className="report-value mb-5">{stats.weightedGpa.toFixed(3)}</h1>
-              <div className="flex justify-center gap-4 text-sm font-medium opacity-90">
-                <span>{stats.totalCredits} 学分</span>
-                <span>{stats.weightedAverageScore.toFixed(2)} 分</span>
-              </div>
-            </div>
-
-            <p className="text-sm text-muted">
-              包含 {courses.length} 门课程的统计数据
-            </p>
+              {language === 'zh' ? '成绩报告' : 'Grade Report'}
+            </h3>
           </div>
 
           <button
+            type="button"
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-[0.9rem] border border-primary/10 bg-[hsl(var(--surface-2))] text-muted transition-colors hover:border-primary/20 hover:text-main"
+            aria-label={
+              language === 'zh' ? '关闭报告弹窗' : 'Close report modal'
+            }
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="flex-1 space-y-5 overflow-y-auto p-6">
+          {exportError ? (
+            <div className="rounded-[0.9rem] border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-600 dark:text-rose-300">
+              {exportError}
+            </div>
+          ) : null}
+
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_16rem]">
+            <div
+              ref={reportRef}
+              id="shareable-report-content"
+              className="rounded-[1.15rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-5"
+            >
+              <div className="space-y-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="figure-label text-primary">
+                      {language === 'zh'
+                        ? '大连理工大学 GPA 摘要'
+                        : 'DLUT GPA Summary'}
+                    </div>
+                    <div className="mt-2 text-xl font-extrabold tracking-[-0.04em] text-main">
+                      {language === 'zh' ? '学业报告预览' : 'Academic Snapshot'}
+                    </div>
+                  </div>
+                  <div className="rounded-[0.85rem] border border-primary/10 bg-surface px-3 py-1.5 text-sm font-semibold text-primary">
+                    DLUT 5.0
+                  </div>
+                </div>
+
+                <div className="rounded-[1rem] border border-primary/10 bg-surface p-5">
+                  <div className="figure-label">
+                    {language === 'zh' ? '加权 GPA' : 'Weighted GPA'}
+                  </div>
+                  <div className="report-value mt-3 text-main">
+                    {stats.weightedGpa.toFixed(3)}
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    <div className="metric-card">
+                      <div className="figure-label">
+                        {language === 'zh' ? '总学分' : 'Credits'}
+                      </div>
+                      <div className="mt-2 text-lg font-extrabold tracking-[-0.04em] text-main">
+                        {stats.totalCredits.toFixed(1)}
+                      </div>
+                    </div>
+                    <div className="metric-card">
+                      <div className="figure-label">
+                        {language === 'zh' ? '均分' : 'Average'}
+                      </div>
+                      <div className="mt-2 text-lg font-extrabold tracking-[-0.04em] text-main">
+                        {stats.weightedAverageScore.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="metric-card">
+                      <div className="figure-label">
+                        {language === 'zh' ? '课程数' : 'Courses'}
+                      </div>
+                      <div className="mt-2 text-lg font-extrabold tracking-[-0.04em] text-main">
+                        {courses.length}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-[1rem] border border-primary/10 bg-surface px-4 py-3 text-sm text-muted">
+                  {language === 'zh'
+                    ? `统计范围包含当前已计入的 ${courses.length} 门课程，可直接导出为图片。`
+                    : `The summary covers ${courses.length} included courses and can be exported directly as an image.`}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-[1rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-4">
+                <div className="figure-label">
+                  {language === 'zh' ? '导出说明' : 'Export Notes'}
+                </div>
+                <ul className="mt-3 space-y-2 text-sm text-muted">
+                  <li>
+                    {language === 'zh'
+                      ? '导出内容为当前已计入课程的学业摘要。'
+                      : 'The export uses currently included courses only.'}
+                  </li>
+                  <li>
+                    {language === 'zh'
+                      ? '适合发给同学、导师或用于阶段记录。'
+                      : 'Suitable for peers, advisors, or personal snapshots.'}
+                  </li>
+                </ul>
+              </div>
+
+              <div className="rounded-[1rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-4">
+                <div className="figure-label">
+                  {language === 'zh' ? '输出格式' : 'Output'}
+                </div>
+                <div className="mt-2 text-sm font-semibold text-main">PNG</div>
+                <p className="type-body-sm mt-2">
+                  {language === 'zh'
+                    ? '保持卡片预览样式，方便直接分享。'
+                    : 'Keeps the same card layout for direct sharing.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-primary/10 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="type-body-sm flex items-center gap-2">
+            <Share2 size={14} />
+            <span>
+              {language === 'zh'
+                ? '导出前请确认当前筛选和计入状态正确。'
+                : 'Confirm the current filters and inclusion state before export.'}
+            </span>
+          </div>
+
+          <button
+            type="button"
             onClick={handleExportPng}
             disabled={isExporting}
-            className="w-full py-3 bg-text-main text-surface rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-text-main/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="primary-button sm:min-w-[12rem]"
           >
-            <Download size={18} />
-            {isExporting ? '正在生成图片...' : '导出图片（PNG）'}
+            <Download size={16} />
+            {isExporting
+              ? language === 'zh'
+                ? '正在导出...'
+                : 'Exporting...'
+              : language === 'zh'
+                ? '导出图片'
+                : 'Export PNG'}
           </button>
         </div>
       </div>

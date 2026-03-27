@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { CheckSquare, Edit, Square, Trash2 } from 'lucide-react';
 import { Course } from '../../types';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 interface VirtualCourseListProps {
   courses: Course[];
@@ -9,61 +10,86 @@ interface VirtualCourseListProps {
   onToggle: (id: string) => void;
 }
 
-const VirtualCourseList: React.FC<VirtualCourseListProps> = ({ courses, onRemove, onEdit, onToggle }) => {
+const VirtualCourseList: React.FC<VirtualCourseListProps> = ({
+  courses,
+  onRemove,
+  onEdit,
+  onToggle,
+}) => {
+  const { language } = useTranslation();
+
   const getTypeBadgeClass = (type: Course['type']) => {
     if (type === '必修') {
-      return 'border-red-500/20 bg-red-500/10 text-red-600 dark:border-red-500/20 dark:bg-red-500/15 dark:text-red-400';
+      return 'border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-300';
     }
     if (type === '选修') {
-      return 'border-sky-500/20 bg-sky-500/10 text-sky-700 dark:border-blue-500/20 dark:bg-blue-500/15 dark:text-blue-400';
+      return 'border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-300';
     }
     return 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-200';
   };
 
   return (
-    <section className="paper-panel max-h-[34rem] overflow-y-auto">
+    <section className="paper-panel max-h-[42rem] overflow-y-auto">
       <div className="divide-y divide-primary/10">
-        {courses.map((course) => (
+        {courses.map(course => (
           <div
             key={course.id}
-            className={`group flex items-center justify-between gap-4 border-b border-primary/10 px-5 py-4 transition-colors hover:bg-slate-900/[0.05] dark:hover:bg-white/[0.05] ${
-              course.isActive ? 'bg-transparent' : 'bg-slate-900/[0.03] opacity-60 dark:bg-white/[0.02]'
+            className={`flex items-center justify-between gap-4 px-5 py-3 transition-colors hover:bg-[hsl(var(--surface-2))] ${
+              course.isActive ? '' : 'opacity-65'
             }`}
           >
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => onToggle(course.id)}
-                className="rounded-full p-1.5 hover:bg-primary/10"
-                aria-label={course.isActive ? 'exclude course' : 'include course'}
+                className="rounded-md p-1.5 transition-colors hover:bg-[hsl(var(--surface-3))]"
+                aria-label={
+                  course.isActive ? 'exclude course' : 'include course'
+                }
               >
-                {course.isActive ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-muted" />}
+                {course.isActive ? (
+                  <CheckSquare size={18} className="text-primary" />
+                ) : (
+                  <Square size={18} className="text-muted" />
+                )}
               </button>
+
               <div className="min-w-0">
-                <div className="truncate text-sm font-semibold text-main">{course.name}</div>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
-                  <span className={`table-chip ${getTypeBadgeClass(course.type)}`}>{course.type}</span>
+                <div className="truncate text-sm font-semibold text-main">
+                  {course.name}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                  <span
+                    className={`table-chip ${getTypeBadgeClass(course.type)}`}
+                  >
+                    {course.type}
+                  </span>
                   <span className="table-chip">{course.semester}</span>
-                  <span className="num-inline">{course.credits} 学分</span>
-                  <span className="num-inline">{course.score} 分</span>
-                  <span className="data-figure text-primary">{course.gpa.toFixed(2)} GPA</span>
+                  <span className="table-chip">{course.credits} 学分</span>
+                  <span className="table-chip">{course.score} 分</span>
+                  <span className="table-chip text-primary">
+                    {course.gpa.toFixed(2)} GPA
+                  </span>
                 </div>
               </div>
             </div>
+
             <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => onEdit(course)}
-                className="rounded-full border border-primary/10 p-2 text-muted opacity-35 transition-all hover:border-primary/30 hover:text-primary group-hover:opacity-100"
-                title="编辑"
+                className="rounded-[0.75rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted transition-colors hover:border-primary/20 hover:text-primary"
+                title={language === 'zh' ? '编辑课程' : 'Edit course'}
+                aria-label={language === 'zh' ? '编辑课程' : 'Edit course'}
               >
                 <Edit size={14} />
               </button>
               <button
                 type="button"
                 onClick={() => onRemove(course.id)}
-                className="rounded-full border border-primary/10 p-2 text-muted opacity-35 transition-all hover:border-[hsl(var(--color-accent))] hover:text-[hsl(var(--color-accent))] group-hover:opacity-100"
-                title="删除"
+                className="rounded-[0.75rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted transition-colors hover:border-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300"
+                title={language === 'zh' ? '删除课程' : 'Delete course'}
+                aria-label={language === 'zh' ? '删除课程' : 'Delete course'}
               >
                 <Trash2 size={14} />
               </button>

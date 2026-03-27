@@ -1,5 +1,14 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
 import { TrendingUp, BarChart3 } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -9,8 +18,10 @@ interface ScoreDistributionHistogramProps {
   stats: GpaStats;
 }
 
-export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProps> = ({ stats }) => {
-  const { t } = useTranslation();
+export const ScoreDistributionHistogram: React.FC<
+  ScoreDistributionHistogramProps
+> = ({ stats }) => {
+  const { t, language } = useTranslation();
   const { theme } = useTheme();
 
   // 定义颜色方案
@@ -21,7 +32,7 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
     primaryColor, // 80-89 range (blue)
     '#F59E0B', // 70-79 range (yellow)
     '#EF4444', // 60-69 range (red)
-    '#6B7280'  // <60 range (gray)
+    '#6B7280', // <60 range (gray)
   ];
 
   // 自定义 Tooltip 组件
@@ -29,14 +40,19 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className={`p-3 rounded-lg border shadow-lg ${
-          theme === 'dark' 
-            ? 'bg-gray-800 border-gray-700 text-white' 
-            : 'bg-white border-gray-200 text-gray-800'
-        }`}>
+        <div
+          className={`p-3 rounded-lg border shadow-lg ${
+            theme === 'dark'
+              ? 'bg-gray-800 border-gray-700 text-white'
+              : 'bg-white border-gray-200 text-gray-800'
+          }`}
+        >
           <p className="type-label text-main dark:text-white">{data.name}</p>
           <p className="type-body-sm mt-1">
-            {t('course_count')}: <span className="num-inline text-main dark:text-white">{data.value}</span>
+            {t('course_count')}:{' '}
+            <span className="num-inline text-main dark:text-white">
+              {data.value}
+            </span>
           </p>
         </div>
       );
@@ -48,12 +64,14 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
     <div className="paper-panel p-5 sm:p-6">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="section-kicker">Histogram View</div>
+          <div className="section-kicker">
+            {language === 'zh' ? '直方统计' : 'Histogram'}
+          </div>
           <h3 className="type-section-title mt-2 text-main">
             {t('score_dist')} - {t('histogram')}
           </h3>
         </div>
-        <div className="rounded-[1.2rem] border border-primary/15 bg-primary/5 p-3 text-primary">
+        <div className="flex h-10 w-10 items-center justify-center rounded-[0.9rem] border border-primary/10 bg-[hsl(var(--surface-2))] text-primary">
           <TrendingUp size={18} className="text-emerald-500" />
         </div>
       </div>
@@ -67,31 +85,44 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
                 top: 20,
                 right: 30,
                 left: 20,
-                bottom: 30
+                bottom: 30,
               }}
             >
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke={theme === 'dark' ? '#374151' : '#E5E7EB'} 
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={theme === 'dark' ? '#374151' : '#E5E7EB'}
               />
-              <XAxis 
-                dataKey="name" 
+              <XAxis
+                dataKey="name"
                 stroke={axisColor}
-                tick={{ fill: axisColor, fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 500 }}
+                tick={{
+                  fill: axisColor,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 12,
+                  fontWeight: 500,
+                }}
               />
-              <YAxis 
+              <YAxis
                 stroke={axisColor}
-                tick={{ fill: axisColor, fontFamily: 'var(--font-numeric)', fontSize: 12, fontWeight: 500 }}
+                tick={{
+                  fill: axisColor,
+                  fontFamily: 'var(--font-numeric)',
+                  fontSize: 12,
+                  fontWeight: 500,
+                }}
                 allowDecimals={false}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar 
-                dataKey="value" 
+              <Bar
+                dataKey="value"
                 name={t('course_count')}
                 radius={[4, 4, 0, 0]}
               >
                 {stats.scoreDistribution.map((_, index) => (
-                  <Cell key={`bar-${index}`} fill={barColors[index % barColors.length]} />
+                  <Cell
+                    key={`bar-${index}`}
+                    fill={barColors[index % barColors.length]}
+                  />
                 ))}
               </Bar>
             </BarChart>
@@ -103,13 +134,16 @@ export const ScoreDistributionHistogram: React.FC<ScoreDistributionHistogramProp
           </div>
         )}
       </div>
-      
+
       <div className="editorial-divider my-4" />
       <div className="mt-4 flex flex-wrap gap-3 justify-center">
         {stats.scoreDistribution.map((entry, index) => (
-          <div key={entry.name} className="flex items-center gap-2 text-xs font-medium">
-            <div 
-              className="w-3 h-3 rounded-sm" 
+          <div
+            key={entry.name}
+            className="flex items-center gap-2 text-xs font-medium"
+          >
+            <div
+              className="w-3 h-3 rounded-sm"
               style={{ backgroundColor: barColors[index % barColors.length] }}
             ></div>
             <span className="text-muted">{entry.name}</span>

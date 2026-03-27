@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown } from 'lucide-react';
 
@@ -34,7 +41,10 @@ const VIEWPORT_PADDING = 16;
 const MENU_OFFSET = 12;
 
 const getViewportConstrainedLeft = (left: number, menuWidth: number) => {
-  const maxLeft = Math.max(VIEWPORT_PADDING, window.innerWidth - menuWidth - VIEWPORT_PADDING);
+  const maxLeft = Math.max(
+    VIEWPORT_PADDING,
+    window.innerWidth - menuWidth - VIEWPORT_PADDING
+  );
   return Math.min(Math.max(VIEWPORT_PADDING, left), maxLeft);
 };
 
@@ -69,14 +79,25 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
     const menuRect = menuRef.current.getBoundingClientRect();
-    const resolvedMenuWidth = menuWidth ?? Math.max(triggerRect.width, menuRect.width);
+    const resolvedMenuWidth =
+      menuWidth ?? Math.max(triggerRect.width, menuRect.width);
     const nextLeft =
-      align === 'end' ? triggerRect.right - resolvedMenuWidth : triggerRect.left;
-    const constrainedLeft = getViewportConstrainedLeft(nextLeft, resolvedMenuWidth);
-    const fitsBelow = triggerRect.bottom + MENU_OFFSET + menuRect.height <= window.innerHeight - VIEWPORT_PADDING;
+      align === 'end'
+        ? triggerRect.right - resolvedMenuWidth
+        : triggerRect.left;
+    const constrainedLeft = getViewportConstrainedLeft(
+      nextLeft,
+      resolvedMenuWidth
+    );
+    const fitsBelow =
+      triggerRect.bottom + MENU_OFFSET + menuRect.height <=
+      window.innerHeight - VIEWPORT_PADDING;
     const nextTop = fitsBelow
       ? triggerRect.bottom + MENU_OFFSET
-      : Math.max(VIEWPORT_PADDING, triggerRect.top - MENU_OFFSET - menuRect.height);
+      : Math.max(
+          VIEWPORT_PADDING,
+          triggerRect.top - MENU_OFFSET - menuRect.height
+        );
 
     setMenuPosition({
       left: constrainedLeft,
@@ -99,7 +120,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
   useLayoutEffect(() => {
     if (!isOpen) {
-      setMenuPosition((current) => ({ ...current, visibility: 'hidden' }));
+      setMenuPosition(current => ({ ...current, visibility: 'hidden' }));
       return;
     }
 
@@ -121,7 +142,10 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
 
-      if (triggerRef.current?.contains(target) || menuRef.current?.contains(target)) {
+      if (
+        triggerRef.current?.contains(target) ||
+        menuRef.current?.contains(target)
+      ) {
         return;
       }
 
@@ -143,7 +167,10 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
     document.addEventListener('pointerdown', handlePointerDown, true);
     document.addEventListener('keydown', handleKeyDown);
     window.addEventListener('resize', handleWindowChange);
-    window.addEventListener('scroll', handleWindowChange, { capture: true, passive: true });
+    window.addEventListener('scroll', handleWindowChange, {
+      capture: true,
+      passive: true,
+    });
 
     const resizeObserver =
       typeof ResizeObserver !== 'undefined' && triggerRef.current
@@ -184,7 +211,10 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
       >
         {icon}
         <span>{label}</span>
-        <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          size={14}
+          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {isOpen && typeof document !== 'undefined'
@@ -201,9 +231,16 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 visibility: menuPosition.visibility,
               }}
             >
-              <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted">{menuLabel}</div>
-              <div id={listboxId} role="listbox" aria-label={menuLabel} className="max-h-72 space-y-1 overflow-y-auto px-2 pb-2">
-                {options.map((option) => {
+              <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
+                {menuLabel}
+              </div>
+              <div
+                id={listboxId}
+                role="listbox"
+                aria-label={menuLabel}
+                className="max-h-72 space-y-1 overflow-y-auto px-2 pb-2"
+              >
+                {options.map(option => {
                   const isSelected = option.value === selectedValue;
 
                   return (
@@ -213,10 +250,10 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                       role="option"
                       aria-selected={isSelected}
                       onClick={() => handleOptionSelect(option.value)}
-                      className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm transition-colors ${
+                      className={`flex w-full items-center justify-between rounded-[0.8rem] px-3 py-2.5 text-left text-sm transition-colors ${
                         isSelected
-                          ? 'bg-primary/12 font-semibold text-primary dark:bg-primary/15 dark:text-white'
-                          : 'text-slate-600 hover:bg-slate-900/5 hover:text-slate-900 dark:text-white/74 dark:hover:bg-white/6 dark:hover:text-white'
+                          ? 'bg-primary text-white'
+                          : 'text-main hover:bg-[hsl(var(--surface-2))] dark:hover:bg-[hsl(var(--surface-3))]'
                       }`}
                     >
                       <span>{option.label}</span>

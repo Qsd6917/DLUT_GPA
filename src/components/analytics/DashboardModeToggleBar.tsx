@@ -9,20 +9,52 @@ interface DashboardModeToggleBarProps {
   onChange: (view: AnalysisView) => void;
 }
 
-export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({ activeView, onChange }) => {
-  const { t } = useTranslation();
+export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({
+  activeView,
+  onChange,
+}) => {
+  const { t, language } = useTranslation();
 
-  const items: Array<{ id: AnalysisView; label: string; sublabel: string; icon: React.ComponentType<any> }> = [
-    { id: 'overview', label: t('analysis_overview'), sublabel: 'Charts', icon: Sparkles },
-    { id: 'simulation', label: t('analysis_simulation'), sublabel: 'GPA', icon: Sigma },
-    { id: 'radar', label: t('analysis_radar'), sublabel: 'Radar', icon: Orbit },
-    { id: 'advisor', label: t('analysis_advisor'), sublabel: 'Notes', icon: Brain },
+  const items: Array<{
+    id: AnalysisView;
+    label: string;
+    sublabel: string;
+    icon: React.ComponentType<any>;
+  }> = [
+    {
+      id: 'overview',
+      label: t('analysis_overview'),
+      sublabel: language === 'zh' ? '图表总览' : 'Charts',
+      icon: Sparkles,
+    },
+    {
+      id: 'simulation',
+      label: t('analysis_simulation'),
+      sublabel: 'GPA',
+      icon: Sigma,
+    },
+    {
+      id: 'radar',
+      label: t('analysis_radar'),
+      sublabel: language === 'zh' ? '学业结构' : 'Radar',
+      icon: Orbit,
+    },
+    {
+      id: 'advisor',
+      label: t('analysis_advisor'),
+      sublabel: language === 'zh' ? '辅助建议' : 'Notes',
+      icon: Brain,
+    },
   ];
 
   return (
-    <div className="paper-panel px-4 py-3 sm:px-5">
-      <div className="flex gap-5 overflow-x-auto">
-        {items.map((item) => {
+    <div className="paper-panel p-2">
+      <div
+        className="grid gap-2 md:grid-cols-2 xl:grid-cols-4"
+        role="tablist"
+        aria-label="Analysis views"
+      >
+        {items.map(item => {
           const Icon = item.icon;
           const active = activeView === item.id;
 
@@ -30,34 +62,35 @@ export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({ 
             <button
               key={item.id}
               type="button"
+              role="tab"
+              aria-selected={active}
               onClick={() => onChange(item.id)}
-              className={`group relative min-w-fit flex-1 px-1 py-2 text-left transition-colors ${
+              className={`flex items-center justify-between rounded-[0.95rem] border px-4 py-3 text-left transition-colors ${
                 active
-                  ? 'text-primary dark:text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:text-white/55 dark:hover:text-white/85'
+                  ? 'border-primary bg-primary text-white'
+                  : 'border-primary/10 bg-transparent text-main hover:border-primary/18 hover:bg-[hsl(var(--surface-2))] dark:border-white/8'
               }`}
-              aria-pressed={active}
             >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <div className={`figure-label ${active ? 'text-primary/70 dark:text-white/55' : ''}`}>{item.sublabel}</div>
-                  <div className="mt-1 text-sm font-semibold sm:text-base">{item.label}</div>
-                </div>
+              <div>
                 <div
-                  className={`rounded-2xl p-2 ${
-                    active
-                      ? 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'
-                      : 'bg-slate-900/5 text-slate-500 group-hover:bg-slate-900/10 group-hover:text-primary dark:bg-white/5 dark:text-white/45 dark:group-hover:text-white'
+                  className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${
+                    active ? 'text-white/72' : 'text-muted'
                   }`}
                 >
-                  <Icon size={16} />
+                  {item.sublabel}
                 </div>
+                <div className="mt-1 text-sm font-semibold">{item.label}</div>
               </div>
-              <span
-                className={`absolute inset-x-0 -bottom-1 h-[3px] rounded-full bg-primary transition-opacity ${
-                  active ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+
+              <div
+                className={`flex h-9 w-9 items-center justify-center rounded-[0.85rem] ${
+                  active
+                    ? 'bg-white/14 text-white'
+                    : 'bg-[hsl(var(--surface-2))] text-muted dark:bg-[hsl(var(--surface-3))]'
                 }`}
-              />
+              >
+                <Icon size={16} />
+              </div>
             </button>
           );
         })}

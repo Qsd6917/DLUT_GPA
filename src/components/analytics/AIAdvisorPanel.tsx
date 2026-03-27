@@ -24,10 +24,14 @@ interface AIAdvisorPanelProps {
   targetGPA: number;
 }
 
-const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targetGPA }) => {
-  const [activeTab, setActiveTab] = useState<'recommendations' | 'strategies' | 'analysis'>(
-    'recommendations'
-  );
+const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({
+  courses,
+  gpaStats,
+  targetGPA,
+}) => {
+  const [activeTab, setActiveTab] = useState<
+    'recommendations' | 'strategies' | 'analysis'
+  >('recommendations');
 
   const studentProfile = useMemo<StudentProfile>(
     () => ({
@@ -44,18 +48,23 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targ
     [courses, gpaStats, targetGPA]
   );
 
-  const recommendationData = useMemo(() => getAIRecommendations(studentProfile), [studentProfile]);
+  const recommendationData = useMemo(
+    () => getAIRecommendations(studentProfile),
+    [studentProfile]
+  );
 
   return (
     <div className="paper-panel overflow-hidden">
       <div className="border-b border-primary/10 p-5 sm:p-6">
         <div className="flex items-center gap-3">
-          <div className="rounded-[1rem] border border-primary/10 bg-primary/10 p-2.5 dark:bg-white/5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[0.95rem] border border-primary/10 bg-[hsl(var(--surface-2))] text-primary dark:border-white/8">
             <Brain className="h-6 w-6 text-primary" />
           </div>
           <div>
             <h2 className="type-section-title text-main">智能学业建议</h2>
-            <p className="type-body-sm">基于当前课程表现的本地规则分析，不会上传个人数据</p>
+            <p className="type-body-sm">
+              基于当前课程表现的本地规则分析，不会上传个人数据
+            </p>
           </div>
         </div>
       </div>
@@ -85,7 +94,9 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({ courses, gpaStats, targ
 
       <div className="p-5 sm:p-6">
         {activeTab === 'recommendations' && (
-          <RecommendationsTab recommendations={recommendationData.recommendations} />
+          <RecommendationsTab
+            recommendations={recommendationData.recommendations}
+          />
         )}
 
         {activeTab === 'strategies' && (
@@ -116,10 +127,10 @@ const TabButton: React.FC<{
 }> = ({ active, icon, label, onClick }) => (
   <button
     type="button"
-    className={`group relative min-w-fit flex-1 px-1 py-3 text-center text-sm font-medium transition-colors ${
+    className={`group relative min-w-fit rounded-[0.8rem] border px-3 py-2.5 text-center text-sm font-medium transition-colors ${
       active
-        ? 'text-primary dark:text-white'
-        : 'text-slate-500 hover:text-slate-900 dark:text-white/55 dark:hover:text-white/85'
+        ? 'border-primary bg-primary text-white'
+        : 'border-primary/10 text-muted hover:border-primary/20 hover:bg-[hsl(var(--surface-2))] hover:text-main dark:border-white/8 dark:hover:text-white'
     }`}
     onClick={onClick}
   >
@@ -127,15 +138,12 @@ const TabButton: React.FC<{
       {icon}
       {label}
     </div>
-    <span
-      className={`absolute inset-x-0 bottom-0 h-[3px] rounded-full bg-primary transition-opacity ${
-        active ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
-      }`}
-    />
   </button>
 );
 
-const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({ recommendations }) => {
+const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({
+  recommendations,
+}) => {
   if (recommendations.length === 0) {
     return (
       <div className="text-center py-8 text-muted">
@@ -168,7 +176,9 @@ const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({ r
                     </span>
                   )}
                 </h4>
-                <p className="text-sm text-muted mt-1">{recommendation.reason}</p>
+                <p className="text-sm text-muted mt-1">
+                  {recommendation.reason}
+                </p>
               </div>
               <div className="flex min-w-[6.75rem] flex-col items-end text-right">
                 <span
@@ -183,7 +193,10 @@ const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({ r
                   成功率 {(recommendation.successProbability * 100).toFixed(0)}%
                 </span>
                 <div className="mt-1 text-xs text-muted">
-                  预计成绩 <span className="num-inline text-main">{recommendation.predictedGrade.toFixed(1)}</span>
+                  预计成绩{' '}
+                  <span className="num-inline text-main">
+                    {recommendation.predictedGrade.toFixed(1)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -191,12 +204,16 @@ const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({ r
             <div className="mt-3 pt-3 border-t border-primary/10 flex justify-between text-sm">
               <div>
                 <span className="text-muted">置信度</span>{' '}
-                <span className="num-inline text-main">{(recommendation.confidence * 100).toFixed(0)}%</span>
+                <span className="num-inline text-main">
+                  {(recommendation.confidence * 100).toFixed(0)}%
+                </span>
               </div>
               <div>
                 <Clock size={14} className="inline mr-1" />
                 <span className="text-muted">建议投入</span>{' '}
-                <span className="num-inline text-main">{recommendation.suggestedStudyTime} 小时/周</span>
+                <span className="num-inline text-main">
+                  {recommendation.suggestedStudyTime} 小时/周
+                </span>
               </div>
             </div>
           </div>
@@ -222,12 +239,17 @@ const LearningStrategiesTab: React.FC<{
   return (
     <div className="space-y-5">
       <h3 className="font-bold text-lg text-main mb-4">学习策略</h3>
-      {strategies.map((strategy) => {
-        const recommendation = recommendations.find((item) => item.courseId === strategy.courseId);
+      {strategies.map(strategy => {
+        const recommendation = recommendations.find(
+          item => item.courseId === strategy.courseId
+        );
         const courseName = recommendation?.courseName ?? strategy.courseId;
 
         return (
-          <div key={strategy.courseId} className="rounded-xl border border-primary/10 bg-white/45 p-5 dark:bg-white/[0.02]">
+          <div
+            key={strategy.courseId}
+            className="rounded-xl border border-primary/10 bg-white/45 p-5 dark:bg-white/[0.02]"
+          >
             <h4 className="font-bold text-main flex items-center gap-2 mb-3">
               <Lightbulb size={18} className="text-primary" />
               {courseName}
@@ -237,7 +259,10 @@ const LearningStrategiesTab: React.FC<{
               <h5 className="font-semibold text-sm text-main mb-2">学习策略</h5>
               <ul className="space-y-2">
                 {strategy.strategies.map((item, index) => (
-                  <li key={`${strategy.courseId}-strategy-${index}`} className="flex items-start">
+                  <li
+                    key={`${strategy.courseId}-strategy-${index}`}
+                    className="flex items-start"
+                  >
                     <span className="text-primary mr-2">•</span>
                     <span className="text-sm text-main">{item}</span>
                   </li>
@@ -249,7 +274,10 @@ const LearningStrategiesTab: React.FC<{
               <h5 className="font-semibold text-sm text-main mb-2">推荐资源</h5>
               <ul className="space-y-2">
                 {strategy.resources.map((resource, index) => (
-                  <li key={`${strategy.courseId}-resource-${index}`} className="flex items-start">
+                  <li
+                    key={`${strategy.courseId}-resource-${index}`}
+                    className="flex items-start"
+                  >
                     <span className="text-primary mr-2">•</span>
                     <span className="text-sm text-main">{resource}</span>
                   </li>
@@ -288,7 +316,9 @@ const AnalysisTab: React.FC<{
   targetGPA: number;
   currentGPA: number;
 }> = ({ academicRisks, skillGapAnalysis, targetGPA, currentGPA }) => {
-  const sortedSkills = [...skillGapAnalysis].sort((a, b) => b.improvementPriority - a.improvementPriority);
+  const sortedSkills = [...skillGapAnalysis].sort(
+    (a, b) => b.improvementPriority - a.improvementPriority
+  );
 
   return (
     <div className="space-y-6">
@@ -299,8 +329,17 @@ const AnalysisTab: React.FC<{
         </h3>
 
         <div className="grid grid-cols-2 gap-4">
-          <ProgressCard label="当前 GPA" value={currentGPA} barWidth={(currentGPA / 4.0) * 100} />
-          <ProgressCard label="目标 GPA" value={targetGPA} barWidth={(targetGPA / 4.0) * 100} accent />
+          <ProgressCard
+            label="当前 GPA"
+            value={currentGPA}
+            barWidth={(currentGPA / 4.0) * 100}
+          />
+          <ProgressCard
+            label="目标 GPA"
+            value={targetGPA}
+            barWidth={(targetGPA / 4.0) * 100}
+            accent
+          />
         </div>
 
         {targetGPA > currentGPA && (
@@ -309,7 +348,13 @@ const AnalysisTab: React.FC<{
               <AlertTriangle size={16} />
               <span className="text-sm font-medium">
                 要达到目标 GPA，后续课程平均分需要约{' '}
-                <strong>{Math.min(100, Math.max(60, 60 + (targetGPA - currentGPA) * 10)).toFixed(0)} 分</strong>
+                <strong>
+                  {Math.min(
+                    100,
+                    Math.max(60, 60 + (targetGPA - currentGPA) * 10)
+                  ).toFixed(0)}{' '}
+                  分
+                </strong>
               </span>
             </div>
           </div>
@@ -329,7 +374,10 @@ const AnalysisTab: React.FC<{
                 key={`risk-${index}`}
                 className="flex items-start rounded-lg border border-red-500/20 bg-red-500/5 p-3"
               >
-                <AlertTriangle size={16} className="mt-0.5 mr-2 flex-shrink-0 text-red-500" />
+                <AlertTriangle
+                  size={16}
+                  className="mt-0.5 mr-2 flex-shrink-0 text-red-500"
+                />
                 <span className="text-sm text-main">{risk}</span>
               </div>
             ))}
@@ -349,8 +397,11 @@ const AnalysisTab: React.FC<{
 
         {sortedSkills.length > 0 ? (
           <div className="space-y-3">
-            {sortedSkills.map((skill) => (
-              <div key={skill.skill} className="rounded-lg border border-primary/10 bg-white/45 p-3 dark:bg-white/[0.02]">
+            {sortedSkills.map(skill => (
+              <div
+                key={skill.skill}
+                className="rounded-lg border border-primary/10 bg-white/45 p-3 dark:bg-white/[0.02]"
+              >
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-main">{skill.skill}</span>
                   <span
@@ -373,13 +424,20 @@ const AnalysisTab: React.FC<{
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
                     <div className="w-full bg-primary/10 rounded-full h-2">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: `${skill.proficiency * 100}%` }} />
+                      <div
+                        className="bg-primary h-2 rounded-full"
+                        style={{ width: `${skill.proficiency * 100}%` }}
+                      />
                     </div>
                   </div>
-                  <span className="text-sm text-muted w-10 text-right">{(skill.proficiency * 100).toFixed(0)}%</span>
+                  <span className="text-sm text-muted w-10 text-right">
+                    {(skill.proficiency * 100).toFixed(0)}%
+                  </span>
                 </div>
 
-                <div className="mt-2 text-xs text-muted">改进优先级 {skill.improvementPriority}/5</div>
+                <div className="mt-2 text-xs text-muted">
+                  改进优先级 {skill.improvementPriority}/5
+                </div>
               </div>
             ))}
           </div>
@@ -399,7 +457,9 @@ const ProgressCard: React.FC<{
 }> = ({ label, value, barWidth, accent = false }) => (
   <div className="rounded-xl border border-primary/10 bg-white/45 p-4 dark:bg-white/[0.02]">
     <div className="text-sm text-muted mb-1">{label}</div>
-    <div className={`result-value ${accent ? 'text-primary' : 'text-main'}`}>{value.toFixed(2)}</div>
+    <div className={`result-value ${accent ? 'text-primary' : 'text-main'}`}>
+      {value.toFixed(2)}
+    </div>
     <div className="w-full bg-primary/10 rounded-full h-2 mt-2">
       <div
         className={`${accent ? 'bg-sky-500' : 'bg-primary'} h-2 rounded-full`}

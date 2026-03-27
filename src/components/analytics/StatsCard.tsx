@@ -21,42 +21,54 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   isSandbox = false,
 }) => {
   const numValue = Number(value);
-  const numComparison = comparisonValue !== undefined ? Number(comparisonValue) : undefined;
-  const diff = numComparison !== undefined && !Number.isNaN(numComparison) ? numValue - numComparison : undefined;
+  const numComparison =
+    comparisonValue !== undefined ? Number(comparisonValue) : undefined;
+  const diff =
+    numComparison !== undefined && !Number.isNaN(numComparison)
+      ? numValue - numComparison
+      : undefined;
 
   const diffNode =
     isSandbox && diff !== undefined ? (
       <div
-        className={`num-inline inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+        className={`num-inline inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-semibold ${
           diff > 0.001
-            ? 'bg-emerald-500/12 text-emerald-300'
+            ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
             : diff < -0.001
-              ? 'bg-rose-500/12 text-rose-300'
-              : 'bg-white/8 text-muted'
+              ? 'border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-300'
+              : 'border-primary/10 bg-[hsl(var(--surface-2))] text-muted'
         }`}
       >
-        {diff > 0.001 ? <ArrowUp size={12} /> : diff < -0.001 ? <ArrowDown size={12} /> : <Minus size={12} />}
-        {Math.abs(diff).toFixed(typeof value === 'number' && Number.isInteger(value) ? 0 : 3)}
+        {diff > 0.001 ? (
+          <ArrowUp size={12} />
+        ) : diff < -0.001 ? (
+          <ArrowDown size={12} />
+        ) : (
+          <Minus size={12} />
+        )}
+        {Math.abs(diff).toFixed(
+          typeof value === 'number' && Number.isInteger(value) ? 0 : 3
+        )}
       </div>
     ) : null;
 
   return (
-    <article className={`paper-panel p-6 sm:p-7 ${colorClass}`}>
-      <div className="relative z-10 flex h-full flex-col justify-between gap-7">
+    <article className={`paper-panel p-5 sm:p-6 ${colorClass}`}>
+      <div className="relative z-10 flex h-full flex-col gap-6">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="space-y-3">
             <div className="figure-label">{title}</div>
-            <div className="mt-4 flex flex-wrap items-end gap-3.5">
+            <div className="flex flex-wrap items-end gap-3">
               <div className="figure-value text-main">{value}</div>
               {diffNode}
             </div>
           </div>
-          <div className="rounded-[1.2rem] border border-primary/10 bg-primary/10 p-3 text-primary shadow-[0_10px_28px_hsla(var(--color-primary),0.08)]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[0.9rem] border border-primary/10 bg-[hsl(var(--surface-2))] text-primary dark:border-white/8">
             {icon}
           </div>
         </div>
 
-        <p className="type-label text-xs text-muted">{description}</p>
+        <p className="type-body-sm">{description}</p>
       </div>
     </article>
   );
