@@ -78,13 +78,32 @@ export const CourseFilterBar: React.FC<CourseFilterBarProps> = ({
   const buttonTone = isSandboxMode
     ? 'border-amber-400/30 text-[hsl(var(--color-accent))]'
     : 'border-primary/10 text-main';
-  const baseButton = `inline-flex h-10 items-center gap-2 rounded-[0.9rem] border bg-surface px-3.5 text-sm font-semibold transition-colors hover:border-primary/20 hover:text-primary dark:bg-[hsl(var(--surface-2))] ${buttonTone}`;
+  const baseButton = `inline-flex h-11 items-center gap-2 rounded-[0.82rem] border bg-surface px-3.5 text-sm font-semibold transition-colors hover:border-primary/20 hover:text-primary dark:bg-[hsl(var(--surface-2))] ${buttonTone}`;
 
   return (
     <section className="paper-panel filter-toolbar-panel p-4">
-      <div className="relative z-20 flex flex-col gap-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
+      <div className="relative z-20 flex flex-col gap-3">
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
+          <div className="relative order-1 w-full">
+            <Search
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+              size={16}
+            />
+            <input
+              type="text"
+              placeholder={t('search_placeholder')}
+              value={searchTerm}
+              onChange={event => onSearchChange(event.target.value)}
+              className="w-full rounded-[0.9rem] border border-primary/10 bg-[hsl(var(--surface-2))] py-3 pl-11 pr-12 text-sm text-main outline-none transition-all placeholder:text-muted focus:border-primary focus:bg-surface"
+            />
+            {debouncedSearchTerm !== searchTerm ? (
+              <span className="type-label absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-muted">
+                {language === 'zh' ? '同步中' : 'Sync'}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="order-2 flex flex-wrap items-center gap-2 xl:justify-end">
             <FilterDropdown
               icon={<Filter size={15} />}
               label={
@@ -120,7 +139,7 @@ export const CourseFilterBar: React.FC<CourseFilterBarProps> = ({
             <button
               type="button"
               onClick={() => setFilterCore(value => !value)}
-              className={`inline-flex h-10 items-center gap-2 rounded-[0.9rem] border bg-surface px-3.5 text-sm font-semibold transition-colors hover:border-primary/20 dark:bg-[hsl(var(--surface-2))] ${
+              className={`inline-flex h-11 items-center gap-2 rounded-[0.82rem] border bg-surface px-3.5 text-sm font-semibold transition-colors hover:border-primary/20 dark:bg-[hsl(var(--surface-2))] ${
                 filterCore
                   ? 'border-amber-400/30 text-[hsl(var(--color-accent))]'
                   : 'border-primary/10 text-main'
@@ -135,39 +154,18 @@ export const CourseFilterBar: React.FC<CourseFilterBarProps> = ({
               <button
                 type="button"
                 onClick={onClearFilters}
-                className="inline-flex h-10 items-center gap-2 rounded-[0.9rem] border border-primary/10 bg-surface px-3.5 text-sm font-semibold text-muted transition-colors hover:border-primary/20 hover:text-primary dark:bg-[hsl(var(--surface-2))]"
+                className="inline-flex h-11 items-center gap-2 rounded-[0.82rem] border border-primary/10 bg-surface px-3.5 text-sm font-semibold text-muted transition-colors hover:border-primary/20 hover:text-primary dark:bg-[hsl(var(--surface-2))]"
               >
                 <X size={15} />
                 <span>{t('clear_filters')}</span>
               </button>
             ) : null}
           </div>
-
-          <div className="relative w-full lg:max-w-[24rem]">
-            <Search
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
-              size={16}
-            />
-            <input
-              type="text"
-              placeholder={t('search_placeholder')}
-              value={searchTerm}
-              onChange={event => onSearchChange(event.target.value)}
-              className="w-full rounded-[0.95rem] border border-primary/10 bg-[hsl(var(--surface-2))] py-2.5 pl-11 pr-12 text-sm text-main outline-none transition-all placeholder:text-muted focus:border-primary focus:bg-surface"
-            />
-            {debouncedSearchTerm !== searchTerm ? (
-              <span className="type-label absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-muted">
-                {language === 'zh' ? '同步中' : 'Sync'}
-              </span>
-            ) : null}
-          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
-          <span>
-            {language === 'zh'
-              ? '用于快速缩小课程范围并保持表格可扫描。'
-              : 'Built for fast narrowing and a readable ledger.'}
+        <div className="flex flex-wrap items-center gap-2 border-t border-primary/10 pt-3 text-sm text-muted">
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+            {language === 'zh' ? '筛选状态' : 'Filters'}
           </span>
           <span className="status-chip">
             {selectedSemester === 'ALL' ? t('all_semesters') : selectedSemester}
@@ -175,6 +173,13 @@ export const CourseFilterBar: React.FC<CourseFilterBarProps> = ({
           <span className="status-chip">{selectedTypeLabel}</span>
           {filterCore ? (
             <span className="status-chip">{t('core_only')}</span>
+          ) : null}
+          {searchTerm.trim() ? (
+            <span className="status-chip">
+              {language === 'zh'
+                ? `搜索：${searchTerm.trim()}`
+                : `Search: ${searchTerm.trim()}`}
+            </span>
           ) : null}
         </div>
       </div>

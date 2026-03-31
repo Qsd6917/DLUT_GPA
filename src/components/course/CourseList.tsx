@@ -61,12 +61,12 @@ export const CourseList: React.FC<CourseListProps> = ({
   if (courses.length === 0) {
     if (totalCourses > 0 && isFiltered) {
       return (
-        <section className="paper-panel flex min-h-[18rem] flex-col items-center justify-center gap-4 p-8 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-[1rem] bg-[hsl(var(--surface-2))] text-primary">
+        <section className="paper-panel flex min-h-[16rem] flex-col items-center justify-center gap-4 p-8 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[0.9rem] bg-[hsl(var(--surface-2))] text-primary">
             <SearchX size={28} />
           </div>
           <div>
-            <h3 className="text-xl font-extrabold tracking-[-0.04em] text-main">
+            <h3 className="text-lg font-bold tracking-[-0.03em] text-main">
               {t('empty_filtered_courses_title')}
             </h3>
             <p className="type-body-sm mt-2 max-w-md">
@@ -97,12 +97,12 @@ export const CourseList: React.FC<CourseListProps> = ({
     }
 
     return (
-      <section className="paper-panel flex min-h-[18rem] flex-col items-center justify-center gap-4 p-8 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-[1rem] bg-[hsl(var(--surface-2))] text-primary">
+      <section className="paper-panel flex min-h-[16rem] flex-col items-center justify-center gap-4 p-8 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-[0.9rem] bg-[hsl(var(--surface-2))] text-primary">
           <BookOpen size={28} />
         </div>
         <div>
-          <h3 className="text-xl font-extrabold tracking-[-0.04em] text-main">
+          <h3 className="text-lg font-bold tracking-[-0.03em] text-main">
             {t('empty_courses_title')}
           </h3>
           <p className="type-body-sm mt-2 max-w-md">
@@ -146,20 +146,20 @@ export const CourseList: React.FC<CourseListProps> = ({
 
   return (
     <section className="paper-panel overflow-hidden">
-      <div className="flex flex-col gap-4 border-b border-primary/10 px-5 py-4 lg:flex-row lg:items-end lg:justify-between lg:px-6">
+      <div className="flex flex-col gap-3 border-b border-primary/10 px-5 py-4 lg:flex-row lg:items-end lg:justify-between lg:px-6">
         <div>
           <div className="section-kicker">
             {language === 'zh' ? '课程档案表' : 'Course Ledger'}
           </div>
-          <div className="mt-2 text-lg font-extrabold tracking-[-0.04em] text-main">
+          <div className="mt-2 text-base font-bold tracking-[-0.02em] text-main sm:text-lg">
             {language === 'zh'
               ? `共 ${courses.length} 门课程，当前计入 ${activeCount} 门`
               : `${courses.length} courses, ${activeCount} active`}
           </div>
-          <p className="type-body-sm mt-1">
+          <p className="type-body-sm mt-1 max-w-2xl">
             {language === 'zh'
-              ? `已计学分 ${activeCredits.toFixed(1)}，表格优先展示高频判断信息。`
-              : `${activeCredits.toFixed(1)} active credits. The table is tuned for fast scanning.`}
+              ? `已计学分 ${activeCredits.toFixed(1)}，表格优先保留课程、成绩、绩点、状态与操作。`
+              : `${activeCredits.toFixed(1)} active credits. The table stays focused on the decisions you make most often.`}
           </p>
         </div>
 
@@ -177,10 +177,10 @@ export const CourseList: React.FC<CourseListProps> = ({
         </div>
       </div>
 
-      <div className="max-h-[42rem] overflow-auto">
+      <div className="max-h-[34rem] overflow-auto">
         <table className="min-w-full border-collapse text-left">
-          <thead className="sticky top-0 z-10 bg-[hsl(var(--surface-1))]">
-            <tr className="border-b border-primary/10 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+          <thead className="sticky top-0 z-10 bg-[hsla(var(--surface-1),0.98)] backdrop-blur">
+            <tr className="border-b border-primary/10 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
               <th className="w-14 px-4 py-3 text-center">
                 <button
                   type="button"
@@ -208,7 +208,7 @@ export const CourseList: React.FC<CourseListProps> = ({
               <th className="w-24 px-4 py-3 text-right">
                 {language === 'zh' ? '绩点' : 'GPA'}
               </th>
-              <th className="w-32 px-4 py-3 text-center">
+              <th className="w-28 px-4 py-3 text-center">
                 {language === 'zh' ? '类型' : 'Type'}
               </th>
               <th className="w-32 px-4 py-3 text-center">
@@ -225,10 +225,10 @@ export const CourseList: React.FC<CourseListProps> = ({
               <tr
                 key={course.id}
                 className={`border-b border-primary/5 transition-colors hover:bg-[hsl(var(--surface-2))] ${
-                  course.isActive ? '' : 'opacity-65'
+                  course.isActive ? '' : 'opacity-70'
                 }`}
               >
-                <td className="px-4 py-3 text-center">
+                <td className="px-4 py-2.5 text-center">
                   <button
                     type="button"
                     onClick={() => onToggle(course.id)}
@@ -244,7 +244,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                     )}
                   </button>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-2.5">
                   <div className="flex items-start gap-3">
                     <div className="min-w-8 pt-0.5 text-right text-[11px] font-semibold text-muted">
                       {String(index + 1).padStart(2, '0')}
@@ -268,12 +268,12 @@ export const CourseList: React.FC<CourseListProps> = ({
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-2.5 text-right">
                   <span className="num-inline text-sm font-semibold text-main">
                     {course.credits.toFixed(course.credits % 1 === 0 ? 0 : 1)}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-2.5 text-right">
                   <span
                     className={`num-inline text-sm font-semibold ${
                       course.score >= 90
@@ -286,27 +286,27 @@ export const CourseList: React.FC<CourseListProps> = ({
                     {course.score}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-2.5 text-right">
                   <span className="num-inline text-sm font-semibold text-primary">
                     {course.gpa.toFixed(2)}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="px-4 py-2.5 text-center">
                   <span
                     className={`table-chip ${getTypeBadgeClass(course.type)}`}
                   >
                     {course.type}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="px-4 py-2.5 text-center">
                   <span className="table-chip">{course.semester}</span>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="px-4 py-2.5 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <button
                       type="button"
                       onClick={() => onEdit(course)}
-                      className="rounded-[0.75rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted transition-colors hover:border-primary/20 hover:text-primary"
+                      className="rounded-[0.72rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted transition-colors hover:border-primary/20 hover:text-primary"
                       title={language === 'zh' ? '编辑课程' : 'Edit course'}
                       aria-label={
                         language === 'zh' ? '编辑课程' : 'Edit course'
@@ -317,7 +317,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                     <button
                       type="button"
                       onClick={() => onRemove(course.id)}
-                      className="rounded-[0.75rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted transition-colors hover:border-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300"
+                      className="rounded-[0.72rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted transition-colors hover:border-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300"
                       title={language === 'zh' ? '删除课程' : 'Delete course'}
                       aria-label={
                         language === 'zh' ? '删除课程' : 'Delete course'

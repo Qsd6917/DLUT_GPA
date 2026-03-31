@@ -23,7 +23,11 @@ export const ThemeSelector: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-center gap-1 rounded-[0.95rem] border border-primary/10 bg-surface p-1 dark:border-white/8 dark:bg-[hsl(var(--surface-1))]">
+    <div
+      className="segmented-control"
+      role="group"
+      aria-label={t('theme_light')}
+    >
       {themes.map(({ id, icon: Icon, labelKey, shortKey }) => {
         const active = theme === id;
 
@@ -32,13 +36,11 @@ export const ThemeSelector: React.FC = () => {
             key={id}
             type="button"
             onClick={() => setTheme(id)}
-            className={`inline-flex h-8 items-center gap-2 rounded-[0.7rem] px-3 text-xs font-semibold transition-colors ${
-              active
-                ? 'bg-primary text-white'
-                : 'text-muted hover:text-main dark:hover:text-white'
-            }`}
+            className="segmented-control-button min-h-[2.3rem] px-3 text-xs"
+            data-active={active}
             aria-label={t(labelKey)}
             title={t(labelKey)}
+            aria-pressed={active}
           >
             <Icon size={14} />
             <span className="hidden md:inline">{t(shortKey)}</span>

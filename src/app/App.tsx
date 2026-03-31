@@ -187,7 +187,7 @@ function App() {
     <div className="metric-card">
       <div className="figure-label">{label}</div>
       <div
-        className={`mt-3 text-[1.45rem] font-extrabold tracking-[-0.05em] ${
+        className={`mt-2 text-[1.28rem] font-bold tracking-[-0.04em] ${
           emphasis === 'primary'
             ? 'text-primary'
             : emphasis === 'accent'
@@ -201,16 +201,41 @@ function App() {
     </div>
   );
 
+  const renderSummaryItem = (
+    label: string,
+    value: string,
+    detail?: string,
+    emphasis?: 'primary' | 'accent'
+  ) => (
+    <div className="summary-item">
+      <div className="min-w-0">
+        <div className="summary-item-label">{label}</div>
+        {detail ? <div className="type-body-sm mt-1">{detail}</div> : null}
+      </div>
+      <div
+        className={`summary-item-value ${
+          emphasis === 'primary'
+            ? 'text-primary'
+            : emphasis === 'accent'
+              ? 'text-[hsl(var(--color-accent))]'
+              : 'text-main'
+        }`}
+      >
+        {value}
+      </div>
+    </div>
+  );
+
   const renderOverview = () => (
     <section className="space-y-4 sm:space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="section-kicker">{t('nav_overview')}</div>
           <h2 className="type-page-title text-main">{t('overview_title')}</h2>
-          <p className="type-body-sm mt-2">
+          <p className="type-body-sm mt-1.5">
             {language === 'zh'
-              ? '核心绩点、学分进度与下一步操作都压缩到一个真正可用的首页。'
-              : 'The homepage is rebuilt around GPA, credits, and the next useful action.'}
+              ? '主绩点、关键摘要和下一步操作都压进了首屏，不再靠大标题撑场。'
+              : 'The first screen is now driven by GPA, summary metrics, and the next useful action.'}
           </p>
         </div>
 
@@ -225,52 +250,65 @@ function App() {
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]">
-        <article className="paper-panel p-6 sm:p-7">
-          <div className="relative z-10 flex h-full flex-col justify-between gap-6">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-              <div className="space-y-3">
-                <div className="figure-label">{t('total_gpa')}</div>
-                <div className="hero-value text-main">
-                  {visibleStats.weightedGpa.toFixed(3)}
+      <article className="paper-panel p-5 sm:p-6 lg:p-7">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.22fr)_minmax(21rem,0.78fr)]">
+          <div className="flex flex-col justify-between gap-5">
+            <div className="space-y-5">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0">
+                  <div className="section-kicker text-primary">
+                    {language === 'zh' ? '当前 GPA' : 'Current GPA'}
+                  </div>
+                  <div className="hero-value mt-3 text-main">
+                    {visibleStats.weightedGpa.toFixed(3)}
+                  </div>
+                  <p className="type-body-sm mt-3 max-w-xl">
+                    {isSandboxMode
+                      ? language === 'zh'
+                        ? '当前正在沙盒演算，所有试算结果与正式数据隔离，可放心比较方案。'
+                        : 'Sandbox simulation is active, so experiments stay isolated from your saved record.'
+                      : language === 'zh'
+                        ? '本地自动保存已启用，先录入课程，再回到分析区查看结构变化。'
+                        : 'Local autosave is active. Record courses first, then come back to analysis for structure changes.'}
+                  </p>
                 </div>
-                <div className="type-body-sm">
-                  {t('based_on_credits', visibleStats.totalCredits.toFixed(1))}
+
+                <div className="grid gap-3 sm:grid-cols-3 lg:max-w-[30rem] lg:grid-cols-3">
+                  {renderMetaCard(
+                    t('credits'),
+                    visibleStats.totalCredits.toFixed(1),
+                    language === 'zh' ? '累计学分' : 'Total credits'
+                  )}
+                  {renderMetaCard(
+                    t('avg_score'),
+                    visibleStats.weightedAverageScore.toFixed(2),
+                    t('hundred_scale')
+                  )}
+                  {renderMetaCard(
+                    t('overview_active'),
+                    `${activeCourses.length} / ${courses.length}`,
+                    language === 'zh' ? '当前计入' : 'Included now'
+                  )}
                 </div>
               </div>
 
-              <div className="w-full max-w-sm rounded-[1rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-4">
-                <div className="figure-label">
-                  {language === 'zh' ? '当前状态' : 'Current State'}
-                </div>
-                <div className="mt-2 text-sm font-semibold text-main">
-                  {isSandboxMode
-                    ? language === 'zh'
-                      ? '正在沙盒演算，修改不会直接覆盖原数据。'
-                      : 'Sandbox mode is active and changes are isolated.'
-                    : language === 'zh'
-                      ? '本地自动保存已启用，可直接继续录入或分析。'
-                      : 'Local autosave is on. Continue editing or analysis safely.'}
-                </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {renderMetaCard(
+                  language === 'zh' ? '必修 GPA' : 'Compulsory GPA',
+                  visibleStats.compulsoryWeightedGpa.toFixed(3),
+                  t('compulsory_desc', visibleStats.compulsoryCredits)
+                )}
+                {renderMetaCard(
+                  t('overview_terms'),
+                  String(semesters.length),
+                  language === 'zh' ? '已记录学期' : 'Recorded terms'
+                )}
+                {renderMetaCard(
+                  t('course_count'),
+                  String(courses.length),
+                  t('selected_total', activeCourses.length)
+                )}
               </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {renderMetaCard(
-                t('credits'),
-                visibleStats.totalCredits.toFixed(1),
-                language === 'zh' ? '累计学分' : 'Total credits'
-              )}
-              {renderMetaCard(
-                t('avg_score'),
-                visibleStats.weightedAverageScore.toFixed(2),
-                t('hundred_scale')
-              )}
-              {renderMetaCard(
-                t('overview_active'),
-                `${activeCourses.length} / ${courses.length}`,
-                language === 'zh' ? '当前纳入计算' : 'Included in GPA'
-              )}
             </div>
 
             <div className="flex flex-wrap gap-2.5">
@@ -290,41 +328,53 @@ function App() {
                 {t('overview_secondary_cta')}
                 <ArrowRight size={15} />
               </button>
+              <button
+                type="button"
+                onClick={() => setIsDataModalOpen(true)}
+                className="ghost-button"
+              >
+                {t('data_mgmt')}
+              </button>
             </div>
           </div>
-        </article>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          {renderMetaCard(
-            language === 'zh' ? '计算制度' : 'Method',
-            currentMethodLabel,
-            language === 'zh' ? '当前换算标准' : 'Current GPA scale',
-            'primary'
-          )}
-          {renderMetaCard(
-            language === 'zh' ? '数据状态' : 'Status',
-            isSandboxMode
-              ? language === 'zh'
-                ? '沙盒中'
-                : 'Sandbox'
-              : language === 'zh'
-                ? '已保存'
-                : 'Saved',
-            language === 'zh' ? '自动本地存储' : 'Local autosave',
-            isSandboxMode ? 'accent' : undefined
-          )}
-          {renderMetaCard(
-            t('overview_terms'),
-            String(semesters.length),
-            language === 'zh' ? '已覆盖学期' : 'Terms covered'
-          )}
-          {renderMetaCard(
-            t('course_count'),
-            String(courses.length),
-            t('selected_total', activeCourses.length)
-          )}
+          <div className="summary-strip">
+            {renderSummaryItem(
+              language === 'zh' ? '学分' : 'Credits',
+              visibleStats.totalCredits.toFixed(1),
+              language === 'zh' ? '当前累计' : 'Accumulated'
+            )}
+            {renderSummaryItem(
+              language === 'zh' ? '平均分' : 'Average',
+              visibleStats.weightedAverageScore.toFixed(2),
+              t('hundred_scale')
+            )}
+            {renderSummaryItem(
+              language === 'zh' ? '计入课程' : 'Included',
+              `${activeCourses.length} / ${courses.length}`,
+              language === 'zh' ? '当前纳入 GPA' : 'Affecting GPA now'
+            )}
+            {renderSummaryItem(
+              language === 'zh' ? 'GPA 制度' : 'Method',
+              currentMethodLabel,
+              language === 'zh' ? '当前换算标准' : 'Current GPA scale',
+              'primary'
+            )}
+            {renderSummaryItem(
+              language === 'zh' ? '数据状态' : 'Status',
+              isSandboxMode
+                ? language === 'zh'
+                  ? '沙盒演算'
+                  : 'Sandbox'
+                : language === 'zh'
+                  ? '已保存'
+                  : 'Saved',
+              language === 'zh' ? '本地自动存储' : 'Local autosave',
+              isSandboxMode ? 'accent' : undefined
+            )}
+          </div>
         </div>
-      </div>
+      </article>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <StatsCard
@@ -375,16 +425,16 @@ function App() {
 
   const renderCourses = () => (
     <section className="space-y-4 sm:space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="section-kicker">{t('nav_courses')}</div>
           <h2 className="type-page-title text-main">
             {t('course_workspace_title')}
           </h2>
-          <p className="type-body-sm mt-2">
+          <p className="type-body-sm mt-1.5">
             {language === 'zh'
-              ? '课程筛选、批量勾选和档案表合并为一个真正高密度的操作区。'
-              : 'Filtering, selection, and the course ledger now live in one dense workspace.'}
+              ? '搜索、筛选与课程总表压成一个真正的操作台，首屏优先给你可扫描的信息。'
+              : 'Search, filters, and the ledger now behave like one operational workspace.'}
           </p>
         </div>
 
@@ -449,11 +499,15 @@ function App() {
 
   const renderAnalysis = () => (
     <section className="space-y-4 sm:space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="section-kicker">{t('nav_analysis')}</div>
           <h2 className="type-page-title text-main">{t('analysis_title')}</h2>
-          <p className="type-body-sm mt-2">{t('analysis_desc')}</p>
+          <p className="type-body-sm mt-1.5">
+            {language === 'zh'
+              ? '切换器退回为真正 tabs，图表和工具面板重新回到主次清楚的控制台结构。'
+              : 'The view switcher is now a true tab bar, with charts and tools back in a clear primary-secondary layout.'}
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -495,7 +549,7 @@ function App() {
           <AIAdvisorPanel courses={courses} gpaStats={stats} targetGPA={3.5} />
         </Suspense>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,0.95fr)]">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)]">
           <div className="space-y-4">
             <Suspense fallback={panelFallback}>
               <ScoreDistributionChart stats={stats} />
