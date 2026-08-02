@@ -24,7 +24,11 @@ const sortSemesters = (left: string, right: string) => {
   return left.localeCompare(right, 'zh-CN', { numeric: true });
 };
 
-export const useCourseFilter = (courses: Course[], originalCourses: Course[], isSandboxMode: boolean) => {
+export const useCourseFilter = (
+  courses: Course[],
+  baselineCourses: Course[],
+  isExperimentActive: boolean
+) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSemesters, setSelectedSemesters] = useState<string[]>([]);
   const [filterType, setFilterType] = useState<'ALL' | CourseType>('ALL');
@@ -75,27 +79,26 @@ export const useCourseFilter = (courses: Course[], originalCourses: Course[], is
   const stats = useMemo(() => calculateStats(activeCourses), [activeCourses]);
   const hasActiveFilters = Boolean(searchTerm.trim()) || selectedSemesters.length > 0 || filterType !== 'ALL' || filterCore;
 
-  const originalStats = useMemo(() => {
-      if (!isSandboxMode) return null;
-      // We need to respect the current filter even for original stats to make comparison meaningful
-      let filteredOriginal = originalCourses;
+  const baselineStats = useMemo(() => {
+      if (!isExperimentActive) return null;
+      let filteredBaseline = baselineCourses;
       
       if (selectedSemesters.length > 0) {
-        filteredOriginal = filteredOriginal.filter(c => selectedSemesters.includes(c.semester));
+        filteredBaseline = filteredBaseline.filter(c => selectedSemesters.includes(c.semester));
       }
       if (filterType !== 'ALL') {
-        filteredOriginal = filteredOriginal.filter(c => c.type === filterType);
+        filteredBaseline = filteredBaseline.filter(c => c.type === filterType);
       }
       if (filterCore) {
-        filteredOriginal = filteredOriginal.filter(c => c.isCore);
+        filteredBaseline = filteredBaseline.filter(c => c.isCore);
       }
       if (searchTerm.trim()) {
-        filteredOriginal = filteredOriginal.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        filteredBaseline = filteredBaseline.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
       }
       
-      const activeOriginal = filteredOriginal.filter(c => c.isActive);
-      return calculateStats(activeOriginal);
-  }, [isSandboxMode, originalCourses, selectedSemesters, searchTerm, filterType, filterCore]);
+      const activeBaseline = filteredBaseline.filter(c => c.isActive);
+      return calculateStats(activeBaseline);
+  }, [baselineCourses, filterCore, filterType, isExperimentActive, searchTerm, selectedSemesters]);
 
   const clearFilters = useCallback(() => {
     setSearchTerm('');
@@ -114,7 +117,7 @@ export const useCourseFilter = (courses: Course[], originalCourses: Course[], is
     filteredCourses,
     activeCourses,
     stats,
-    originalStats,
+    baselineStats,
     clearFilters,
     hasActiveFilters,
   };

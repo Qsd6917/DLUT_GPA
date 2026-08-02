@@ -22,12 +22,14 @@ interface AIAdvisorPanelProps {
   courses: Course[];
   gpaStats: GpaStats;
   targetGPA: number;
+  maximumGpa: number;
 }
 
 const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({
   courses,
   gpaStats,
   targetGPA,
+  maximumGpa,
 }) => {
   const [activeTab, setActiveTab] = useState<
     'recommendations' | 'strategies' | 'analysis'
@@ -52,6 +54,19 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({
     () => getAIRecommendations(studentProfile),
     [studentProfile]
   );
+
+  const hasEvidence = courses.some(
+    course => course.isActive && course.credits > 0
+  );
+  if (!hasEvidence) {
+    return (
+      <div className="paper-panel p-8 text-center">
+        <Brain className="mx-auto h-10 w-10 text-muted/40" />
+        <h2 className="type-section-title mt-3 text-main">暂无可分析课程</h2>
+        <p className="type-body-sm mt-2">请先添加有效成绩并将课程设为计入 GPA，再生成本地学业建议。</p>
+      </div>
+    );
+  }
 
   return (
     <div className="paper-panel overflow-hidden">
@@ -112,6 +127,7 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({
             skillGapAnalysis={recommendationData.skillGapAnalysis}
             targetGPA={targetGPA}
             currentGPA={gpaStats.weightedGpa}
+            maximumGpa={maximumGpa}
           />
         )}
       </div>
@@ -315,7 +331,8 @@ const AnalysisTab: React.FC<{
   skillGapAnalysis: AIDashboardData['skillGapAnalysis'];
   targetGPA: number;
   currentGPA: number;
-}> = ({ academicRisks, skillGapAnalysis, targetGPA, currentGPA }) => {
+  maximumGpa: number;
+}> = ({ academicRisks, skillGapAnalysis, targetGPA, currentGPA, maximumGpa }) => {
   const sortedSkills = [...skillGapAnalysis].sort(
     (a, b) => b.improvementPriority - a.improvementPriority
   );
@@ -332,12 +349,12 @@ const AnalysisTab: React.FC<{
           <ProgressCard
             label="当前 GPA"
             value={currentGPA}
-            barWidth={(currentGPA / 4.0) * 100}
+            barWidth={(currentGPA / maximumGpa) * 100}
           />
           <ProgressCard
             label="目标 GPA"
             value={targetGPA}
-            barWidth={(targetGPA / 4.0) * 100}
+            barWidth={(targetGPA / maximumGpa) * 100}
             accent
           />
         </div>
@@ -347,14 +364,7 @@ const AnalysisTab: React.FC<{
             <div className="flex items-center gap-2 text-amber-700 dark:text-amber-200">
               <AlertTriangle size={16} />
               <span className="text-sm font-medium">
-                要达到目标 GPA，后续课程平均分需要约{' '}
-                <strong>
-                  {Math.min(
-                    100,
-                    Math.max(60, 60 + (targetGPA - currentGPA) * 10)
-                  ).toFixed(0)}{' '}
-                  分
-                </strong>
+                请在目标 GPA 计算器中设置剩余学分和预期绩点
               </span>
             </div>
           </div>

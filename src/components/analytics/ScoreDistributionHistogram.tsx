@@ -54,6 +54,12 @@ export const ScoreDistributionHistogram: React.FC<
               {data.value}
             </span>
           </p>
+          <p className="type-body-sm mt-1">
+            {language === 'zh' ? '学分 / 占比' : 'Credits / Share'}:{' '}
+            <span className="num-inline text-main dark:text-white">
+              {(data.credits ?? 0).toFixed(1)} / {(data.percentage ?? 0).toFixed(1)}%
+            </span>
+          </p>
         </div>
       );
     }
@@ -147,10 +153,15 @@ export const ScoreDistributionHistogram: React.FC<
               style={{ backgroundColor: barColors[index % barColors.length] }}
             ></div>
             <span className="text-muted">{entry.name}</span>
-            <span className="num-inline text-muted/70">({entry.value})</span>
+            <span className="num-inline text-muted/70">
+              {language === 'zh'
+                ? `${entry.value} 门 · ${(entry.credits ?? 0).toFixed(1)} 学分 · ${(entry.percentage ?? 0).toFixed(1)}%`
+                : `${entry.value} courses · ${(entry.credits ?? 0).toFixed(1)} credits · ${(entry.percentage ?? 0).toFixed(1)}%`}
+            </span>
           </div>
         ))}
       </div>
+      <table className="sr-only" aria-label={language === 'zh' ? '成绩分布数据' : 'Score distribution data'}><thead><tr><th>{language === 'zh' ? '分数区间' : 'Score range'}</th><th>{language === 'zh' ? '课程数' : 'Courses'}</th><th>{language === 'zh' ? '学分' : 'Credits'}</th><th>{language === 'zh' ? '课程占比' : 'Course share'}</th></tr></thead><tbody>{stats.scoreDistribution.map(entry => <tr key={entry.name}><td>{entry.name}</td><td>{entry.value}</td><td>{(entry.credits ?? 0).toFixed(1)}</td><td>{(entry.percentage ?? 0).toFixed(1)}%</td></tr>)}</tbody></table>
     </div>
   );
 };

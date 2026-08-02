@@ -8,7 +8,7 @@ interface StatsCardProps {
   description: string;
   colorClass?: string;
   comparisonValue?: string | number;
-  isSandbox?: boolean;
+  isExperiment?: boolean;
 }
 
 export const StatsCard: React.FC<StatsCardProps> = ({
@@ -18,7 +18,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   description,
   colorClass = '',
   comparisonValue,
-  isSandbox = false,
+  isExperiment = false,
 }) => {
   const numValue = Number(value);
   const numComparison =
@@ -29,7 +29,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
       : undefined;
 
   const diffNode =
-    isSandbox && diff !== undefined ? (
+    isExperiment && diff !== undefined ? (
       <div
         className={`num-inline inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-semibold ${
           diff > 0.001

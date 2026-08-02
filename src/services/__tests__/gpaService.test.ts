@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { calculateCourseGpa, calculateStats } from '../gpaService';
+import {
+  calculateCourseGpa,
+  calculateStats,
+  calculateTargetGpa,
+  calculateSemesterTrends,
+} from '../gpaService';
 import { CalculationMethod, Course } from '../../types';
 
 describe('gpaService', () => {
@@ -113,6 +118,114 @@ describe('gpaService', () => {
     it('should count courses correctly', () => {
         const stats = calculateStats(mockCourses);
         expect(stats.courseCount).toBe(2);
+    });
+
+    it('includes credit totals and course share in every distribution bucket', () => {
+      const stats = calculateStats(mockCourses);
+      expect(stats.scoreDistribution[0]).toMatchObject({
+        name: '90-100',
+        value: 1,
+        credits: 4,
+        percentage: 50,
+      });
+      expect(stats.scoreDistribution[1]).toMatchObject({
+        name: '80-89',
+        value: 1,
+        credits: 2,
+        percentage: 50,
+      });
+    });
+  });
+
+  describe('calculateTargetGpa', () => {
+    it('marks a plan on track when the expected future GPA reaches the target', () => {
+      expect(
+        calculateTargetGpa({
+          currentGpa: 3.2,
+          currentCredits: 100,
+          targetGpa: 3.3,
+          futureCredits: 20,
+          expectedFutureGpa: 3.8,
+          maximumGpa: 5,
+        })
+      ).toMatchObject({
+        status: 'reachable',
+        outlook: 'on-track',
+        requiredFutureGpa: 3.8,
+        projectedGpa: 3.3,
+      });
+    });
+
+    it('asks for a higher future GPA when the target is possible but the current plan falls short', () => {
+      expect(
+        calculateTargetGpa({
+          currentGpa: 3.2,
+          currentCredits: 100,
+          targetGpa: 3.4,
+          futureCredits: 20,
+          expectedFutureGpa: 4,
+          maximumGpa: 5,
+        })
+      ).toMatchObject({
+        status: 'reachable',
+        outlook: 'needs-higher',
+        requiredFutureGpa: 4.4,
+      });
+    });
+
+    it('marks a target unreachable when it requires more than the selected GPA scale allows', () => {
+      expect(
+        calculateTargetGpa({
+          currentGpa: 3,
+          currentCredits: 100,
+          targetGpa: 4,
+          futureCredits: 20,
+          expectedFutureGpa: 5,
+          maximumGpa: 5,
+        })
+      ).toMatchObject({ status: 'unreachable', requiredFutureGpa: 9 });
+    });
+
+    it.each([
+      ['zero future credits', { futureCredits: 0 }, 'futureCredits'],
+      ['target above scale', { targetGpa: 5.1 }, 'targetGpa'],
+      ['non-finite expected GPA', { expectedFutureGpa: Number.NaN }, 'expectedFutureGpa'],
+    ])('returns a field error for %s', (_label, overrides, field) => {
+      expect(
+        calculateTargetGpa({
+          currentGpa: 3.2,
+          currentCredits: 100,
+          targetGpa: 3.5,
+          futureCredits: 20,
+          expectedFutureGpa: 4,
+          maximumGpa: 5,
+          ...overrides,
+        })
+      ).toMatchObject({ status: 'invalid', field });
+    });
+
+    it('rejects a current GPA outside the selected scale', () => {
+      expect(calculateTargetGpa({ currentGpa: 5.1, currentCredits: 10, targetGpa: 4, futureCredits: 10, expectedFutureGpa: 4, maximumGpa: 5 })).toMatchObject({ status: 'invalid', field: 'currentGpa' });
+    });
+
+    it('clamps the required future GPA to zero when the target is already achieved', () => {
+      expect(calculateTargetGpa({ currentGpa: 4, currentCredits: 100, targetGpa: 3.5, futureCredits: 20, expectedFutureGpa: 3, maximumGpa: 5 })).toMatchObject({ status: 'reachable', outlook: 'achieved', requiredFutureGpa: 0 });
+    });
+  });
+
+  describe('calculateSemesterTrends', () => {
+    it('aggregates valid active courses by semester and orders semesters naturally', () => {
+      const courses: Course[] = [
+        { id: 'a', name: 'A', credits: 2, score: 80, gpa: 3, isActive: true, semester: '2-1', type: '必修' },
+        { id: 'b', name: 'B', credits: 4, score: 90, gpa: 4, isActive: true, semester: '1-2', type: '必修' },
+        { id: 'c', name: 'C', credits: 2, score: 70, gpa: 2, isActive: true, semester: '1-2', type: '选修' },
+        { id: 'd', name: 'D', credits: 3, score: 0, gpa: 0, isActive: true, semester: '1-2', type: '选修' },
+        { id: 'e', name: 'E', credits: 3, score: 100, gpa: 5, isActive: false, semester: '1-2', type: '选修' },
+      ];
+      expect(calculateSemesterTrends(courses)).toEqual([
+        { semester: '1-2', gpa: 20 / 9, averageScore: 500 / 9, credits: 9, courseCount: 3 },
+        { semester: '2-1', gpa: 3, averageScore: 80, credits: 2, courseCount: 1 },
+      ]);
     });
   });
 });

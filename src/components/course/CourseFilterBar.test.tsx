@@ -26,7 +26,7 @@ const renderFilterBar = () => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           semesterOptions={['1-1', '2-2', '3-3']}
-          isSandboxMode={false}
+          isExperimentActive={false}
           isFiltered={isFiltered}
           onClearFilters={() => {
             setSelectedSemesters([]);

@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Download, Share2, X } from 'lucide-react';
 import { Course, GpaStats } from '../../types';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
@@ -9,6 +16,13 @@ interface ShareableReportModalProps {
   onClose: () => void;
   stats: GpaStats;
   courses: Course[];
+  calculationMethodLabel?: string;
+  isExperiment?: boolean;
+  totalCourseCount?: number;
+  filteredCourseCount?: number;
+  hasActiveFilters?: boolean;
+  generatedAt?: Date;
+  returnFocusRef?: RefObject<HTMLElement | null>;
 }
 
 let html2CanvasModulePromise: Promise<typeof import('html2canvas')> | null =
@@ -28,17 +42,37 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
   onClose,
   stats,
   courses,
+  calculationMethodLabel = 'DLUT 5.0',
+  isExperiment = false,
+  totalCourseCount,
+  filteredCourseCount,
+  hasActiveFilters = false,
+  generatedAt,
+  returnFocusRef,
 }) => {
   const { language } = useTranslation();
   const reportRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [reportGeneratedAt, setReportGeneratedAt] = useState(
+    () => generatedAt ?? new Date()
+  );
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   useBodyScrollLock(isOpen);
 
   useEffect(() => {
+    if (isOpen) {
+      setReportGeneratedAt(generatedAt ?? new Date());
+    }
+  }, [generatedAt, isOpen]);
+
+  useEffect(() => {
     if (!isOpen) {
       return undefined;
     }
+
+    const returnFocusTarget = returnFocusRef?.current ?? null;
+    closeButtonRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -47,8 +81,50 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      returnFocusTarget?.focus();
+    };
+  }, [isOpen, onClose, returnFocusRef]);
+
+  const formattedGeneratedAt = useMemo(() => {
+    const pad2 = (n: number) => String(n).padStart(2, '0');
+    const y = reportGeneratedAt.getFullYear();
+    const m = pad2(reportGeneratedAt.getMonth() + 1);
+    const d = pad2(reportGeneratedAt.getDate());
+    const hh = pad2(reportGeneratedAt.getHours());
+    const mm = pad2(reportGeneratedAt.getMinutes());
+    return `${y}-${m}-${d} ${hh}:${mm}`;
+  }, [reportGeneratedAt]);
+
+  const scopeText = useMemo(() => {
+    const includedCount = stats.courseCount;
+    const currentScopeCount = filteredCourseCount ?? courses.length;
+    const allCount = totalCourseCount ?? currentScopeCount;
+
+    if (language === 'zh') {
+      if (hasActiveFilters) {
+        return `当前筛选中计入 GPA 的 ${includedCount} / ${currentScopeCount} 门课程（全部 ${allCount} 门）`;
+      }
+
+      return `当前计入 GPA 的 ${includedCount} / ${allCount} 门课程`;
+    }
+
+    if (hasActiveFilters) {
+      return `${includedCount} of ${currentScopeCount} filtered courses included in GPA (${allCount} total)`;
+    }
+
+    return `${includedCount} of ${allCount} courses included in GPA`;
+  }, [
+    courses.length,
+    filteredCourseCount,
+    hasActiveFilters,
+    language,
+    stats.courseCount,
+    totalCourseCount,
+  ]);
+
+  const distributionRows = stats.scoreDistribution.filter(row => row.value > 0);
 
   const getExportFileName = useCallback(() => {
     const now = new Date();
@@ -145,6 +221,7 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
           </div>
 
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             className="flex h-10 w-10 items-center justify-center rounded-[0.9rem] border border-primary/10 bg-[hsl(var(--surface-2))] text-muted transition-colors hover:border-primary/20 hover:text-main"
@@ -182,7 +259,50 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
                     </div>
                   </div>
                   <div className="rounded-[0.85rem] border border-primary/10 bg-surface px-3 py-1.5 text-sm font-semibold text-primary">
-                    DLUT 5.0
+                    {calculationMethodLabel}
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="metric-card">
+                    <div className="figure-label">
+                      {language === 'zh' ? '生成时间' : 'Generated'}
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-main">
+                      {formattedGeneratedAt}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="figure-label">
+                      {language === 'zh'
+                        ? '计算方法'
+                        : 'Calculation method'}
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-main">
+                      {calculationMethodLabel}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="figure-label">
+                      {language === 'zh' ? '数据模式' : 'Data mode'}
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-main">
+                      {isExperiment
+                        ? language === 'zh'
+                          ? '实验方案'
+                          : 'Experiment plan'
+                        : language === 'zh'
+                          ? '正式数据'
+                          : 'Saved data'}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="figure-label">
+                      {language === 'zh' ? '计入口径' : 'Scope'}
+                    </div>
+                    <div className="mt-2 text-sm font-semibold leading-5 text-main">
+                      {scopeText}
+                    </div>
                   </div>
                 </div>
 
@@ -221,10 +341,39 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
                   </div>
                 </div>
 
+                <div className="rounded-[1rem] border border-primary/10 bg-surface p-4">
+                  <div className="figure-label">
+                    {language === 'zh' ? '主要图表' : 'Main chart'}
+                  </div>
+                  <div className="mt-3 grid gap-2">
+                    {distributionRows.length > 0 ? (
+                      distributionRows.map(row => (
+                        <div
+                          key={row.name}
+                          className="flex items-center justify-between gap-3 rounded-[0.85rem] border border-primary/10 bg-[hsl(var(--surface-2))] px-3 py-2 text-sm"
+                        >
+                          <span className="font-semibold text-main">
+                            {row.name}
+                          </span>
+                          <span className="text-muted">
+                            {language === 'zh'
+                              ? `${row.value} 门 / ${(row.credits ?? 0).toFixed(1)} 学分`
+                              : `${row.value} courses / ${(row.credits ?? 0).toFixed(1)} credits`}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="type-body-sm">
+                        {language === 'zh'
+                          ? '暂无可展示的成绩分布。'
+                          : 'No score distribution to show yet.'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="rounded-[1rem] border border-primary/10 bg-surface px-4 py-3 text-sm text-muted">
-                  {language === 'zh'
-                    ? `统计范围包含当前已计入的 ${courses.length} 门课程，可直接导出为图片。`
-                    : `The summary covers ${courses.length} included courses and can be exported directly as an image.`}
+                  {scopeText}
                 </div>
               </div>
             </div>
@@ -237,13 +386,17 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
                 <ul className="mt-3 space-y-2 text-sm text-muted">
                   <li>
                     {language === 'zh'
-                      ? '导出内容为当前已计入课程的学业摘要。'
-                      : 'The export uses currently included courses only.'}
+                      ? '导出内容使用当前总览页同一统计口径。'
+                      : 'The export uses the same scope as the current overview.'}
                   </li>
                   <li>
                     {language === 'zh'
-                      ? '适合发给同学、导师或用于阶段记录。'
-                      : 'Suitable for peers, advisors, or personal snapshots.'}
+                      ? isExperiment
+                        ? '当前为实验方案，报告会保留实验标识。'
+                        : '当前为正式数据，报告会保留计算方法与范围说明。'
+                      : isExperiment
+                        ? 'The experiment plan is marked in the report.'
+                        : 'Saved data reports include method and scope details.'}
                   </li>
                 </ul>
               </div>

@@ -27,17 +27,52 @@ export interface GpaStats {
   weightedGpa: number;
   weightedAverageScore: number;
   courseCount: number;
-  scoreDistribution: { name: string; value: number }[];
+  scoreDistribution: {
+    name: string;
+    value: number;
+    credits?: number;
+    percentage?: number;
+  }[];
   
   // New fields for compulsory courses
   compulsoryCredits: number;
   compulsoryWeightedGpa: number;
 }
 
+export interface ExperimentSession {
+  baselineCourses: Course[];
+  draftCourses: Course[];
+}
+
+export type ExperimentChangeKind =
+  | 'added'
+  | 'removed'
+  | 'score'
+  | 'included'
+  | 'metadata';
+
+export interface ExperimentCourseChange {
+  courseId: string;
+  kinds: ExperimentChangeKind[];
+  baselineCourse?: Course;
+  draftCourse?: Course;
+}
+
+export interface ExperimentComparison {
+  baselineStats: GpaStats;
+  draftStats: GpaStats;
+  gpaDelta: number;
+  averageScoreDelta: number;
+  creditsDelta: number;
+  changes: ExperimentCourseChange[];
+}
+
 export interface SemesterTrend {
   semester: string;
   gpa: number;
+  averageScore: number;
   credits: number;
+  courseCount: number;
 }
 
 export interface GraduationRequirements {
@@ -46,3 +81,30 @@ export interface GraduationRequirements {
   elective: number; // 选修
   optional: number; // 任选
 }
+
+export interface TargetGpaInput {
+  currentGpa: number;
+  currentCredits: number;
+  targetGpa: number;
+  futureCredits: number;
+  expectedFutureGpa: number;
+  maximumGpa: number;
+}
+
+export type TargetGpaResult =
+  | {
+      status: 'reachable';
+      outlook: 'achieved' | 'on-track' | 'needs-higher';
+      requiredFutureGpa: number;
+      projectedGpa: number;
+    }
+  | {
+      status: 'unreachable';
+      requiredFutureGpa: number;
+      projectedGpa: number;
+    }
+  | {
+      status: 'invalid';
+      field: keyof TargetGpaInput;
+      reason: 'required' | 'positive' | 'out-of-range';
+    };

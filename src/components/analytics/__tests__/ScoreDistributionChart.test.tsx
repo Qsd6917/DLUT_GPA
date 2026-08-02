@@ -49,4 +49,13 @@ describe('ScoreDistributionChart', () => {
     expect(centerValue).toHaveAttribute('font-weight', '600');
     expect(container.querySelector('text tspan')).toBe(centerValue);
   });
+
+  test('exposes score range, course count, credits and course share to screen readers', () => {
+    render(<ThemeProvider><LanguageProvider><ScoreDistributionChart stats={{ ...mockStats, scoreDistribution: [{ name: '90-100', value: 2, credits: 10, percentage: 40 }] }} /></LanguageProvider></ThemeProvider>);
+    const table = screen.getByRole('table', { name: '成绩分布数据' });
+    expect(table).toHaveTextContent('90-100');
+    expect(table).toHaveTextContent('2');
+    expect(table).toHaveTextContent('10.0');
+    expect(table).toHaveTextContent('40.0%');
+  });
 });

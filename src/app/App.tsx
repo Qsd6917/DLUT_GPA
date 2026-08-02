@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
   Book,
@@ -12,19 +12,21 @@ import { useCourseData } from '../hooks/useCourseData';
 import { useCourseFilter } from '../hooks/useCourseFilter';
 import { Layout } from '../components/layout/Layout';
 import { Header } from '../components/layout/Header';
-import { SandboxBanner } from '../components/layout/SandboxBanner';
 import { CourseFilterBar } from '../components/course/CourseFilterBar';
 import { AddCourseForm } from '../components/course/AddCourseForm';
 import { CourseList } from '../components/course/CourseList';
 import { EditCourseModal } from '../components/course/EditCourseModal';
 import { StatsCard } from '../components/analytics/StatsCard';
-import { TargetGpaCalculator } from '../components/analytics/TargetGpaCalculator';
-import { GraduationProgress } from '../components/analytics/GraduationProgress';
-import { DashboardModeToggleBar } from '../components/analytics/DashboardModeToggleBar';
+import {
+  AnalysisView,
+  DashboardModeToggleBar,
+} from '../components/analytics/DashboardModeToggleBar';
 import { ReloadPrompt } from '../components/common/ReloadPrompt';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { Course } from '../types';
 import useDebounce from '../hooks/useDebounce';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { calculateSemesterTrends } from '../services/gpaService';
 
 const DataManagementModal = lazy(() =>
   import('../components/data/DataManagementModal').then(module => ({
@@ -36,9 +38,9 @@ const ShareableReportModal = lazy(() =>
     default: module.ShareableReportModal,
   }))
 );
-const GpaSimulationMode = lazy(() =>
-  import('../components/analytics/GpaSimulationMode').then(module => ({
-    default: module.GpaSimulationMode,
+const ExperimentLab = lazy(() =>
+  import('../components/analytics/ExperimentLab').then(module => ({
+    default: module.ExperimentLab,
   }))
 );
 const AcademicRadar = lazy(() =>
@@ -54,32 +56,40 @@ const ScoreDistributionChart = lazy(() =>
     default: module.ScoreDistributionChart,
   }))
 );
-const ScoreDistributionHistogram = lazy(() =>
-  import('../components/analytics/ScoreDistributionHistogram').then(module => ({
-    default: module.ScoreDistributionHistogram,
+const SemesterTrendChart = lazy(() =>
+  import('../components/analytics/SemesterTrendChart').then(module => ({
+    default: module.SemesterTrendChart,
   }))
+);
+const TargetGpaCalculator = lazy(() =>
+  import('../components/analytics/TargetGpaCalculator').then(module => ({ default: module.TargetGpaCalculator }))
+);
+const GraduationProgress = lazy(() =>
+  import('../components/analytics/GraduationProgress').then(module => ({ default: module.GraduationProgress }))
 );
 
 type Section = 'overview' | 'courses' | 'analysis';
-type AnalysisView = 'overview' | 'simulation' | 'radar' | 'advisor';
-
 function App() {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const {
     courses,
     hydrated,
     method,
     setMethod,
-    isSandboxMode,
-    originalCourses,
+    experiment,
+    isExperimentActive,
     addCourse,
     removeCourse,
     toggleCourse,
     saveCourse,
+    updateCourseScore,
     importData,
     resetData,
-    enterSandbox,
-    exitSandbox,
+    startExperiment,
+    resetExperiment,
+    restoreExperimentCourse,
+    discardExperiment,
+    commitExperiment,
     setAllActive,
   } = useCourseData();
 
@@ -97,10 +107,14 @@ function App() {
     filteredCourses,
     activeCourses,
     stats,
-    originalStats,
+    baselineStats,
     clearFilters,
     hasActiveFilters,
-  } = useCourseFilter(courses, originalCourses, isSandboxMode);
+  } = useCourseFilter(
+    courses,
+    experiment?.baselineCourses ?? [],
+    isExperimentActive
+  );
 
   const [localSearchTerm, setLocalSearchTerm] = useState(rawSearchTerm);
   const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
@@ -111,7 +125,8 @@ function App() {
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCourseEntryOpen, setIsCourseEntryOpen] = useState(false);
-  const [simulatedStats, setSimulatedStats] = useState(stats);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+  const shareReturnFocusRef = useRef<HTMLElement | null>(null);
   useBodyScrollLock(isCourseEntryOpen);
 
   useEffect(() => {
@@ -133,9 +148,7 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isCourseEntryOpen]);
 
-  const analysisInSimulation =
-    activeSection === 'analysis' && activeAnalysisView === 'simulation';
-  const visibleStats = analysisInSimulation ? simulatedStats : stats;
+  const visibleStats = stats;
   const currentMethodLabel = useMemo(() => {
     switch (method) {
       case 'STD_4_0':
@@ -152,6 +165,15 @@ function App() {
         return 'DLUT 5.0';
     }
   }, [method]);
+  const maximumGpa = useMemo(() => {
+    if (method === 'STD_4_0' || method === 'PKU_4_0' || method === 'WES') return 4;
+    if (method === 'SCALE_4_5') return 4.5;
+    return 5;
+  }, [method]);
+  const semesterTrends = useMemo(
+    () => calculateSemesterTrends(activeCourses),
+    [activeCourses]
+  );
 
   const panelFallback = (
     <div className="paper-panel flex items-center justify-center gap-3 p-8">
@@ -160,12 +182,12 @@ function App() {
     </div>
   );
 
-  const handleReset = () => {
-    if (window.confirm(t('confirm_reset'))) {
+  const handleReset = () => setIsResetConfirmOpen(true);
+  const confirmReset = () => {
       resetData();
       setLocalSearchTerm('');
       clearFilters();
-    }
+      setIsResetConfirmOpen(false);
   };
 
   const handleToggleAll = (checked: boolean) => {
@@ -176,6 +198,30 @@ function App() {
     }
 
     setAllActive(checked);
+  };
+
+  const handleOpenShareReport = () => {
+    shareReturnFocusRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    setIsShareModalOpen(true);
+  };
+
+  const handleOpenExperiment = () => {
+    if (!isExperimentActive) startExperiment();
+    setActiveSection('analysis');
+    setActiveAnalysisView('experiment');
+  };
+
+  const handleDiscardExperiment = () => {
+    discardExperiment();
+    setActiveAnalysisView('overview');
+  };
+
+  const handleCommitExperiment = () => {
+    commitExperiment();
+    setActiveAnalysisView('overview');
   };
 
   const renderMetaCard = (
@@ -201,48 +247,19 @@ function App() {
     </div>
   );
 
-  const renderSummaryItem = (
-    label: string,
-    value: string,
-    detail?: string,
-    emphasis?: 'primary' | 'accent'
-  ) => (
-    <div className="summary-item">
-      <div className="min-w-0">
-        <div className="summary-item-label">{label}</div>
-        {detail ? <div className="type-body-sm mt-1">{detail}</div> : null}
-      </div>
-      <div
-        className={`summary-item-value ${
-          emphasis === 'primary'
-            ? 'text-primary'
-            : emphasis === 'accent'
-              ? 'text-[hsl(var(--color-accent))]'
-              : 'text-main'
-        }`}
-      >
-        {value}
-      </div>
-    </div>
-  );
-
   const renderOverview = () => (
     <section className="space-y-4 sm:space-y-5">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="section-kicker">{t('nav_overview')}</div>
           <h2 className="type-page-title text-main">{t('overview_title')}</h2>
-          <p className="type-body-sm mt-1.5">
-            {language === 'zh'
-              ? '主绩点、关键摘要和下一步操作都压进了首屏，不再靠大标题撑场。'
-              : 'The first screen is now driven by GPA, summary metrics, and the next useful action.'}
-          </p>
+          <p className="type-body-sm mt-1.5">{t('overview_intro')}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <span className="status-chip">{currentMethodLabel}</span>
           <span className="status-chip">
-            {isSandboxMode ? t('sandbox_mode') : t('overview_state_live')}
+            {isExperimentActive ? t('experiment_status') : t('overview_state_live')}
           </span>
           <span className="status-chip">
             {semesters.length} {t('overview_terms')}
@@ -257,19 +274,15 @@ function App() {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
                   <div className="section-kicker text-primary">
-                    {language === 'zh' ? '当前 GPA' : 'Current GPA'}
+                    {t('overview_current_gpa')}
                   </div>
                   <div className="hero-value mt-3 text-main">
                     {visibleStats.weightedGpa.toFixed(3)}
                   </div>
                   <p className="type-body-sm mt-3 max-w-xl">
-                    {isSandboxMode
-                      ? language === 'zh'
-                        ? '当前正在沙盒演算，所有试算结果与正式数据隔离，可放心比较方案。'
-                        : 'Sandbox simulation is active, so experiments stay isolated from your saved record.'
-                      : language === 'zh'
-                        ? '本地自动保存已启用，先录入课程，再回到分析区查看结构变化。'
-                        : 'Local autosave is active. Record courses first, then come back to analysis for structure changes.'}
+                    {isExperimentActive
+                      ? t('overview_experiment_isolated')
+                      : t('overview_autosave_hint')}
                   </p>
                 </div>
 
@@ -277,7 +290,7 @@ function App() {
                   {renderMetaCard(
                     t('credits'),
                     visibleStats.totalCredits.toFixed(1),
-                    language === 'zh' ? '累计学分' : 'Total credits'
+                    t('total_credits_detail')
                   )}
                   {renderMetaCard(
                     t('avg_score'),
@@ -287,21 +300,21 @@ function App() {
                   {renderMetaCard(
                     t('overview_active'),
                     `${activeCourses.length} / ${courses.length}`,
-                    language === 'zh' ? '当前计入' : 'Included now'
+                    t('included_now_detail')
                   )}
                 </div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {renderMetaCard(
-                  language === 'zh' ? '必修 GPA' : 'Compulsory GPA',
+                  t('compulsory_gpa'),
                   visibleStats.compulsoryWeightedGpa.toFixed(3),
                   t('compulsory_desc', visibleStats.compulsoryCredits)
                 )}
                 {renderMetaCard(
                   t('overview_terms'),
                   String(semesters.length),
-                  language === 'zh' ? '已记录学期' : 'Recorded terms'
+                  t('recorded_terms_detail')
                 )}
                 {renderMetaCard(
                   t('course_count'),
@@ -338,41 +351,6 @@ function App() {
             </div>
           </div>
 
-          <div className="summary-strip">
-            {renderSummaryItem(
-              language === 'zh' ? '学分' : 'Credits',
-              visibleStats.totalCredits.toFixed(1),
-              language === 'zh' ? '当前累计' : 'Accumulated'
-            )}
-            {renderSummaryItem(
-              language === 'zh' ? '平均分' : 'Average',
-              visibleStats.weightedAverageScore.toFixed(2),
-              t('hundred_scale')
-            )}
-            {renderSummaryItem(
-              language === 'zh' ? '计入课程' : 'Included',
-              `${activeCourses.length} / ${courses.length}`,
-              language === 'zh' ? '当前纳入 GPA' : 'Affecting GPA now'
-            )}
-            {renderSummaryItem(
-              language === 'zh' ? 'GPA 制度' : 'Method',
-              currentMethodLabel,
-              language === 'zh' ? '当前换算标准' : 'Current GPA scale',
-              'primary'
-            )}
-            {renderSummaryItem(
-              language === 'zh' ? '数据状态' : 'Status',
-              isSandboxMode
-                ? language === 'zh'
-                  ? '沙盒演算'
-                  : 'Sandbox'
-                : language === 'zh'
-                  ? '已保存'
-                  : 'Saved',
-              language === 'zh' ? '本地自动存储' : 'Local autosave',
-              isSandboxMode ? 'accent' : undefined
-            )}
-          </div>
         </div>
       </article>
 
@@ -382,42 +360,32 @@ function App() {
           value={visibleStats.compulsoryWeightedGpa.toFixed(3)}
           icon={<Book size={20} />}
           description={t('compulsory_desc', visibleStats.compulsoryCredits)}
-          comparisonValue={originalStats?.compulsoryWeightedGpa.toFixed(3)}
-          isSandbox={analysisInSimulation || isSandboxMode}
+          comparisonValue={baselineStats?.compulsoryWeightedGpa.toFixed(3)}
+          isExperiment={isExperimentActive}
         />
         <StatsCard
           title={t('avg_score')}
           value={visibleStats.weightedAverageScore.toFixed(2)}
           icon={<Percent size={20} />}
           description={t('hundred_scale')}
-          comparisonValue={originalStats?.weightedAverageScore.toFixed(2)}
-          isSandbox={analysisInSimulation || isSandboxMode}
+          comparisonValue={baselineStats?.weightedAverageScore.toFixed(2)}
+          isExperiment={isExperimentActive}
         />
         <StatsCard
           title={t('overview_terms')}
           value={semesters.length}
           icon={<CalendarRange size={20} />}
           description={
-            language === 'zh'
-              ? '按已记录学期统计'
-              : 'Calculated from recorded terms'
+            t('terms_recorded_detail')
           }
         />
         <StatsCard
           title={t('course_count')}
-          value={
-            analysisInSimulation
-              ? simulatedStats.courseCount
-              : activeCourses.length
-          }
+          value={activeCourses.length}
           icon={<GraduationCap size={20} />}
-          description={
-            analysisInSimulation
-              ? t('selected_total', simulatedStats.courseCount)
-              : t('selected_total', courses.length)
-          }
-          comparisonValue={originalStats?.courseCount}
-          isSandbox={analysisInSimulation || isSandboxMode}
+          description={t('selected_total', courses.length)}
+          comparisonValue={baselineStats?.courseCount}
+          isExperiment={isExperimentActive}
         />
       </div>
     </section>
@@ -432,9 +400,7 @@ function App() {
             {t('course_workspace_title')}
           </h2>
           <p className="type-body-sm mt-1.5">
-            {language === 'zh'
-              ? '搜索、筛选与课程总表压成一个真正的操作台，首屏优先给你可扫描的信息。'
-              : 'Search, filters, and the ledger now behave like one operational workspace.'}
+            {t('course_workspace_hint')}
           </p>
         </div>
 
@@ -445,9 +411,7 @@ function App() {
               : t('filter_state_all')}
           </span>
           <span className="status-chip">
-            {language === 'zh'
-              ? `计入 ${activeCourses.length} 门`
-              : `${activeCourses.length} active`}
+            {t('courses_included', activeCourses.length)}
           </span>
           <button
             type="button"
@@ -471,7 +435,7 @@ function App() {
         searchTerm={localSearchTerm}
         onSearchChange={setLocalSearchTerm}
         semesterOptions={semesterOptions}
-        isSandboxMode={isSandboxMode}
+        isExperimentActive={isExperimentActive}
         isFiltered={hasActiveFilters}
         onClearFilters={() => {
           clearFilters();
@@ -498,15 +462,13 @@ function App() {
   );
 
   const renderAnalysis = () => (
-    <section className="space-y-4 sm:space-y-5">
+    <section className="space-y-4 sm:space-y-5" aria-label={t('analysis_data_label')}>
       <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="section-kicker">{t('nav_analysis')}</div>
           <h2 className="type-page-title text-main">{t('analysis_title')}</h2>
           <p className="type-body-sm mt-1.5">
-            {language === 'zh'
-              ? '切换器退回为真正 tabs，图表和工具面板重新回到主次清楚的控制台结构。'
-              : 'The view switcher is now a true tab bar, with charts and tools back in a clear primary-secondary layout.'}
+            {t('analysis_workspace_hint')}
           </p>
         </div>
 
@@ -518,9 +480,7 @@ function App() {
               : t('filter_state_all')}
           </span>
           <span className="status-chip">
-            {language === 'zh'
-              ? `${activeCourses.length} 门计入`
-              : `${activeCourses.length} active`}
+            {t('courses_included', activeCourses.length)}
           </span>
         </div>
       </div>
@@ -532,12 +492,24 @@ function App() {
         />
       ) : null}
 
-      {activeAnalysisView === 'simulation' ? (
+      <div
+        role="tabpanel"
+        id={`analysis-panel-${activeAnalysisView}`}
+        aria-labelledby={`analysis-tab-${activeAnalysisView}`}
+        tabIndex={0}
+      >
+      {activeAnalysisView === 'experiment' ? (
         <Suspense fallback={panelFallback}>
-          <GpaSimulationMode
-            courses={courses}
-            method={method}
-            onSimulatedStats={setSimulatedStats}
+          <ExperimentLab
+            experiment={experiment}
+            maximumGpa={maximumGpa}
+            onStart={startExperiment}
+            onUpdateCourseScore={updateCourseScore}
+            onRemoveCourse={removeCourse}
+            onRestoreCourse={restoreExperimentCourse}
+            onReset={resetExperiment}
+            onDiscard={handleDiscardExperiment}
+            onCommit={handleCommitExperiment}
           />
         </Suspense>
       ) : activeAnalysisView === 'radar' ? (
@@ -546,62 +518,74 @@ function App() {
         </Suspense>
       ) : activeAnalysisView === 'advisor' ? (
         <Suspense fallback={panelFallback}>
-          <AIAdvisorPanel courses={courses} gpaStats={stats} targetGPA={3.5} />
+          <AIAdvisorPanel courses={activeCourses} gpaStats={stats} targetGPA={3.8} maximumGpa={maximumGpa} />
         </Suspense>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)]">
-          <div className="space-y-4">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div><div className="section-kicker">{t('included_in_gpa_detail')}</div><p className="type-body-sm mt-1">{t('included_metrics_detail', activeCourses.length, courses.length)}</p></div>
+            {isExperimentActive ? <span className="status-chip text-[hsl(var(--color-accent))]">{t('experiment_draft')}</span> : null}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {renderMetaCard(t('weighted_gpa'), stats.weightedGpa.toFixed(3), currentMethodLabel, 'primary')}
+            {renderMetaCard(t('weighted_average'), stats.weightedAverageScore.toFixed(2), t('hundred_scale'))}
+            {renderMetaCard(t('included_credits_detail'), stats.totalCredits.toFixed(1), t('enabled_courses_only'))}
+            {renderMetaCard(t('included_courses_detail'), String(stats.courseCount), t('all_courses_total', courses.length))}
+          </div>
+          {stats.courseCount === 0 ? (
+            <div className="paper-panel p-8 text-center"><h3 className="type-section-title text-main">{t('no_courses_to_analyze')}</h3><p className="type-body-sm mt-2">{t('add_or_include_course')}</p></div>
+          ) : <>
+          <div className="grid gap-4 xl:grid-cols-2">
             <Suspense fallback={panelFallback}>
               <ScoreDistributionChart stats={stats} />
             </Suspense>
             <Suspense fallback={panelFallback}>
-              <ScoreDistributionHistogram stats={stats} />
+              <SemesterTrendChart trends={semesterTrends} />
             </Suspense>
           </div>
-
-          <div className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)]">
+            <Suspense fallback={panelFallback}>
             <TargetGpaCalculator
               currentGpa={stats.weightedGpa}
               currentCredits={stats.totalCredits}
+              maximumGpa={maximumGpa}
             />
+            </Suspense>
+            <Suspense fallback={panelFallback}>
             <GraduationProgress
               courses={activeCourses}
               totalCredits={stats.totalCredits}
             />
+            </Suspense>
           </div>
+          </>}
         </div>
       )}
+      </div>
     </section>
   );
 
   return (
     <Layout
-      isSandboxMode={isSandboxMode}
+      isExperimentActive={isExperimentActive}
       header={
         <>
           <ReloadPrompt />
           <Header
             activeSection={activeSection}
             onSectionChange={setActiveSection}
-            isSandboxMode={isSandboxMode}
+            isExperimentActive={isExperimentActive}
             onReset={handleReset}
             onDataMgmt={() => setIsDataModalOpen(true)}
-            onShare={() => setIsShareModalOpen(true)}
-            onEnterSandbox={enterSandbox}
+            onShare={handleOpenShareReport}
+            onOpenExperiment={handleOpenExperiment}
             method={method}
             setMethod={setMethod}
           />
         </>
       }
-      sandboxBanner={
-        isSandboxMode ? (
-          <SandboxBanner
-            onDiscard={() => exitSandbox(false)}
-            onSave={() => exitSandbox(true)}
-          />
-        ) : undefined
-      }
-    >
+      >
+      <ConfirmDialog open={isResetConfirmOpen} title={t('confirm_reset')} description={t('reset_data_detail')} confirmLabel={t('reset')} cancelLabel={t('experiment_cancel')} onConfirm={confirmReset} onCancel={() => setIsResetConfirmOpen(false)} />
       {editingCourse ? (
         <EditCourseModal
           course={editingCourse}
@@ -630,6 +614,12 @@ function App() {
           onClose={() => setIsShareModalOpen(false)}
           stats={stats}
           courses={activeCourses}
+          calculationMethodLabel={currentMethodLabel}
+          isExperiment={isExperimentActive}
+          totalCourseCount={courses.length}
+          filteredCourseCount={filteredCourses.length}
+          hasActiveFilters={hasActiveFilters}
+          returnFocusRef={shareReturnFocusRef}
         />
       </Suspense>
 
@@ -642,12 +632,17 @@ function App() {
             onClick={() => setIsCourseEntryOpen(false)}
           />
 
-          <aside className="course-drawer absolute right-0 top-0 h-full w-full max-w-[28rem] border-l border-primary/10 p-5 sm:p-6">
+          <aside
+            className="course-drawer absolute right-0 top-0 h-full w-full max-w-[28rem] border-l border-primary/10 p-5 sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="course-entry-title"
+          >
             <div className="flex h-full flex-col gap-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="section-kicker">{t('course_entry')}</div>
-                  <h3 className="type-section-title mt-2 text-main">
+                  <h3 id="course-entry-title" className="type-section-title mt-2 text-main">
                     {t('new_course')}
                   </h3>
                   <p className="type-body-sm mt-2">{t('course_entry_desc')}</p>

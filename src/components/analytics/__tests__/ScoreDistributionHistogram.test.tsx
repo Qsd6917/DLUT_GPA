@@ -16,7 +16,7 @@ const mockStats = {
   weightedAverageScore: 85,
   courseCount: 5,
   scoreDistribution: [
-    { name: '90-100', value: 2 },
+    { name: '90-100', value: 2, credits: 10, percentage: 40 },
     { name: '80-89', value: 1 },
     { name: '70-79', value: 1 },
     { name: '60-69', value: 0 },
@@ -61,10 +61,19 @@ describe('ScoreDistributionHistogram', () => {
     );
 
     // Check if all score ranges are displayed in the legend
-    expect(screen.getByText('90-100')).toBeInTheDocument();
-    expect(screen.getByText('80-89')).toBeInTheDocument();
-    expect(screen.getByText('70-79')).toBeInTheDocument();
-    expect(screen.getByText('60-69')).toBeInTheDocument();
-    expect(screen.getByText('<60')).toBeInTheDocument();
+    for (const range of ['90-100', '80-89', '70-79', '60-69', '<60']) {
+      expect(screen.getAllByText(range).length).toBeGreaterThan(0);
+    }
+  });
+
+  it('shows course count, credits and share with the score range', () => {
+    render(
+      <ThemeProvider><LanguageProvider><ScoreDistributionHistogram stats={mockStats} /></LanguageProvider></ThemeProvider>
+    );
+    expect(screen.getByText('2 门 · 10.0 学分 · 40.0%')).toBeInTheDocument();
+  });
+  it('exposes a screen-reader table labelled with course share', () => {
+    render(<ThemeProvider><LanguageProvider><ScoreDistributionHistogram stats={mockStats} /></LanguageProvider></ThemeProvider>);
+    expect(screen.getByRole('table', { name: '成绩分布数据' })).toHaveTextContent('课程占比');
   });
 });

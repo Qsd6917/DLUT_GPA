@@ -272,12 +272,29 @@ function generateLearningStrategies(studentProfile: StudentProfile, course: Cour
  * Main AI Advisor service function
  */
 export function getAIRecommendations(studentProfile: StudentProfile): AIDashboardData {
+  const evidenceCourses = studentProfile.courses.filter(
+    course => course.isActive && course.credits > 0
+  );
+  if (evidenceCourses.length === 0) {
+    return {
+      recommendations: [],
+      learningStrategies: [],
+      academicRisks: [],
+      milestonePredictions: {
+        targetGpaDate: null,
+        graduationProjection: null,
+      },
+      skillGapAnalysis: [],
+    };
+  }
+
   // Analyze subject performance
-  const subjectPerformance = analyzeSubjectPerformance(studentProfile.courses);
+  const subjectPerformance = analyzeSubjectPerformance(evidenceCourses);
   const strengthsAndWeaknesses = identifyStrengthsAndWeaknesses(subjectPerformance);
 
   const derivedProfile: StudentProfile = {
     ...studentProfile,
+    courses: evidenceCourses,
     strengths: strengthsAndWeaknesses.strengths,
     weaknesses: strengthsAndWeaknesses.weaknesses,
   };

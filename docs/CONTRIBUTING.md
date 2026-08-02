@@ -77,7 +77,7 @@ npm run dev
 ### 运行测试
 ```bash
 # 运行所有测试
-npm run test
+npm run test:run
 
 # 运行测试并查看覆盖率
 npm run test:coverage
@@ -85,11 +85,13 @@ npm run test:coverage
 # 运行质量基线
 npm run type-check
 npm run lint
+npm run build
 ```
 
 ### 测试原则
 - 为新增功能编写单元测试
-- 确保测试覆盖率达到 80% 以上
+- 关键逻辑优先覆盖：课程持久化、GPA 服务、目标 GPA 计算、报告导出与焦点行为
+- 当前不使用任意全局 80% 阈值阻断 CI；覆盖率基线记录在 `docs/QUALITY_BASELINE.md`
 - 使用 Vitest 和 React Testing Library
 - 优先编写行为测试而不是快照测试
 
@@ -160,7 +162,7 @@ npm run lint
 - **语言**: TypeScript
 - **样式**: TailwindCSS
 - **构建工具**: Vite
-- **测试**: Jest, React Testing Library
+- **测试**: Vitest, React Testing Library
 - **图标**: Lucide React
 - **图表**: Recharts
 

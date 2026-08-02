@@ -44,7 +44,7 @@ export interface AIDashboardData {
   academicRisks: string[]; // Potential risks to academic success
   milestonePredictions: {
     targetGpaDate: Date | null; // Estimated date to reach target GPA
-    graduationProjection: Date; // Projected graduation date
+    graduationProjection: Date | null; // No projection without course evidence
   };
   skillGapAnalysis: {
     skill: string;

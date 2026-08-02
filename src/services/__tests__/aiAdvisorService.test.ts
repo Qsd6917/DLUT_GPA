@@ -90,4 +90,17 @@ describe('getAIRecommendations', () => {
       expect(Number.isFinite(recommendation.suggestedStudyTime)).toBe(true);
     }
   });
+
+  it('does not fabricate personalized advice without active course evidence', () => {
+    const profile = createStudentProfile();
+    profile.courses = [];
+    profile.gpaStats = { ...mockGpaStats, totalCredits: 0, courseCount: 0 };
+
+    expect(getAIRecommendations(profile)).toMatchObject({
+      recommendations: [],
+      learningStrategies: [],
+      academicRisks: [],
+      skillGapAnalysis: [],
+    });
+  });
 });

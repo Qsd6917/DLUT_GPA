@@ -1,4 +1,89 @@
-import { CalculationMethod, Course, GpaStats } from '../types';
+import {
+  CalculationMethod,
+  Course,
+  GpaStats,
+  TargetGpaInput,
+  TargetGpaResult,
+  SemesterTrend,
+} from '../types';
+
+export function calculateTargetGpa(input: TargetGpaInput): TargetGpaResult {
+  const numericFields = Object.entries(input) as [keyof TargetGpaInput, number][];
+  const missing = numericFields.find(([, value]) => !Number.isFinite(value));
+  if (missing) {
+    return { status: 'invalid', field: missing[0], reason: 'required' };
+  }
+  if (input.futureCredits <= 0) {
+    return { status: 'invalid', field: 'futureCredits', reason: 'positive' };
+  }
+  if (input.currentCredits < 0) {
+    return { status: 'invalid', field: 'currentCredits', reason: 'positive' };
+  }
+  if (input.maximumGpa <= 0) {
+    return { status: 'invalid', field: 'maximumGpa', reason: 'positive' };
+  }
+  if (input.currentGpa < 0 || input.currentGpa > input.maximumGpa) {
+    return { status: 'invalid', field: 'currentGpa', reason: 'out-of-range' };
+  }
+  if (input.targetGpa < 0 || input.targetGpa > input.maximumGpa) {
+    return { status: 'invalid', field: 'targetGpa', reason: 'out-of-range' };
+  }
+  if (
+    input.expectedFutureGpa < 0 ||
+    input.expectedFutureGpa > input.maximumGpa
+  ) {
+    return {
+      status: 'invalid',
+      field: 'expectedFutureGpa',
+      reason: 'out-of-range',
+    };
+  }
+
+  const combinedCredits = input.currentCredits + input.futureCredits;
+  const requiredFutureGpa =
+    (input.targetGpa * combinedCredits -
+      input.currentGpa * input.currentCredits) /
+    input.futureCredits;
+  const projectedGpa =
+    (input.currentGpa * input.currentCredits +
+      input.expectedFutureGpa * input.futureCredits) /
+    combinedCredits;
+  if (input.currentGpa >= input.targetGpa) {
+    return { status: 'reachable', outlook: 'achieved', requiredFutureGpa: 0, projectedGpa };
+  }
+  const shared = { requiredFutureGpa: Math.max(0, requiredFutureGpa), projectedGpa };
+
+  if (requiredFutureGpa > input.maximumGpa) {
+    return { status: 'unreachable', ...shared };
+  }
+  return {
+    status: 'reachable',
+    outlook:
+      input.expectedFutureGpa + Number.EPSILON >= requiredFutureGpa
+        ? 'on-track'
+        : 'needs-higher',
+    ...shared,
+  };
+}
+
+export function calculateSemesterTrends(courses: Course[]): SemesterTrend[] {
+  const groups = new Map<string, Course[]>();
+  courses
+    .filter(course => course.isActive && course.credits > 0)
+    .forEach(course => groups.set(course.semester, [...(groups.get(course.semester) ?? []), course]));
+  return [...groups.entries()]
+    .sort(([left], [right]) => left.localeCompare(right, undefined, { numeric: true }))
+    .map(([semester, items]) => {
+      const credits = items.reduce((sum, course) => sum + course.credits, 0);
+      return {
+        semester,
+        gpa: items.reduce((sum, course) => sum + course.gpa * course.credits, 0) / credits,
+        averageScore: items.reduce((sum, course) => sum + course.score * course.credits, 0) / credits,
+        credits,
+        courseCount: items.length,
+      };
+    });
+}
 
 export function calculateCourseGpa(score: number, method: CalculationMethod): number {
   if (score < 60) return 0;
@@ -54,19 +139,22 @@ export function calculateStats(courses: Course[]): GpaStats {
 
   // Score Distribution
   const distribution = [
-    { name: '90-100', value: 0 },
-    { name: '80-89', value: 0 },
-    { name: '70-79', value: 0 },
-    { name: '60-69', value: 0 },
-    { name: '<60', value: 0 },
+    { name: '90-100', value: 0, credits: 0, percentage: 0 },
+    { name: '80-89', value: 0, credits: 0, percentage: 0 },
+    { name: '70-79', value: 0, credits: 0, percentage: 0 },
+    { name: '60-69', value: 0, credits: 0, percentage: 0 },
+    { name: '<60', value: 0, credits: 0, percentage: 0 },
   ];
 
   activeCourses.forEach(c => {
-    if (c.score >= 90) distribution[0].value++;
-    else if (c.score >= 80) distribution[1].value++;
-    else if (c.score >= 70) distribution[2].value++;
-    else if (c.score >= 60) distribution[3].value++;
-    else distribution[4].value++;
+    const bucket = c.score >= 90 ? 0 : c.score >= 80 ? 1 : c.score >= 70 ? 2 : c.score >= 60 ? 3 : 4;
+    distribution[bucket].value++;
+    distribution[bucket].credits += c.credits;
+  });
+  distribution.forEach(bucket => {
+    bucket.percentage = activeCourses.length > 0
+      ? (bucket.value / activeCourses.length) * 100
+      : 0;
   });
 
   return {

@@ -15,7 +15,7 @@ interface CourseFilterBarProps {
   searchTerm: string;
   onSearchChange: (searchTerm: string) => void;
   semesterOptions: string[];
-  isSandboxMode: boolean;
+  isExperimentActive: boolean;
   isFiltered: boolean;
   onClearFilters: () => void;
 }
@@ -34,7 +34,7 @@ export const CourseFilterBar: React.FC<CourseFilterBarProps> = ({
   searchTerm,
   onSearchChange,
   semesterOptions,
-  isSandboxMode,
+  isExperimentActive,
   isFiltered,
   onClearFilters,
 }) => {
@@ -75,7 +75,7 @@ export const CourseFilterBar: React.FC<CourseFilterBarProps> = ({
           `type_${filterType === '必修' ? 'compulsory' : filterType === '选修' ? 'elective' : 'optional'}`
         );
 
-  const buttonTone = isSandboxMode
+  const buttonTone = isExperimentActive
     ? 'border-amber-400/30 text-[hsl(var(--color-accent))]'
     : 'border-primary/10 text-main';
   const baseButton = `inline-flex h-11 items-center gap-2 rounded-[0.82rem] border bg-surface px-3.5 text-sm font-semibold transition-colors hover:border-primary/20 hover:text-primary dark:bg-[hsl(var(--surface-2))] ${buttonTone}`;

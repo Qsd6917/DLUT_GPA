@@ -3,15 +3,16 @@
 ## 目录
 1. [项目概述](#项目概述)
 2. [快速开始](#快速开始)
-3. [功能介绍](#功能介绍)
-4. [架构说明](#架构说明)
-5. [性能优化](#性能优化)
-6. [开发指南](#开发指南)
-7. [API 说明](#api-说明)
-8. [部署指南](#部署指南)
-9. [贡献指南](#贡献指南)
-10. [自我改进记忆](#自我改进记忆)
-11. [许可证](#许可证)
+3. [默认课程数据](#默认课程数据)
+4. [功能介绍](#功能介绍)
+5. [架构说明](#架构说明)
+6. [性能优化](#性能优化)
+7. [开发指南](#开发指南)
+8. [API 说明](#api-说明)
+9. [部署指南](#部署指南)
+10. [贡献指南](#贡献指南)
+11. [自我改进记忆](#自我改进记忆)
+12. [许可证](#许可证)
 
 ## 项目概述
 
@@ -30,8 +31,8 @@ DLUT GPA 计算器是专门为大连理工大学学生设计的GPA计算和分�
 - 多种GPA计算方式（加权平均、百分制转绩点等）
 - 课程管理和成绩录入
 - 数据可视化（图表分析）
-- AI学术顾问功能
-- 沙盒模式（数据实验）
+- 本地规则驱动的智能建议
+- 实验室（数据实验）
 - 无障碍访问支持（符合WCAG 2.1 AA标准）
 - 国际化支持（中英双语）
 
@@ -62,6 +63,17 @@ npm run build
 npm run preview
 ```
 
+## 默认课程数据
+
+课程控制台的默认数据由 `src/utils/constants.ts` 中的 `SAMPLE_COURSES` 提供。当前默认数据已根据 2026-07-04 中文成绩单同步，覆盖 2023-2024-1 学期至 2025-2026-2 学期，共 83 门课程。
+
+成绩单汇总信息：
+- 已获得学分：149.50
+- 平均学分绩点：3.81
+- 加权平均成绩：87.4
+
+项目保留现有 GPA 计算规则：成绩为 `通过` 或 `0` 的课程会显示在课程控制台中，但默认不计入 GPA 和成绩均值统计。2026-07-04 中文成绩单已固定为新的初始数据集，使用独立的 `dlut_gpa_courses_transcript_20260704` 本地存储键，旧版课程缓存不会覆盖它；点击应用中的“重置”也会回到这份成绩单数据。
+
 ## 功能介绍
 
 ### 1. GPA计算
@@ -78,25 +90,25 @@ npm run preview
 
 ### 3. 数据分析
 - **成绩分布图表**：可视化展示成绩分布
-- **GPA趋势分析**：展示GPA变化趋势
+- **学期趋势分析**：展示按学期计算的 GPA、均分、学分和课程数
 - **目标GPA计算器**：预测达到目标GPA所需的策略
 - **毕业进度追踪**：监控学分完成情况
 
-### 4. AI学术顾问
-- **个性化推荐**：基于学习成绩推荐适合的课程
-- **学习策略建议**：提供个性化的学习策略
-- **学术风险预警**：识别潜在的学术风险
-- **技能差距分析**：分析技能短板并提供改进方案
+### 4. 智能建议
+- **本地规则分析**：基于当前计入 GPA 的课程生成建议
+- **学习策略建议**：提供可追溯到成绩数据的学习策略
+- **学术风险提示**：识别当前成绩结构中的潜在风险
+- **空数据保护**：无可分析课程时不生成伪个性化结论
 
 ### 5. 数据管理
 - **数据导入/导出**：支持JSON格式数据导入导出
-- **沙盒模式**：在不影响原始数据的情况下进行实验
-- **数据分享**：生成可分享的成绩报告
+- **实验室**：在不影响正式数据的情况下进行实验
+- **数据分享**：生成口径与当前页面一致的成绩报告，并支持 PNG 导出
 
 ### 6. 可视化功能
 - **雷达图**：多维度展示学术能力
 - **直方图**：成绩分布可视化
-- **趋势图**：GPA和成绩趋势展示
+- **趋势图**：按学期展示 GPA 和成绩趋势
 
 ## 架构说明
 
@@ -129,7 +141,7 @@ src/
 #### useCourseData Hook
 - 管理课程数据的增删改查
 - 提供数据持久化功能
-- 支持沙盒模式操作
+- 支持实验草稿操作
 
 #### useCourseFilter Hook
 - 实现课程筛选和搜索功能
@@ -137,15 +149,16 @@ src/
 - 管理筛选条件状态
 
 #### AIAdvisorPanel
-- 提供本地规则驱动的学术分析
-- 实现个性化推荐算法
+- 提供本地规则驱动的学业建议
+- 不发起外部 AI 请求，不上传个人成绩数据
 
 ## 性能优化
 
 ### 代码分割
 - 使用 React.lazy 实现组件懒加载
-- 按需加载大型功能模块（如AI顾问面板）
-- 减少初始包大小
+- 按需加载数据管理、分享报告、雷达图、实验室、智能建议、目标 GPA、毕业进度、学期趋势
+- `xlsx`、`html2canvas` 和大型 Recharts 图表代码不进入主入口
+- 当前包体基线记录在 [QUALITY_BASELINE.md](./QUALITY_BASELINE.md)
 
 ### 防抖处理
 - 在搜索功能中使用防抖算法
@@ -253,6 +266,12 @@ interface GpaStats {
   totalCredits: number;         // 总学分
   compulsoryCredits: number;    // 必修课学分
   courseCount: number;          // 课程总数
+  scoreDistribution: {
+    name: string;
+    value: number;
+    credits?: number;
+    percentage?: number;
+  }[];
 }
 ```
 
@@ -265,15 +284,19 @@ const {
   hydrated,          // 数据加载状态
   method,            // GPA计算方法
   setMethod,         // 设置计算方法
-  isSandboxMode,     // 沙盒模式状态
+  experiment,        // 当前实验会话（正式基线 + 内存草稿）
+  isExperimentActive,// 是否正在实验
   addCourse,         // 添加课程
   removeCourse,      // 删除课程
   toggleCourse,      // 切换课程激活状态
   saveCourse,        // 保存课程
   importData,        // 导入数据
   resetData,         // 重置数据
-  enterSandbox,      // 进入沙盒模式
-  exitSandbox,       // 退出沙盒模式
+  startExperiment,   // 开始或重入实验
+  resetExperiment,   // 恢复本次实验基线
+  discardExperiment, // 放弃实验草稿
+  commitExperiment,  // 应用实验草稿并持久化
+  updateCourseScore, // 更新工作数据中的课程成绩
   setAllActive       // 批量设置激活状态
 } = useCourseData();
 ```
@@ -293,8 +316,10 @@ const {
   filteredCourses,   // 过滤后的课程
   activeCourses,     // 激活的课程
   stats,             // 统计数据
-  originalStats      // 原始统计数据
-} = useCourseFilter(courses, originalCourses, isSandboxMode);
+  baselineStats,     // 正式基线统计数据
+  clearFilters,      // 清除筛选
+  hasActiveFilters   // 是否存在筛选
+} = useCourseFilter(courses, baselineCourses, isExperimentActive);
 ```
 
 ## 部署指南
@@ -355,6 +380,8 @@ npm run lint
 npm run test:run
 npm run build
 ```
+
+CI 位于 `.github/workflows/ci.yml`，使用 Node 20 和 `npm ci` 复现上述质量门。覆盖率基线可通过 `npm run test:coverage` 生成，当前基线记录在 [QUALITY_BASELINE.md](./QUALITY_BASELINE.md)。
 
 ### 报告问题
 

@@ -28,6 +28,11 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({
     () => ['#10B981', primaryColor, '#F59E0B', '#EF4444', '#6B7280'],
     [primaryColor]
   );
+  const DistributionTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: GpaStats['scoreDistribution'][number] }> }) => {
+    if (!active || !payload?.length) return null;
+    const item = payload[0].payload;
+    return <div className="rounded-xl border border-primary/10 bg-surface p-3 text-sm shadow-lg"><strong>{item.name}</strong><div>{language === 'zh' ? '课程数' : 'Courses'}: {item.value}</div><div>{language === 'zh' ? '学分' : 'Credits'}: {(item.credits ?? 0).toFixed(1)}</div><div>{language === 'zh' ? '课程占比' : 'Course share'}: {(item.percentage ?? 0).toFixed(1)}%</div></div>;
+  };
 
   return (
     <div className="paper-panel p-5 sm:p-6">
@@ -68,6 +73,7 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({
                 ))}
               </Pie>
               <RechartsTooltip
+                content={<DistributionTooltip />}
                 contentStyle={{
                   borderRadius: '12px',
                   border: 'none',
@@ -127,11 +133,14 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({
             ></span>
             <span className="text-muted">{entry.name}</span>
             <span className="num-inline ml-0.5 text-muted/70">
-              ({entry.value})
+              {language === 'zh'
+                ? `${entry.value}门 · ${(entry.credits ?? 0).toFixed(1)}学分 · ${(entry.percentage ?? 0).toFixed(1)}%`
+                : `${entry.value} · ${(entry.credits ?? 0).toFixed(1)} cr · ${(entry.percentage ?? 0).toFixed(1)}%`}
             </span>
           </div>
         ))}
       </div>
+      <table className="sr-only" aria-label={language === 'zh' ? '成绩分布数据' : 'Score distribution data'}><thead><tr><th>{language === 'zh' ? '分数区间' : 'Score range'}</th><th>{language === 'zh' ? '课程数' : 'Courses'}</th><th>{language === 'zh' ? '学分' : 'Credits'}</th><th>{language === 'zh' ? '课程占比' : 'Course share'}</th></tr></thead><tbody>{stats.scoreDistribution.map(entry => <tr key={entry.name}><td>{entry.name}</td><td>{entry.value}</td><td>{(entry.credits ?? 0).toFixed(1)}</td><td>{(entry.percentage ?? 0).toFixed(1)}%</td></tr>)}</tbody></table>
     </div>
   );
 };

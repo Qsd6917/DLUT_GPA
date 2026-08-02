@@ -2,7 +2,7 @@ import React from 'react';
 import { Brain, Orbit, Sigma, Sparkles } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
 
-type AnalysisView = 'overview' | 'simulation' | 'radar' | 'advisor';
+export type AnalysisView = 'overview' | 'experiment' | 'radar' | 'advisor';
 
 interface DashboardModeToggleBarProps {
   activeView: AnalysisView;
@@ -13,7 +13,7 @@ export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({
   activeView,
   onChange,
 }) => {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
 
   const items: Array<{
     id: AnalysisView;
@@ -24,35 +24,45 @@ export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({
     {
       id: 'overview',
       label: t('analysis_overview'),
-      sublabel: language === 'zh' ? '图表总览' : 'Charts',
+      sublabel: t('analysis_overview_sublabel'),
       icon: Sparkles,
     },
     {
-      id: 'simulation',
-      label: t('analysis_simulation'),
-      sublabel: 'GPA',
+      id: 'experiment',
+      label: t('analysis_experiment'),
+      sublabel: t('analysis_experiment_sublabel'),
       icon: Sigma,
     },
     {
       id: 'radar',
       label: t('analysis_radar'),
-      sublabel: language === 'zh' ? '学业结构' : 'Radar',
+      sublabel: t('analysis_radar_sublabel'),
       icon: Orbit,
     },
     {
       id: 'advisor',
       label: t('analysis_advisor'),
-      sublabel: language === 'zh' ? '辅助建议' : 'Notes',
+      sublabel: t('analysis_advisor_sublabel'),
       icon: Brain,
     },
   ];
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const keys = ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'];
+    if (!keys.includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 :
+      (index + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    onChange(items[next].id);
+    document.getElementById(`analysis-tab-${items[next].id}`)?.focus();
+  };
+
   return (
     <div className="paper-panel p-2">
       <div
-        className="grid gap-2 md:grid-cols-2 xl:grid-cols-4"
+        className="flex min-w-max gap-2 overflow-x-auto pb-1 md:grid md:min-w-0 md:grid-cols-2 md:overflow-visible md:pb-0 xl:grid-cols-4"
         role="tablist"
-        aria-label="Analysis views"
+        aria-label={t('analysis_views')}
       >
         {items.map(item => {
           const Icon = item.icon;
@@ -63,9 +73,13 @@ export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({
               key={item.id}
               type="button"
               role="tab"
+              id={`analysis-tab-${item.id}`}
+              aria-controls={`analysis-panel-${item.id}`}
               aria-selected={active}
+              tabIndex={active ? 0 : -1}
+              onKeyDown={event => handleKeyDown(event, items.indexOf(item))}
               onClick={() => onChange(item.id)}
-              className={`flex items-center justify-between rounded-[0.95rem] border px-4 py-3 text-left transition-colors ${
+              className={`flex min-w-[11rem] shrink-0 items-center justify-between rounded-[0.95rem] border px-4 py-3 text-left transition-colors md:min-w-0 ${
                 active
                   ? 'border-primary bg-primary text-white'
                   : 'border-primary/10 bg-transparent text-main hover:border-primary/18 hover:bg-[hsl(var(--surface-2))] dark:border-white/8'
