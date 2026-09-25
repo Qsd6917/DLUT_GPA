@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { fireEvent, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import App from './App';
 import { renderWithProviders } from '../test/renderWithProviders';
 
@@ -19,6 +20,14 @@ const CURRENT_SEED = 'transcript-20260704-qian-dayu-v2';
 
 const expectBefore = (earlier: HTMLElement, later: HTMLElement) => {
   expect(earlier.compareDocumentPosition(later) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+};
+
+const getActivePlannerPanel = () => {
+  const planner = screen
+    .getByRole('heading', { name: '目标成绩规划' })
+    .closest('section');
+  expect(planner).toBeInTheDocument();
+  return within(planner as HTMLElement).getByRole('tabpanel');
 };
 
 describe('App shell', () => {
@@ -50,6 +59,33 @@ describe('App shell', () => {
     expect(screen.getAllByRole('button', { name: '分析' })).toHaveLength(1);
   });
 
+  test('shows WES as a 4.0 scale on the page and in the shared report', async () => {
+    renderApp();
+
+    fireEvent.click(screen.getByRole('button', { name: 'DLUT 5.0' }));
+    const methodOptions = within(
+      screen.getByRole('listbox', { name: 'GPA 算法' })
+    ).getAllByRole('option');
+    const wesOption = methodOptions.find(option =>
+      option.textContent?.startsWith('WES ')
+    );
+    expect(wesOption).toBeDefined();
+    fireEvent.click(wesOption as HTMLElement);
+
+    const visibleWesLabels = screen.getAllByText(/^WES /);
+    expect(visibleWesLabels.length).toBeGreaterThanOrEqual(2);
+    visibleWesLabels.forEach(label => {
+      expect(label).toHaveTextContent(/^WES 4\.0$/);
+    });
+    expect(screen.queryAllByText('WES 5.0')).toHaveLength(0);
+
+    fireEvent.click(screen.getByRole('button', { name: '分享报告' }));
+
+    const report = await screen.findByRole('dialog', { name: '成绩报告' });
+    expect(within(report).getAllByText('WES 4.0').length).toBeGreaterThan(0);
+    expect(within(report).queryAllByText('WES 5.0')).toHaveLength(0);
+  });
+
   test('renders core metrics before distribution, trend, and target GPA sections in DOM order', async () => {
     renderApp();
     fireEvent.click(screen.getByRole('button', { name: '分析' }));
@@ -62,7 +98,7 @@ describe('App shell', () => {
 
     const distribution = await within(analysis).findByRole('heading', { name: '成绩分布' });
     const trend = await within(analysis).findByRole('heading', { name: '学期趋势' });
-    const targetGpa = await within(analysis).findByRole('heading', { name: '目标 GPA 计算器' });
+    const targetGpa = await within(analysis).findByRole('heading', { name: '目标成绩规划' });
 
     expectBefore(scopeHeading, weightedGpa);
     expectBefore(weightedGpa, distribution);
@@ -78,7 +114,42 @@ describe('App shell', () => {
 
     const analysis = screen.getByRole('region', { name: '学业数据分析' });
     expect(within(analysis).getByRole('tab', { name: /成绩实验/ })).toHaveAttribute('aria-selected', 'true');
-    expect(await within(analysis).findByRole('heading', { name: '成绩实验室' })).toBeInTheDocument();
+    expect(
+      await within(analysis).findByRole(
+        'heading',
+        { name: '成绩实验室' },
+        { timeout: 5000 }
+      )
+    ).toBeInTheDocument();
+    const overviewPanel = document.getElementById('analysis-panel-overview');
+    const experimentPanel = document.getElementById(
+      'analysis-panel-experiment'
+    );
+    expect(overviewPanel).toBeInTheDocument();
+    expect(experimentPanel).toBeInTheDocument();
+    expect(
+      within(overviewPanel as HTMLElement).queryAllByRole('heading', {
+        name: '目标成绩规划',
+        hidden: true,
+      })
+    ).toHaveLength(0);
+    expect(
+      within(overviewPanel as HTMLElement).queryAllByRole('heading', {
+        name: '成绩分布',
+        hidden: true,
+      })
+    ).toHaveLength(0);
+    expect(
+      within(overviewPanel as HTMLElement).queryAllByRole('heading', {
+        name: '学期趋势',
+        hidden: true,
+      })
+    ).toHaveLength(0);
+    expect(
+      within(experimentPanel as HTMLElement).getByRole('heading', {
+        name: '目标成绩规划',
+      })
+    ).toBeInTheDocument();
   }, 15000);
 
   test('shares the working draft and marks it as an experiment plan', async () => {
@@ -204,4 +275,197 @@ describe('App shell', () => {
     },
     15000
   );
+
+  test('keeps the planner baseline independent from semester filters', async () => {
+    const courses = [
+      {
+        id: 'planner-low',
+        name: '规划样例低分课',
+        credits: 3,
+        score: 70,
+        gpa: 2,
+        isActive: true,
+        semester: '1-1',
+        type: '必修',
+        isCore: false,
+      },
+      {
+        id: 'planner-high',
+        name: '规划样例高分课',
+        credits: 3,
+        score: 90,
+        gpa: 4,
+        isActive: true,
+        semester: '2-2',
+        type: '必修',
+        isCore: false,
+      },
+    ];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
+    localStorage.setItem(SEED_KEY, CURRENT_SEED);
+    renderApp();
+
+    fireEvent.click(screen.getByRole('button', { name: '分析' }));
+    expect(await screen.findByLabelText('规划基线当前 GPA')).toHaveTextContent('3.000');
+
+    fireEvent.click(screen.getByRole('button', { name: '课程' }));
+    fireEvent.click(screen.getAllByRole('button', { name: /全部学期/i })[0]);
+    fireEvent.click(await screen.findByRole('option', { name: '1-1' }));
+    fireEvent.click(screen.getByRole('button', { name: '分析' }));
+
+    expect(await screen.findByLabelText('规划基线当前 GPA')).toHaveTextContent('3.000');
+  }, 15000);
+
+  test('keeps the planner visible with the overall baseline when filters match no courses', async () => {
+    const courses = [
+      {
+        id: 'planner-empty-filter-low',
+        name: '规划样例低分课',
+        credits: 3,
+        score: 70,
+        gpa: 2,
+        isActive: true,
+        semester: '1-1',
+        type: '必修',
+        isCore: false,
+      },
+      {
+        id: 'planner-empty-filter-high',
+        name: '规划样例高分课',
+        credits: 3,
+        score: 90,
+        gpa: 4,
+        isActive: true,
+        semester: '2-2',
+        type: '必修',
+        isCore: false,
+      },
+    ];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
+    localStorage.setItem(SEED_KEY, CURRENT_SEED);
+    renderApp();
+
+    fireEvent.click(screen.getByRole('button', { name: '课程' }));
+    fireEvent.click(screen.getAllByRole('button', { name: /全部学期/i })[0]);
+    fireEvent.click(await screen.findByRole('option', { name: '3-3' }));
+    fireEvent.click(screen.getByRole('button', { name: '分析' }));
+
+    const analysis = screen.getByRole('region', { name: '学业数据分析' });
+    expect(
+      within(analysis).getByRole('heading', { name: '暂无可分析课程' })
+    ).toBeInTheDocument();
+    expect(
+      await within(analysis).findByRole('heading', { name: '目标成绩规划' })
+    ).toBeInTheDocument();
+    expect(within(analysis).getByLabelText('规划基线当前 GPA')).toHaveTextContent(
+      '3.000'
+    );
+    expect(
+      within(analysis).queryByRole('heading', { name: '成绩分布' })
+    ).not.toBeInTheDocument();
+    expect(
+      within(analysis).queryByRole('heading', { name: '学期趋势' })
+    ).not.toBeInTheDocument();
+  }, 15000);
+
+  test('keeps every analysis tab target mounted while loading only the active non-overview view', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: '分析' }));
+
+    const analysis = screen.getByRole('region', { name: '学业数据分析' });
+    const tabs = within(analysis)
+      .getAllByRole('tab')
+      .filter(tab =>
+        tab.getAttribute('aria-controls')?.startsWith('analysis-panel-')
+      );
+    expect(tabs).toHaveLength(4);
+    for (const tab of tabs) {
+      const panelId = tab.getAttribute('aria-controls');
+      expect(panelId).toBeTruthy();
+      expect(document.getElementById(panelId ?? '')).toBeInTheDocument();
+    }
+
+    const overviewPanel = document.getElementById('analysis-panel-overview');
+    const radarPanel = document.getElementById('analysis-panel-radar');
+    expect(overviewPanel).not.toHaveAttribute('hidden');
+    expect(radarPanel).toHaveAttribute('hidden');
+
+    await user.click(within(analysis).getByRole('tab', { name: /学业雷达/ }));
+    expect(overviewPanel).toHaveAttribute('hidden');
+    expect(radarPanel).not.toHaveAttribute('hidden');
+  }, 15000);
+
+  test('preserves planner edits while visiting radar, advisor, and experiment views', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: '分析' }));
+    await screen.findByRole('heading', { name: '目标成绩规划' });
+    fireEvent.change(within(getActivePlannerPanel()).getByLabelText('目标 GPA'), {
+      target: { value: '4.2' },
+    });
+    await user.click(screen.getByRole('button', { name: '添加未来课程' }));
+    fireEvent.change(screen.getByLabelText('未来课程 2 名称'), {
+      target: { value: '高等代数进阶' },
+    });
+    await user.click(
+      screen.getByRole('radio', { name: '未来课程 2 固定分数' })
+    );
+    fireEvent.change(screen.getByLabelText('未来课程 2 固定分数值'), {
+      target: { value: '96' },
+    });
+
+    const analysis = screen.getByRole('region', { name: '学业数据分析' });
+    for (const tabName of [/学业雷达/, /智能建议/, /成绩实验/]) {
+      await user.click(within(analysis).getByRole('tab', { name: tabName }));
+      await user.click(
+        within(analysis).getByRole('tab', { name: /总览分析/ })
+      );
+
+      expect(
+        within(getActivePlannerPanel()).getByLabelText('目标 GPA')
+      ).toHaveValue(4.2);
+      expect(screen.getByLabelText('未来课程 2 名称')).toHaveValue(
+        '高等代数进阶'
+      );
+      expect(screen.getByLabelText('未来课程 2 固定分数值')).toHaveValue(96);
+    }
+  }, 15000);
+
+  test('keeps planner edits in component memory without changing saved courses', async () => {
+    const courses = [
+      {
+        id: 'planner-storage',
+        name: '正式课程',
+        credits: 3,
+        score: 90,
+        gpa: 4,
+        isActive: true,
+        semester: '1-1',
+        type: '必修',
+        isCore: false,
+      },
+    ];
+    const savedCourses = JSON.stringify(courses);
+    localStorage.setItem(STORAGE_KEY, savedCourses);
+    localStorage.setItem(SEED_KEY, CURRENT_SEED);
+    renderApp();
+
+    fireEvent.click(screen.getByRole('button', { name: '分析' }));
+    await screen.findByRole('heading', { name: '目标成绩规划' });
+    fireEvent.change(within(getActivePlannerPanel()).getByLabelText('目标 GPA'), {
+      target: { value: '4.2' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '添加未来课程' }));
+    fireEvent.change(screen.getByLabelText('未来课程 2 名称'), {
+      target: { value: '只存在于规划器' },
+    });
+
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(savedCourses);
+    fireEvent.click(screen.getByRole('button', { name: '课程' }));
+    expect(await screen.findByText('正式课程')).toBeInTheDocument();
+    expect(screen.queryByText('只存在于规划器')).not.toBeInTheDocument();
+  }, 15000);
 });

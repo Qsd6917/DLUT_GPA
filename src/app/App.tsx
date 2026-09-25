@@ -26,7 +26,11 @@ import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { Course } from '../types';
 import useDebounce from '../hooks/useDebounce';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
-import { calculateSemesterTrends } from '../services/gpaService';
+import {
+  calculateSemesterTrends,
+  calculateStats,
+  getMaximumGpa,
+} from '../services/gpaService';
 
 const DataManagementModal = lazy(() =>
   import('../components/data/DataManagementModal').then(module => ({
@@ -121,6 +125,8 @@ function App() {
   const [activeSection, setActiveSection] = useState<Section>('overview');
   const [activeAnalysisView, setActiveAnalysisView] =
     useState<AnalysisView>('overview');
+  const [hasVisitedAnalysisOverview, setHasVisitedAnalysisOverview] =
+    useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -132,6 +138,12 @@ function App() {
   useEffect(() => {
     setSearchTerm(debouncedSearchTerm);
   }, [debouncedSearchTerm, setSearchTerm]);
+
+  useEffect(() => {
+    if (activeSection === 'analysis' && activeAnalysisView === 'overview') {
+      setHasVisitedAnalysisOverview(true);
+    }
+  }, [activeAnalysisView, activeSection]);
 
   useEffect(() => {
     if (!isCourseEntryOpen) {
@@ -160,16 +172,13 @@ function App() {
       case 'LINEAR':
         return 'Linear 5.0';
       case 'WES':
-        return 'WES 5.0';
+        return 'WES 4.0';
       default:
         return 'DLUT 5.0';
     }
   }, [method]);
-  const maximumGpa = useMemo(() => {
-    if (method === 'STD_4_0' || method === 'PKU_4_0' || method === 'WES') return 4;
-    if (method === 'SCALE_4_5') return 4.5;
-    return 5;
-  }, [method]);
+  const maximumGpa = useMemo(() => getMaximumGpa(method), [method]);
+  const plannerOverallStats = useMemo(() => calculateStats(courses), [courses]);
   const semesterTrends = useMemo(
     () => calculateSemesterTrends(activeCourses),
     [activeCourses]
@@ -461,6 +470,87 @@ function App() {
     </section>
   );
 
+  const renderAnalysisOverview = () => (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div className="section-kicker">{t('included_in_gpa_detail')}</div>
+          <p className="type-body-sm mt-1">
+            {t(
+              'included_metrics_detail',
+              activeCourses.length,
+              courses.length
+            )}
+          </p>
+        </div>
+        {isExperimentActive ? (
+          <span className="status-chip text-[hsl(var(--color-accent))]">
+            {t('experiment_draft')}
+          </span>
+        ) : null}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {renderMetaCard(
+          t('weighted_gpa'),
+          stats.weightedGpa.toFixed(3),
+          currentMethodLabel,
+          'primary'
+        )}
+        {renderMetaCard(
+          t('weighted_average'),
+          stats.weightedAverageScore.toFixed(2),
+          t('hundred_scale')
+        )}
+        {renderMetaCard(
+          t('included_credits_detail'),
+          stats.totalCredits.toFixed(1),
+          t('enabled_courses_only')
+        )}
+        {renderMetaCard(
+          t('included_courses_detail'),
+          String(stats.courseCount),
+          t('all_courses_total', courses.length)
+        )}
+      </div>
+
+      {stats.courseCount === 0 ? (
+        <div className="paper-panel p-8 text-center">
+          <h3 className="type-section-title text-main">
+            {t('no_courses_to_analyze')}
+          </h3>
+          <p className="type-body-sm mt-2">{t('add_or_include_course')}</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-2">
+          <Suspense fallback={panelFallback}>
+            <ScoreDistributionChart stats={stats} />
+          </Suspense>
+          <Suspense fallback={panelFallback}>
+            <SemesterTrendChart trends={semesterTrends} />
+          </Suspense>
+        </div>
+      )}
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)]">
+        <Suspense fallback={panelFallback}>
+          <TargetGpaCalculator
+            currentGpa={plannerOverallStats.weightedGpa}
+            currentCredits={plannerOverallStats.totalCredits}
+            method={method}
+          />
+        </Suspense>
+        {stats.courseCount > 0 ? (
+          <Suspense fallback={panelFallback}>
+            <GraduationProgress
+              courses={activeCourses}
+              totalCredits={stats.totalCredits}
+            />
+          </Suspense>
+        ) : null}
+      </div>
+    </div>
+  );
+
   const renderAnalysis = () => (
     <section className="space-y-4 sm:space-y-5" aria-label={t('analysis_data_label')}>
       <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
@@ -494,73 +584,72 @@ function App() {
 
       <div
         role="tabpanel"
-        id={`analysis-panel-${activeAnalysisView}`}
-        aria-labelledby={`analysis-tab-${activeAnalysisView}`}
-        tabIndex={0}
+        id="analysis-panel-overview"
+        aria-labelledby="analysis-tab-overview"
+        hidden={activeAnalysisView !== 'overview'}
+        tabIndex={activeAnalysisView === 'overview' ? 0 : -1}
       >
-      {activeAnalysisView === 'experiment' ? (
-        <Suspense fallback={panelFallback}>
-          <ExperimentLab
-            experiment={experiment}
-            maximumGpa={maximumGpa}
-            onStart={startExperiment}
-            onUpdateCourseScore={updateCourseScore}
-            onRemoveCourse={removeCourse}
-            onRestoreCourse={restoreExperimentCourse}
-            onReset={resetExperiment}
-            onDiscard={handleDiscardExperiment}
-            onCommit={handleCommitExperiment}
-          />
-        </Suspense>
-      ) : activeAnalysisView === 'radar' ? (
-        <Suspense fallback={panelFallback}>
-          <AcademicRadar courses={activeCourses} />
-        </Suspense>
-      ) : activeAnalysisView === 'advisor' ? (
-        <Suspense fallback={panelFallback}>
-          <AIAdvisorPanel courses={activeCourses} gpaStats={stats} targetGPA={3.8} maximumGpa={maximumGpa} />
-        </Suspense>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div><div className="section-kicker">{t('included_in_gpa_detail')}</div><p className="type-body-sm mt-1">{t('included_metrics_detail', activeCourses.length, courses.length)}</p></div>
-            {isExperimentActive ? <span className="status-chip text-[hsl(var(--color-accent))]">{t('experiment_draft')}</span> : null}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {renderMetaCard(t('weighted_gpa'), stats.weightedGpa.toFixed(3), currentMethodLabel, 'primary')}
-            {renderMetaCard(t('weighted_average'), stats.weightedAverageScore.toFixed(2), t('hundred_scale'))}
-            {renderMetaCard(t('included_credits_detail'), stats.totalCredits.toFixed(1), t('enabled_courses_only'))}
-            {renderMetaCard(t('included_courses_detail'), String(stats.courseCount), t('all_courses_total', courses.length))}
-          </div>
-          {stats.courseCount === 0 ? (
-            <div className="paper-panel p-8 text-center"><h3 className="type-section-title text-main">{t('no_courses_to_analyze')}</h3><p className="type-body-sm mt-2">{t('add_or_include_course')}</p></div>
-          ) : <>
-          <div className="grid gap-4 xl:grid-cols-2">
-            <Suspense fallback={panelFallback}>
-              <ScoreDistributionChart stats={stats} />
-            </Suspense>
-            <Suspense fallback={panelFallback}>
-              <SemesterTrendChart trends={semesterTrends} />
-            </Suspense>
-          </div>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)]">
-            <Suspense fallback={panelFallback}>
-            <TargetGpaCalculator
-              currentGpa={stats.weightedGpa}
-              currentCredits={stats.totalCredits}
+        {hasVisitedAnalysisOverview || activeAnalysisView === 'overview'
+          ? renderAnalysisOverview()
+          : null}
+      </div>
+
+      <div
+        role="tabpanel"
+        id="analysis-panel-experiment"
+        aria-labelledby="analysis-tab-experiment"
+        hidden={activeAnalysisView !== 'experiment'}
+        tabIndex={activeAnalysisView === 'experiment' ? 0 : -1}
+      >
+        {activeAnalysisView === 'experiment' ? (
+          <Suspense fallback={panelFallback}>
+            <ExperimentLab
+              experiment={experiment}
+              method={method}
+              maximumGpa={maximumGpa}
+              onStart={startExperiment}
+              onUpdateCourseScore={updateCourseScore}
+              onRemoveCourse={removeCourse}
+              onRestoreCourse={restoreExperimentCourse}
+              onReset={resetExperiment}
+              onDiscard={handleDiscardExperiment}
+              onCommit={handleCommitExperiment}
+            />
+          </Suspense>
+        ) : null}
+      </div>
+
+      <div
+        role="tabpanel"
+        id="analysis-panel-radar"
+        aria-labelledby="analysis-tab-radar"
+        hidden={activeAnalysisView !== 'radar'}
+        tabIndex={activeAnalysisView === 'radar' ? 0 : -1}
+      >
+        {activeAnalysisView === 'radar' ? (
+          <Suspense fallback={panelFallback}>
+            <AcademicRadar courses={activeCourses} />
+          </Suspense>
+        ) : null}
+      </div>
+
+      <div
+        role="tabpanel"
+        id="analysis-panel-advisor"
+        aria-labelledby="analysis-tab-advisor"
+        hidden={activeAnalysisView !== 'advisor'}
+        tabIndex={activeAnalysisView === 'advisor' ? 0 : -1}
+      >
+        {activeAnalysisView === 'advisor' ? (
+          <Suspense fallback={panelFallback}>
+            <AIAdvisorPanel
+              courses={activeCourses}
+              gpaStats={stats}
+              targetGPA={3.8}
               maximumGpa={maximumGpa}
             />
-            </Suspense>
-            <Suspense fallback={panelFallback}>
-            <GraduationProgress
-              courses={activeCourses}
-              totalCredits={stats.totalCredits}
-            />
-            </Suspense>
-          </div>
-          </>}
-        </div>
-      )}
+          </Suspense>
+        ) : null}
       </div>
     </section>
   );

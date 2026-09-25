@@ -115,9 +115,69 @@ export type TargetGpaResult =
     };
 ```
 
+### PlannedCourseInput / TargetScorePlanInput / TargetScorePlanResult
+
+定义位置：`src/types/index.ts`
+
+```typescript
+export interface PlannedCourseInput {
+  id: string;
+  name: string;
+  credits: number;
+  score: { mode: 'auto' } | { mode: 'fixed'; value: number };
+}
+
+export interface TargetScorePlanInput {
+  currentGpa: number;
+  currentCredits: number;
+  targetGpa: number;
+  method: CalculationMethod;
+  courses: PlannedCourseInput[];
+}
+
+export type TargetScorePlanField =
+  | 'currentGpa'
+  | 'currentCredits'
+  | 'targetGpa'
+  | 'courses'
+  | 'courseCredits'
+  | 'fixedScore';
+
+export type TargetScorePlanResult =
+  | {
+      status: 'invalid';
+      field: TargetScorePlanField;
+      reason: 'required' | 'positive' | 'out-of-range' | 'no-courses';
+      courseId?: string;
+    }
+  | {
+      status: 'feasible';
+      recommendedScore: number | null;
+      projectedGpa: number;
+      requiredAutoGpa: number | null;
+      courseScores: { courseId: string; score: number }[];
+    }
+  | {
+      status: 'unreachable';
+      bestPossibleGpa: number;
+      shortfall: number;
+      courseScores: { courseId: string; score: number }[];
+    };
+```
+
+`score.mode` 为 `auto` 时由服务计算统一的均衡分数；为 `fixed` 时使用给定百分制分数。`name` 用于界面标签，规划服务使用 `id` 关联逐课结果。
+
 ## GPA 服务
 
 定义位置：`src/services/gpaService.ts`
+
+### getMaximumGpa(method)
+
+```typescript
+getMaximumGpa(method: CalculationMethod): number
+```
+
+返回算法的绩点上限：`SUBTRACTIVE`、`LINEAR` 为 `5`，`SCALE_4_5` 为 `4.5`，`WES`、`STD_4_0`、`PKU_4_0` 为 `4`。目标快速估算与逐课规划共用该函数，不在组件中维护第二份上限映射。
 
 ### calculateCourseGpa(score, method)
 
@@ -169,6 +229,46 @@ calculateTargetGpa(input: TargetGpaInput): TargetGpaResult
 - `reachable`：参数合法，目标在允许绩点范围内可达到；`outlook` 区分已达到、按当前预期可达到、需要更高未来绩点。
 - `unreachable`：参数合法，但所需未来绩点超过 `maximumGpa`。
 - `invalid`：字段缺失、非正数或超出绩点范围。
+
+### calculateTargetScorePlan(input)
+
+```typescript
+calculateTargetScorePlan(input: TargetScorePlanInput): TargetScorePlanResult
+```
+
+逐课程目标成绩规划纯函数，支持当前六种 `CalculationMethod`。自动课程共享同一个建议分数；函数以 `0.1` 分为步长从低到高搜索，返回第一个使预计 GPA 严格不低于目标的分数，因此展示的建议值不会低估达标要求。
+
+返回规则：
+
+- `feasible`：方案可以达到目标。存在自动课程时，`recommendedScore` 是最低的 `0.1` 分刻度均衡分数，`requiredAutoGpa` 是自动课程理论所需绩点；只有固定课程时两者均为 `null`。
+- `unreachable`：固定方案未达标且没有自动课程，或所有自动课程均按 `100` 分计算仍未达标；返回最高可达 GPA、差距和逐课分数。
+- `invalid`：当前 GPA、当前学分或目标 GPA 不是有限数，课程列表为空，课程 ID 为空或重复，课程学分不是有限正数，固定分数不是 `0–100` 内的有限数，或中间汇总发生数值溢出。
+
+其他约束：
+
+- `currentCredits` 可以为 `0`，但不能为负数；当前与目标 GPA 必须位于所选算法的 `0–maximumGpa` 范围内。
+- 每个 `id` 去除首尾空白后必须非空，原始 `id` 在同一输入中必须唯一。
+- `courseScores` 始终按 `courses` 的输入顺序返回，便于界面稳定关联课程行。
+
+该函数不修改传入课程、不调用服务端，也不读写 `localStorage`。
+
+## 组件接口
+
+### TargetGpaCalculator
+
+定义位置：`src/components/analytics/TargetGpaCalculator.tsx`
+
+```typescript
+interface TargetGpaCalculatorProps {
+  currentGpa: number;
+  currentCredits: number;
+  method: CalculationMethod;
+}
+```
+
+组件通过可访问的标签页提供“快速估算”和“逐课规划”。`App` 传入 `calculateStats(courses)` 计算的全量计入课程基线，因此搜索、学期、类型和核心课程筛选不会改变目标规划口径；实验会话期间，`courses` 指向实验草稿，规划基线也随之更新。
+
+逐课表单状态只存在于组件内存中。组件没有课程写入回调，不会修改正式课程，也没有新增持久化键或服务端接口。
 
 ## 智能建议服务
 

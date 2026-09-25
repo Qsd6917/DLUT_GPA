@@ -4,8 +4,260 @@ import {
   GpaStats,
   TargetGpaInput,
   TargetGpaResult,
+  TargetScorePlanInput,
+  TargetScorePlanResult,
   SemesterTrend,
 } from '../types';
+
+const TARGET_SCORE_STEPS = 1000;
+
+export function getMaximumGpa(method: CalculationMethod): number {
+  switch (method) {
+    case CalculationMethod.SUBTRACTIVE:
+    case CalculationMethod.LINEAR:
+      return 5;
+    case CalculationMethod.SCALE_4_5:
+      return 4.5;
+    case CalculationMethod.WES:
+    case CalculationMethod.STD_4_0:
+    case CalculationMethod.PKU_4_0:
+      return 4;
+  }
+}
+
+export function calculateTargetScorePlan(
+  input: TargetScorePlanInput
+): TargetScorePlanResult {
+  const maximumGpa = getMaximumGpa(input.method);
+
+  if (!Number.isFinite(input.currentGpa)) {
+    return { status: 'invalid', field: 'currentGpa', reason: 'required' };
+  }
+  if (!Number.isFinite(input.currentCredits)) {
+    return { status: 'invalid', field: 'currentCredits', reason: 'required' };
+  }
+  if (!Number.isFinite(input.targetGpa)) {
+    return { status: 'invalid', field: 'targetGpa', reason: 'required' };
+  }
+  if (input.currentCredits < 0) {
+    return { status: 'invalid', field: 'currentCredits', reason: 'positive' };
+  }
+  if (input.currentGpa < 0 || input.currentGpa > maximumGpa) {
+    return { status: 'invalid', field: 'currentGpa', reason: 'out-of-range' };
+  }
+  if (input.targetGpa < 0 || input.targetGpa > maximumGpa) {
+    return { status: 'invalid', field: 'targetGpa', reason: 'out-of-range' };
+  }
+  if (input.courses.length === 0) {
+    return { status: 'invalid', field: 'courses', reason: 'no-courses' };
+  }
+
+  const seenCourseIds = new Set<string>();
+  for (const course of input.courses) {
+    if (course.id.trim().length === 0) {
+      return { status: 'invalid', field: 'courses', reason: 'required' };
+    }
+    if (seenCourseIds.has(course.id)) {
+      return {
+        status: 'invalid',
+        field: 'courses',
+        reason: 'out-of-range',
+        courseId: course.id,
+      };
+    }
+    seenCourseIds.add(course.id);
+
+    if (!Number.isFinite(course.credits)) {
+      return {
+        status: 'invalid',
+        field: 'courseCredits',
+        reason: 'required',
+        courseId: course.id,
+      };
+    }
+    if (course.credits <= 0) {
+      return {
+        status: 'invalid',
+        field: 'courseCredits',
+        reason: 'positive',
+        courseId: course.id,
+      };
+    }
+    if (course.score.mode === 'fixed' && !Number.isFinite(course.score.value)) {
+      return {
+        status: 'invalid',
+        field: 'fixedScore',
+        reason: 'required',
+        courseId: course.id,
+      };
+    }
+    if (
+      course.score.mode === 'fixed' &&
+      (course.score.value < 0 || course.score.value > 100)
+    ) {
+      return {
+        status: 'invalid',
+        field: 'fixedScore',
+        reason: 'out-of-range',
+        courseId: course.id,
+      };
+    }
+  }
+
+  const currentQuality = input.currentGpa * input.currentCredits;
+  if (!Number.isFinite(currentQuality)) {
+    return { status: 'invalid', field: 'currentCredits', reason: 'out-of-range' };
+  }
+
+  let plannedCredits = 0;
+  let fixedQuality = 0;
+  let autoCredits = 0;
+  for (const course of input.courses) {
+    const nextPlannedCredits = plannedCredits + course.credits;
+    if (!Number.isFinite(nextPlannedCredits)) {
+      return {
+        status: 'invalid',
+        field: 'courseCredits',
+        reason: 'out-of-range',
+        courseId: course.id,
+      };
+    }
+    plannedCredits = nextPlannedCredits;
+
+    if (!Number.isFinite(input.currentCredits + plannedCredits)) {
+      return {
+        status: 'invalid',
+        field: 'courseCredits',
+        reason: 'out-of-range',
+        courseId: course.id,
+      };
+    }
+
+    if (course.score.mode === 'auto') {
+      const nextAutoCredits = autoCredits + course.credits;
+      if (!Number.isFinite(nextAutoCredits)) {
+        return {
+          status: 'invalid',
+          field: 'courseCredits',
+          reason: 'out-of-range',
+          courseId: course.id,
+        };
+      }
+      autoCredits = nextAutoCredits;
+      continue;
+    }
+
+    const courseQuality =
+      calculateCourseGpa(course.score.value, input.method) * course.credits;
+    const nextFixedQuality = fixedQuality + courseQuality;
+    if (!Number.isFinite(courseQuality) || !Number.isFinite(nextFixedQuality)) {
+      return {
+        status: 'invalid',
+        field: 'courseCredits',
+        reason: 'out-of-range',
+        courseId: course.id,
+      };
+    }
+    fixedQuality = nextFixedQuality;
+
+    if (!Number.isFinite(currentQuality + fixedQuality)) {
+      return {
+        status: 'invalid',
+        field: 'courseCredits',
+        reason: 'out-of-range',
+        courseId: course.id,
+      };
+    }
+  }
+
+  const combinedCredits = input.currentCredits + plannedCredits;
+  const baseQuality = currentQuality + fixedQuality;
+  const targetQuality = input.targetGpa * combinedCredits;
+  if (!Number.isFinite(targetQuality)) {
+    return { status: 'invalid', field: 'courses', reason: 'out-of-range' };
+  }
+
+  let bestPossibleQuality = baseQuality;
+  for (const course of input.courses) {
+    if (course.score.mode === 'fixed') continue;
+
+    const courseQuality = maximumGpa * course.credits;
+    const nextBestPossibleQuality = bestPossibleQuality + courseQuality;
+    if (!Number.isFinite(courseQuality) || !Number.isFinite(nextBestPossibleQuality)) {
+      return {
+        status: 'invalid',
+        field: 'courseCredits',
+        reason: 'out-of-range',
+        courseId: course.id,
+      };
+    }
+    bestPossibleQuality = nextBestPossibleQuality;
+  }
+
+  const scoresFor = (automaticScore: number) =>
+    input.courses.map(course => ({
+      courseId: course.id,
+      score: course.score.mode === 'auto' ? automaticScore : course.score.value,
+    }));
+  const projectedGpaFor = (automaticScore: number) =>
+    (baseQuality + calculateCourseGpa(automaticScore, input.method) * autoCredits) /
+    combinedCredits;
+
+  if (autoCredits === 0) {
+    const projectedGpa = baseQuality / combinedCredits;
+    const courseScores = scoresFor(0);
+    if (projectedGpa >= input.targetGpa) {
+      return {
+        status: 'feasible',
+        recommendedScore: null,
+        projectedGpa,
+        requiredAutoGpa: null,
+        courseScores,
+      };
+    }
+    return {
+      status: 'unreachable',
+      bestPossibleGpa: projectedGpa,
+      shortfall: input.targetGpa - projectedGpa,
+      courseScores,
+    };
+  }
+
+  const bestPossibleGpa = bestPossibleQuality / combinedCredits;
+  if (bestPossibleGpa < input.targetGpa) {
+    return {
+      status: 'unreachable',
+      bestPossibleGpa,
+      shortfall: input.targetGpa - bestPossibleGpa,
+      courseScores: scoresFor(100),
+    };
+  }
+
+  const requiredAutoGpa = Math.max(
+    0,
+    (targetQuality - baseQuality) / autoCredits
+  );
+  for (let step = 0; step <= TARGET_SCORE_STEPS; step += 1) {
+    const recommendedScore = step / 10;
+    const projectedGpa = projectedGpaFor(recommendedScore);
+    if (projectedGpa >= input.targetGpa) {
+      return {
+        status: 'feasible',
+        recommendedScore,
+        projectedGpa,
+        requiredAutoGpa,
+        courseScores: scoresFor(recommendedScore),
+      };
+    }
+  }
+
+  return {
+    status: 'unreachable',
+    bestPossibleGpa,
+    shortfall: input.targetGpa - bestPossibleGpa,
+    courseScores: scoresFor(100),
+  };
+}
 
 export function calculateTargetGpa(input: TargetGpaInput): TargetGpaResult {
   const numericFields = Object.entries(input) as [keyof TargetGpaInput, number][];

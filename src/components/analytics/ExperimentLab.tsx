@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import {
+  CalculationMethod,
   Course,
   CourseType,
   ExperimentCourseChange,
@@ -30,6 +31,7 @@ import { TargetGpaCalculator } from './TargetGpaCalculator';
 
 export interface ExperimentLabProps {
   experiment: ExperimentSession | null;
+  method: CalculationMethod;
   maximumGpa: number;
   onStart: () => void;
   onUpdateCourseScore: (id: string, score: number) => void;
@@ -502,6 +504,7 @@ ExperimentCourseEditor.displayName = 'ExperimentCourseEditor';
 
 export const ExperimentLab: React.FC<ExperimentLabProps> = ({
   experiment,
+  method,
   maximumGpa,
   onStart,
   onUpdateCourseScore,
@@ -615,7 +618,7 @@ export const ExperimentLab: React.FC<ExperimentLabProps> = ({
       <TargetGpaCalculator
         currentGpa={comparison.draftStats.weightedGpa}
         currentCredits={comparison.draftStats.totalCredits}
-        maximumGpa={maximumGpa}
+        method={method}
       />
 
       <ExperimentCommandBar

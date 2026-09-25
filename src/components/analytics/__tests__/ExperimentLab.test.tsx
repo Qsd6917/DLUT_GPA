@@ -60,6 +60,7 @@ const renderLab = (
   renderWithProviders(
     <ExperimentLab
       experiment={experiment}
+      method={CalculationMethod.SUBTRACTIVE}
       maximumGpa={5}
       {...handlers}
       {...props}
@@ -89,7 +90,7 @@ describe('ExperimentLab', () => {
     expect(screen.getByText('平均分变化')).toBeInTheDocument();
     expect(screen.getByText('学分变化')).toBeInTheDocument();
     expect(screen.getByText('改动课程')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '目标 GPA 计算器' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '目标成绩规划' })).toBeInTheDocument();
 
     fireEvent.change(
       screen.getByRole('spinbutton', { name: '自动控制原理A 实验分数' }),

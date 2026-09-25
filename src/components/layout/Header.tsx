@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
     { value: CalculationMethod.PKU_4_0, label: 'PKU 4.0' },
     { value: CalculationMethod.SCALE_4_5, label: '4.5 Scale' },
     { value: CalculationMethod.LINEAR, label: 'Linear 5.0' },
-    { value: CalculationMethod.WES, label: 'WES 5.0' },
+    { value: CalculationMethod.WES, label: 'WES 4.0' },
   ];
 
   const currentMethodLabel =
