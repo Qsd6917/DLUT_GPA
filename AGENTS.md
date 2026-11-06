@@ -24,6 +24,7 @@
 ```bash
 npm run type-check
 npm run lint
+npm run format:check
 npm run test:run
 npm run build
 ```
@@ -34,21 +35,21 @@ npm run build
 
 本仓库的文档分四个角色，**每个事实只有一个 owner**，别处只链接不复制。
 
-| 角色 | owner | 装什么 |
-|---|---|---|
-| 宪法（本文件） | `AGENTS.md` | 工作规则、质量门、跳转表 |
-| 地图 | `README.md` + [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) | 有什么、在哪、去哪找 |
-| 状态 | GitHub Issues（`gh issue list`） | 任务进度、阻塞、有意不做的东西 |
-| 历史 | [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | 版本变更与难逆决策 |
+| 角色           | owner                                                                  | 装什么                         |
+| -------------- | ---------------------------------------------------------------------- | ------------------------------ |
+| 宪法（本文件） | `AGENTS.md`                                                            | 工作规则、质量门、跳转表       |
+| 地图           | `README.md` + [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) | 有什么、在哪、去哪找           |
+| 状态           | GitHub Issues（`gh issue list`）                                       | 任务进度、阻塞、有意不做的东西 |
+| 历史           | [`docs/CHANGELOG.md`](docs/CHANGELOG.md)                               | 版本变更与难逆决策             |
 
-| 需要什么 | 看哪里 | 怎么核实 |
-|---|---|---|
-| 仓库结构与目录职责 | `docs/PROJECT_STRUCTURE.md` | `git ls-files` |
-| 质量与性能基线 | `docs/QUALITY_BASELINE.md` | 跑一遍质量门 |
-| 测试约定 | `tests/TESTING_GUIDELINES.md` | 对应测试文件 |
-| 构建与启动脚本 | `scripts/build/BUILD_SCRIPTS.md` | 实跑一遍 |
-| 任务状态与阻塞 | GitHub Issues | `gh issue list` |
-| 为什么这么定 | `docs/CHANGELOG.md` | 对应提交 |
+| 需要什么           | 看哪里                           | 怎么核实        |
+| ------------------ | -------------------------------- | --------------- |
+| 仓库结构与目录职责 | `docs/PROJECT_STRUCTURE.md`      | `git ls-files`  |
+| 质量与性能基线     | `docs/QUALITY_BASELINE.md`       | 跑一遍质量门    |
+| 测试约定           | `tests/TESTING_GUIDELINES.md`    | 对应测试文件    |
+| 构建与启动脚本     | `scripts/build/BUILD_SCRIPTS.md` | 实跑一遍        |
+| 任务状态与阻塞     | GitHub Issues                    | `gh issue list` |
+| 为什么这么定       | `docs/CHANGELOG.md`              | 对应提交        |
 
 阅读顺序：先看项目结构，再看 issue 状态，最后只读与当前任务相关的文档。
 
@@ -90,5 +91,7 @@ GPA 计算口径是本项目的核心正确性来源，改动前必须核对。
   **必须写成 `/build/` 锚定根目录**，否则会连带忽略 `scripts/build/`，且 `git status` 看不见。
 - CI 用 Node 20，本机可能是更高版本。`jsdom@28` 要求 Node `^20.19 || ^22.12 || >=24`，
   `package.json` 的 `engines` 仍写 `>=18`，这是已知契约不一致，改动前先确认。
-- `format:check` 当前有 64 个文件不通过，且不在 CI 里。不要顺手全仓格式化——
-  那会产生一个 64 文件的大 diff，必须单独提交。
+- `format:check` 已在 CI 中，全仓格式化于 2026-11-06 完成。新增代码必须符合 prettier 风格；
+  `docs/archive/` 经 `.prettierignore` 排除，不要对它格式化。
+- 涉及时间的测试断言必须与运行时区无关：`ShareableReportModal` 用 `getHours()/getDate()` 渲染本地时间，
+  硬编码期望值会让 CI(UTC) 与本地(UTC+8) 结果不同。用同一套格式化逻辑推导期望值。
