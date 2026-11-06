@@ -20,11 +20,18 @@ const LanguageInitializer = ({ language }: { language: 'zh' | 'en' }) => {
   return null;
 };
 
-const ThemeStorageRestorer = ({ previousTheme }: { previousTheme: string | null }) => {
-  useEffect(() => () => {
-    if (previousTheme === null) localStorage.removeItem('dlut_gpa_theme');
-    else localStorage.setItem('dlut_gpa_theme', previousTheme);
-  }, [previousTheme]);
+const ThemeStorageRestorer = ({
+  previousTheme,
+}: {
+  previousTheme: string | null;
+}) => {
+  useEffect(
+    () => () => {
+      if (previousTheme === null) localStorage.removeItem('dlut_gpa_theme');
+      else localStorage.setItem('dlut_gpa_theme', previousTheme);
+    },
+    [previousTheme]
+  );
   return null;
 };
 
@@ -38,9 +45,13 @@ export const renderWithProviders = (
 
   const Providers = ({ children }: { children: React.ReactNode }) => (
     <ThemeProvider>
-      {initialTheme ? <ThemeStorageRestorer previousTheme={previousTheme} /> : null}
+      {initialTheme ? (
+        <ThemeStorageRestorer previousTheme={previousTheme} />
+      ) : null}
       <LanguageProvider>
-        {initialLanguage ? <LanguageInitializer language={initialLanguage} /> : null}
+        {initialLanguage ? (
+          <LanguageInitializer language={initialLanguage} />
+        ) : null}
         <LoadingProvider>{children}</LoadingProvider>
       </LanguageProvider>
     </ThemeProvider>

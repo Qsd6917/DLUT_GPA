@@ -9,8 +9,12 @@ vi.mock('recharts', async () => {
   const actual = await vi.importActual<typeof import('recharts')>('recharts');
   return {
     ...actual,
-    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    PieChart: ({ children }: { children: React.ReactNode }) => <svg>{children}</svg>,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+    PieChart: ({ children }: { children: React.ReactNode }) => (
+      <svg>{children}</svg>
+    ),
     Pie: ({ children }: { children: React.ReactNode }) => <g>{children}</g>,
     Cell: () => null,
     Tooltip: () => null,
@@ -51,7 +55,20 @@ describe('ScoreDistributionChart', () => {
   });
 
   test('exposes score range, course count, credits and course share to screen readers', () => {
-    render(<ThemeProvider><LanguageProvider><ScoreDistributionChart stats={{ ...mockStats, scoreDistribution: [{ name: '90-100', value: 2, credits: 10, percentage: 40 }] }} /></LanguageProvider></ThemeProvider>);
+    render(
+      <ThemeProvider>
+        <LanguageProvider>
+          <ScoreDistributionChart
+            stats={{
+              ...mockStats,
+              scoreDistribution: [
+                { name: '90-100', value: 2, credits: 10, percentage: 40 },
+              ],
+            }}
+          />
+        </LanguageProvider>
+      </ThemeProvider>
+    );
     const table = screen.getByRole('table', { name: '成绩分布数据' });
     expect(table).toHaveTextContent('90-100');
     expect(table).toHaveTextContent('2');

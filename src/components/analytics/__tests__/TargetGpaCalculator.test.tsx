@@ -89,7 +89,9 @@ describe('TargetGpaCalculator', () => {
         expect(panel).toHaveAttribute('aria-labelledby', tab.id);
       }
 
-      fireEvent.click(within(calculator).getByRole('tab', { name: '快速估算' }));
+      fireEvent.click(
+        within(calculator).getByRole('tab', { name: '快速估算' })
+      );
       const remainingCredits = within(calculator).getByLabelText('剩余学分');
       fireEvent.change(remainingCredits, { target: { value: '' } });
       const quickErrorId = remainingCredits.getAttribute('aria-describedby');
@@ -99,8 +101,9 @@ describe('TargetGpaCalculator', () => {
       );
     }
 
-    const ids = Array.from(container.querySelectorAll('[id]'), element =>
-      element.id
+    const ids = Array.from(
+      container.querySelectorAll('[id]'),
+      element => element.id
     );
     expect(new Set(ids).size).toBe(ids.length);
   });
@@ -118,8 +121,12 @@ describe('TargetGpaCalculator', () => {
       plannerTab.getAttribute('aria-controls') ?? ''
     );
 
-    expect(screen.getByRole('heading', { name: '目标成绩规划' })).toBeInTheDocument();
-    expect(screen.getByRole('tablist', { name: '目标成绩规划模式' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: '目标成绩规划' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('tablist', { name: '目标成绩规划模式' })
+    ).toBeInTheDocument();
     expect(plannerTab).toHaveAttribute('aria-selected', 'true');
     expect(plannerTab).toHaveAttribute('tabindex', '0');
     expect(quickTab).toHaveAttribute('aria-selected', 'false');
@@ -186,9 +193,12 @@ describe('TargetGpaCalculator', () => {
       method: CalculationMethod.WES,
     });
 
-    fireEvent.change(within(screen.getByRole('tabpanel')).getByLabelText('目标 GPA'), {
-      target: { value: '3' },
-    });
+    fireEvent.change(
+      within(screen.getByRole('tabpanel')).getByLabelText('目标 GPA'),
+      {
+        target: { value: '3' },
+      }
+    );
 
     expect(screen.getByRole('status')).toHaveTextContent('75.0');
     expect(screen.getByRole('status')).toHaveTextContent('预计累计 GPA 3.000');
@@ -230,7 +240,9 @@ describe('TargetGpaCalculator', () => {
   test('shows a fixed-score input only for fixed mode and reports a reached fixed plan', () => {
     renderPlanner();
 
-    expect(screen.queryByLabelText('未来课程 1 固定分数值')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('未来课程 1 固定分数值')
+    ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('radio', { name: '未来课程 1 固定分数' }));
     const fixedScore = screen.getByLabelText('未来课程 1 固定分数值');
     expectAssociatedError(fixedScore, '请输入未来课程 1 固定分数');
@@ -244,7 +256,9 @@ describe('TargetGpaCalculator', () => {
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('radio', { name: '未来课程 1 自动规划' }));
-    expect(screen.queryByLabelText('未来课程 1 固定分数值')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('未来课程 1 固定分数值')
+    ).not.toBeInTheDocument();
   });
 
   test('shows an action prompt after every future course is removed', () => {
@@ -252,7 +266,9 @@ describe('TargetGpaCalculator', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '删除未来课程 1' }));
 
-    expect(screen.getByText('请添加至少一门未来课程开始规划。')).toBeInTheDocument();
+    expect(
+      screen.getByText('请添加至少一门未来课程开始规划。')
+    ).toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
@@ -298,9 +314,12 @@ describe('TargetGpaCalculator', () => {
 
   test('reports the highest possible GPA and remaining gap for an unreachable plan', () => {
     renderPlanner({ currentGpa: 0, currentCredits: 100 });
-    fireEvent.change(within(screen.getByRole('tabpanel')).getByLabelText('目标 GPA'), {
-      target: { value: '5' },
-    });
+    fireEvent.change(
+      within(screen.getByRole('tabpanel')).getByLabelText('目标 GPA'),
+      {
+        target: { value: '5' },
+      }
+    );
 
     const result = screen.getByRole('status');
     expect(within(result).getByText('当前方案无法达标')).toBeInTheDocument();
@@ -337,10 +356,18 @@ describe('TargetGpaCalculator', () => {
     expect(
       await screen.findByRole('heading', { name: 'Target score planning' })
     ).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Per-course plan' })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: 'Future course 1 Auto plan' })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: 'Future course 1 Fixed score' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add future course' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: 'Per-course plan' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('radio', { name: 'Future course 1 Auto plan' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('radio', { name: 'Future course 1 Fixed score' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Add future course' })
+    ).toBeInTheDocument();
   });
 
   test('updates untouched default names across language changes without overwriting custom names', async () => {
@@ -349,22 +376,30 @@ describe('TargetGpaCalculator', () => {
 
     expect(screen.getByLabelText('未来课程 1 名称')).toHaveValue('未来课程 1');
 
-    await user.click(screen.getByRole('button', { name: 'switch test language' }));
+    await user.click(
+      screen.getByRole('button', { name: 'switch test language' })
+    );
     expect(screen.getByLabelText('Future course 1 name')).toHaveValue(
       'Future course 1'
     );
 
-    await user.click(screen.getByRole('button', { name: 'switch test language' }));
+    await user.click(
+      screen.getByRole('button', { name: 'switch test language' })
+    );
     const localizedDefault = screen.getByLabelText('未来课程 1 名称');
     expect(localizedDefault).toHaveValue('未来课程 1');
     await user.clear(localizedDefault);
     await user.type(localizedDefault, '自定义课程');
 
-    await user.click(screen.getByRole('button', { name: 'switch test language' }));
+    await user.click(
+      screen.getByRole('button', { name: 'switch test language' })
+    );
     expect(screen.getByLabelText('Future course 1 name')).toHaveValue(
       '自定义课程'
     );
-    await user.click(screen.getByRole('button', { name: 'switch test language' }));
+    await user.click(
+      screen.getByRole('button', { name: 'switch test language' })
+    );
     expect(screen.getByLabelText('未来课程 1 名称')).toHaveValue('自定义课程');
   });
 

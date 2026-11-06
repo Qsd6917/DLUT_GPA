@@ -64,9 +64,11 @@ const VirtualCourseRow = memo(
           type="button"
           onClick={() => onToggle(course.id)}
           className="rounded-md p-1.5 hover:bg-[hsl(var(--surface-3))]"
-          aria-label={language === 'zh'
-            ? `${course.isActive ? '排除课程' : '计入课程'}：${course.name}`
-            : `${course.isActive ? 'Exclude course' : 'Include course'}: ${course.name}`}
+          aria-label={
+            language === 'zh'
+              ? `${course.isActive ? '排除课程' : '计入课程'}：${course.name}`
+              : `${course.isActive ? 'Exclude course' : 'Include course'}: ${course.name}`
+          }
         >
           {course.isActive ? (
             <CheckSquare size={18} className="text-primary" />
@@ -107,7 +109,11 @@ const VirtualCourseRow = memo(
           onClick={() => onEdit(course)}
           className="rounded-[0.75rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted hover:border-primary/20 hover:text-primary"
           title={language === 'zh' ? '编辑课程' : 'Edit course'}
-          aria-label={language === 'zh' ? `编辑课程：${course.name}` : `Edit course: ${course.name}`}
+          aria-label={
+            language === 'zh'
+              ? `编辑课程：${course.name}`
+              : `Edit course: ${course.name}`
+          }
         >
           <Edit size={14} />
         </button>
@@ -116,7 +122,11 @@ const VirtualCourseRow = memo(
           onClick={() => onRemove(course.id)}
           className="rounded-[0.75rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted hover:border-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300"
           title={language === 'zh' ? '删除课程' : 'Delete course'}
-          aria-label={language === 'zh' ? `删除课程：${course.name}` : `Delete course: ${course.name}`}
+          aria-label={
+            language === 'zh'
+              ? `删除课程：${course.name}`
+              : `Delete course: ${course.name}`
+          }
         >
           <Trash2 size={14} />
         </button>
@@ -153,25 +163,21 @@ const VirtualCourseList: React.FC<VirtualCourseListProps> = ({
   );
   const totalHeight = courses.length * ROW_HEIGHT;
 
-  const handleScroll = useCallback(
-    (event: React.UIEvent<HTMLElement>) => {
-      pendingScrollTopRef.current = event.currentTarget.scrollTop;
+  const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
+    pendingScrollTopRef.current = event.currentTarget.scrollTop;
 
-      if (animationFrameRef.current !== undefined) {
-        return;
-      }
+    if (animationFrameRef.current !== undefined) {
+      return;
+    }
 
-      animationFrameRef.current = window.requestAnimationFrame(() => {
-        animationFrameRef.current = undefined;
-        setScrollTop(pendingScrollTopRef.current);
-      });
-    },
-    []
-  );
+    animationFrameRef.current = window.requestAnimationFrame(() => {
+      animationFrameRef.current = undefined;
+      setScrollTop(pendingScrollTopRef.current);
+    });
+  }, []);
 
   const visibleWindow = useMemo(() => {
-    const visibleCount =
-      Math.ceil(listHeight / ROW_HEIGHT) + OVERSCAN_ROWS * 2;
+    const visibleCount = Math.ceil(listHeight / ROW_HEIGHT) + OVERSCAN_ROWS * 2;
     const rawStart = Math.max(
       0,
       Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN_ROWS

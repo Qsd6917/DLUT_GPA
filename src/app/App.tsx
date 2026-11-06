@@ -66,10 +66,14 @@ const SemesterTrendChart = lazy(() =>
   }))
 );
 const TargetGpaCalculator = lazy(() =>
-  import('../components/analytics/TargetGpaCalculator').then(module => ({ default: module.TargetGpaCalculator }))
+  import('../components/analytics/TargetGpaCalculator').then(module => ({
+    default: module.TargetGpaCalculator,
+  }))
 );
 const GraduationProgress = lazy(() =>
-  import('../components/analytics/GraduationProgress').then(module => ({ default: module.GraduationProgress }))
+  import('../components/analytics/GraduationProgress').then(module => ({
+    default: module.GraduationProgress,
+  }))
 );
 
 type Section = 'overview' | 'courses' | 'analysis';
@@ -193,10 +197,10 @@ function App() {
 
   const handleReset = () => setIsResetConfirmOpen(true);
   const confirmReset = () => {
-      resetData();
-      setLocalSearchTerm('');
-      clearFilters();
-      setIsResetConfirmOpen(false);
+    resetData();
+    setLocalSearchTerm('');
+    clearFilters();
+    setIsResetConfirmOpen(false);
   };
 
   const handleToggleAll = (checked: boolean) => {
@@ -268,7 +272,9 @@ function App() {
         <div className="flex flex-wrap gap-2">
           <span className="status-chip">{currentMethodLabel}</span>
           <span className="status-chip">
-            {isExperimentActive ? t('experiment_status') : t('overview_state_live')}
+            {isExperimentActive
+              ? t('experiment_status')
+              : t('overview_state_live')}
           </span>
           <span className="status-chip">
             {semesters.length} {t('overview_terms')}
@@ -359,7 +365,6 @@ function App() {
               </button>
             </div>
           </div>
-
         </div>
       </article>
 
@@ -384,9 +389,7 @@ function App() {
           title={t('overview_terms')}
           value={semesters.length}
           icon={<CalendarRange size={20} />}
-          description={
-            t('terms_recorded_detail')
-          }
+          description={t('terms_recorded_detail')}
         />
         <StatsCard
           title={t('course_count')}
@@ -408,9 +411,7 @@ function App() {
           <h2 className="type-page-title text-main">
             {t('course_workspace_title')}
           </h2>
-          <p className="type-body-sm mt-1.5">
-            {t('course_workspace_hint')}
-          </p>
+          <p className="type-body-sm mt-1.5">{t('course_workspace_hint')}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -476,11 +477,7 @@ function App() {
         <div>
           <div className="section-kicker">{t('included_in_gpa_detail')}</div>
           <p className="type-body-sm mt-1">
-            {t(
-              'included_metrics_detail',
-              activeCourses.length,
-              courses.length
-            )}
+            {t('included_metrics_detail', activeCourses.length, courses.length)}
           </p>
         </div>
         {isExperimentActive ? (
@@ -552,14 +549,15 @@ function App() {
   );
 
   const renderAnalysis = () => (
-    <section className="space-y-4 sm:space-y-5" aria-label={t('analysis_data_label')}>
+    <section
+      className="space-y-4 sm:space-y-5"
+      aria-label={t('analysis_data_label')}
+    >
       <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="section-kicker">{t('nav_analysis')}</div>
           <h2 className="type-page-title text-main">{t('analysis_title')}</h2>
-          <p className="type-body-sm mt-1.5">
-            {t('analysis_workspace_hint')}
-          </p>
+          <p className="type-body-sm mt-1.5">{t('analysis_workspace_hint')}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -673,8 +671,16 @@ function App() {
           />
         </>
       }
-      >
-      <ConfirmDialog open={isResetConfirmOpen} title={t('confirm_reset')} description={t('reset_data_detail')} confirmLabel={t('reset')} cancelLabel={t('experiment_cancel')} onConfirm={confirmReset} onCancel={() => setIsResetConfirmOpen(false)} />
+    >
+      <ConfirmDialog
+        open={isResetConfirmOpen}
+        title={t('confirm_reset')}
+        description={t('reset_data_detail')}
+        confirmLabel={t('reset')}
+        cancelLabel={t('experiment_cancel')}
+        onConfirm={confirmReset}
+        onCancel={() => setIsResetConfirmOpen(false)}
+      />
       {editingCourse ? (
         <EditCourseModal
           course={editingCourse}
@@ -731,7 +737,10 @@ function App() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="section-kicker">{t('course_entry')}</div>
-                  <h3 id="course-entry-title" className="type-section-title mt-2 text-main">
+                  <h3
+                    id="course-entry-title"
+                    className="type-section-title mt-2 text-main"
+                  >
                     {t('new_course')}
                   </h3>
                   <p className="type-body-sm mt-2">{t('course_entry_desc')}</p>

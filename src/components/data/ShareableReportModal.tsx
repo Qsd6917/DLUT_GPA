@@ -274,9 +274,7 @@ export const ShareableReportModal: React.FC<ShareableReportModalProps> = ({
                   </div>
                   <div className="metric-card">
                     <div className="figure-label">
-                      {language === 'zh'
-                        ? '计算方法'
-                        : 'Calculation method'}
+                      {language === 'zh' ? '计算方法' : 'Calculation method'}
                     </div>
                     <div className="mt-2 text-sm font-semibold text-main">
                       {calculationMethodLabel}

@@ -1,5 +1,12 @@
 import React from 'react';
-import { Radar, RadarChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import {
+  Radar,
+  RadarChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+} from 'recharts';
 import { Trophy } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -23,7 +30,11 @@ const categorizeCourse = (courseName: string): string => {
     return 'math';
   }
 
-  if (nameLower.includes('英语') || nameLower.includes('english') || nameLower.includes('外语')) {
+  if (
+    nameLower.includes('英语') ||
+    nameLower.includes('english') ||
+    nameLower.includes('外语')
+  ) {
     return 'english';
   }
 
@@ -52,14 +63,22 @@ const categorizeCourse = (courseName: string): string => {
     return 'general';
   }
 
-  if (nameLower.includes('体育') || nameLower.includes('physical') || nameLower.includes('pe') || nameLower.includes('运动')) {
+  if (
+    nameLower.includes('体育') ||
+    nameLower.includes('physical') ||
+    nameLower.includes('pe') ||
+    nameLower.includes('运动')
+  ) {
     return 'sports';
   }
 
   return 'other';
 };
 
-const getCategoryLabel = (category: string, t: (key: string) => string): string => {
+const getCategoryLabel = (
+  category: string,
+  t: (key: string) => string
+): string => {
   const labels: Record<string, string> = {
     math: t('category_math'),
     english: t('category_english'),
@@ -85,15 +104,18 @@ export const AcademicRadar: React.FC<AcademicRadarProps> = ({ courses }) => {
   };
 
   courses
-    .filter((course) => course.isActive)
-    .forEach((course) => {
+    .filter(course => course.isActive)
+    .forEach(course => {
       const category = categorizeCourse(course.name);
       categorizedScores[category].push(course.score);
     });
 
   const radarData = Object.entries(categorizedScores)
     .map(([category, scores]) => {
-      const average = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
+      const average =
+        scores.length > 0
+          ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+          : 0;
 
       return {
         subject: getCategoryLabel(category, t),
@@ -102,7 +124,7 @@ export const AcademicRadar: React.FC<AcademicRadarProps> = ({ courses }) => {
         category,
       };
     })
-    .filter((item) => item.score > 0);
+    .filter(item => item.score > 0);
 
   const primaryColor = theme === 'dark' ? '#60A5FA' : '#005BAC';
   const secondaryColor = theme === 'dark' ? '#A5B4FC' : '#4F46E5';
@@ -112,7 +134,9 @@ export const AcademicRadar: React.FC<AcademicRadarProps> = ({ courses }) => {
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="section-kicker">Radar</div>
-          <h3 className="type-section-title mt-2 text-main">{t('academic_radar_title')}</h3>
+          <h3 className="type-section-title mt-2 text-main">
+            {t('academic_radar_title')}
+          </h3>
         </div>
         <div className="rounded-[1.2rem] border border-primary/10 bg-primary/10 p-3 text-primary">
           <Trophy size={18} />
@@ -126,15 +150,32 @@ export const AcademicRadar: React.FC<AcademicRadarProps> = ({ courses }) => {
               <PolarGrid stroke={theme === 'dark' ? '#334155' : '#CBD5E1'} />
               <PolarAngleAxis
                 dataKey="subject"
-                tick={{ fill: theme === 'dark' ? '#CBD5E1' : '#475569', fontSize: 12, fontFamily: 'var(--font-body)', fontWeight: 500 }}
+                tick={{
+                  fill: theme === 'dark' ? '#CBD5E1' : '#475569',
+                  fontSize: 12,
+                  fontFamily: 'var(--font-body)',
+                  fontWeight: 500,
+                }}
               />
               <PolarRadiusAxis
                 angle={90}
                 domain={[0, 100]}
                 tickCount={6}
-                tick={{ fill: theme === 'dark' ? '#94A3B8' : '#64748B', fontSize: 11, fontFamily: 'var(--font-numeric)', fontWeight: 500 }}
+                tick={{
+                  fill: theme === 'dark' ? '#94A3B8' : '#64748B',
+                  fontSize: 11,
+                  fontFamily: 'var(--font-numeric)',
+                  fontWeight: 500,
+                }}
               />
-              <Radar name={t('scores')} dataKey="score" stroke={secondaryColor} fill={primaryColor} fillOpacity={0.28} strokeWidth={2} />
+              <Radar
+                name={t('scores')}
+                dataKey="score"
+                stroke={secondaryColor}
+                fill={primaryColor}
+                fillOpacity={0.28}
+                strokeWidth={2}
+              />
             </RadarChart>
           </ResponsiveContainer>
         ) : (
@@ -146,10 +187,18 @@ export const AcademicRadar: React.FC<AcademicRadarProps> = ({ courses }) => {
       </div>
 
       <div className="mt-4 flex flex-wrap justify-center gap-3">
-        {radarData.map((item) => (
-          <div key={item.category} className="flex items-center gap-1.5 text-xs font-medium">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: secondaryColor }} />
-            <span className="text-muted">{getCategoryLabel(item.category, t)}</span>
+        {radarData.map(item => (
+          <div
+            key={item.category}
+            className="flex items-center gap-1.5 text-xs font-medium"
+          >
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: secondaryColor }}
+            />
+            <span className="text-muted">
+              {getCategoryLabel(item.category, t)}
+            </span>
             <span className="num-inline text-muted/70">({item.score})</span>
           </div>
         ))}

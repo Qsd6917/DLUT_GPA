@@ -74,7 +74,9 @@ describe('ExperimentLab', () => {
   test('inactive state only presents the start action without course controls', () => {
     const handlers = renderLab(null);
 
-    expect(screen.getByRole('heading', { name: '成绩实验室' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: '成绩实验室' })
+    ).toBeInTheDocument();
     expect(screen.queryByRole('slider')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '开始实验' }));
@@ -90,7 +92,9 @@ describe('ExperimentLab', () => {
     expect(screen.getByText('平均分变化')).toBeInTheDocument();
     expect(screen.getByText('学分变化')).toBeInTheDocument();
     expect(screen.getByText('改动课程')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '目标成绩规划' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: '目标成绩规划' })
+    ).toBeInTheDocument();
 
     fireEvent.change(
       screen.getByRole('spinbutton', { name: '自动控制原理A 实验分数' }),
@@ -102,7 +106,10 @@ describe('ExperimentLab', () => {
       screen.getByRole('slider', { name: '自动控制原理A 分数滑块' }),
       { target: { value: '64' } }
     );
-    expect(handlers.onUpdateCourseScore).toHaveBeenLastCalledWith('control', 64);
+    expect(handlers.onUpdateCourseScore).toHaveBeenLastCalledWith(
+      'control',
+      64
+    );
   });
 
   test('filters by search, semester, type, core, changed state, and inclusion', () => {
@@ -160,9 +167,7 @@ describe('ExperimentLab', () => {
     );
     const handlers = renderLab(createExperiment(draft));
 
-    fireEvent.click(
-      screen.getByRole('button', { name: '恢复自动控制原理A' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: '恢复自动控制原理A' }));
     expect(handlers.onRestoreCourse).toHaveBeenCalledWith(baseline[0]);
   });
 
@@ -209,9 +214,7 @@ describe('ExperimentCommandBar', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '放弃实验' }));
     const discardDialog = screen.getByRole('dialog', { name: '放弃实验？' });
-    fireEvent.click(
-      screen.getByRole('button', { name: '确认放弃' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: '确认放弃' }));
     expect(discardDialog).not.toBeInTheDocument();
     expect(handlers.onDiscard).toHaveBeenCalledTimes(1);
 

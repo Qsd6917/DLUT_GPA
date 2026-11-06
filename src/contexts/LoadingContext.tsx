@@ -9,8 +9,12 @@ interface LoadingContextType {
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
-export const LoadingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [loadingTasks, setLoadingTasks] = useState<Map<string, string>>(new Map());
+export const LoadingProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [loadingTasks, setLoadingTasks] = useState<Map<string, string>>(
+    new Map()
+  );
 
   const showLoading = (id: string, message: string) => {
     setLoadingTasks(prev => new Map(prev).set(id, message));
@@ -29,7 +33,9 @@ export const LoadingProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   return (
-    <LoadingContext.Provider value={{ loadingTasks, showLoading, hideLoading, isLoading }}>
+    <LoadingContext.Provider
+      value={{ loadingTasks, showLoading, hideLoading, isLoading }}
+    >
       {children}
       {/* Loading overlay */}
       {loadingTasks.size > 0 && (
@@ -38,7 +44,9 @@ export const LoadingProvider: React.FC<{ children: ReactNode }> = ({ children })
             <div className="flex flex-col items-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
               {Array.from(loadingTasks.values()).map((message, index) => (
-                <p key={index} className="text-main text-center">{message}</p>
+                <p key={index} className="text-main text-center">
+                  {message}
+                </p>
               ))}
             </div>
           </div>

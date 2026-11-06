@@ -47,12 +47,31 @@ export const DashboardModeToggleBar: React.FC<DashboardModeToggleBarProps> = ({
     },
   ];
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const keys = ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'];
+  const handleKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number
+  ) => {
+    const keys = [
+      'ArrowRight',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowUp',
+      'Home',
+      'End',
+    ];
     if (!keys.includes(event.key)) return;
     event.preventDefault();
-    const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 :
-      (index + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    const next =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? items.length - 1
+          : (index +
+              (event.key === 'ArrowRight' || event.key === 'ArrowDown'
+                ? 1
+                : -1) +
+              items.length) %
+            items.length;
     onChange(items[next].id);
     document.getElementById(`analysis-tab-${items[next].id}`)?.focus();
   };

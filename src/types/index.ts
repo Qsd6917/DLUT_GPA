@@ -1,4 +1,3 @@
-
 export type CourseType = '必修' | '选修' | '任选';
 
 export interface Course {
@@ -33,7 +32,7 @@ export interface GpaStats {
     credits?: number;
     percentage?: number;
   }[];
-  
+
   // New fields for compulsory courses
   compulsoryCredits: number;
   compulsoryWeightedGpa: number;

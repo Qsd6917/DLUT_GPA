@@ -94,8 +94,12 @@ describe('ShareableReportModal', () => {
       />
     );
 
-    expect(screen.getByRole('dialog', { name: '成绩报告' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '成绩报告' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('dialog', { name: '成绩报告' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: '成绩报告' })
+    ).toBeInTheDocument();
     expect(document.body.style.overflow).toBe('hidden');
 
     rerender(
@@ -209,7 +213,9 @@ describe('ShareableReportModal', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
 
     await waitFor(() =>
-      expect(screen.queryByRole('dialog', { name: '成绩报告' })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('dialog', { name: '成绩报告' })
+      ).not.toBeInTheDocument()
     );
     expect(screen.getByRole('button', { name: '分享报告' })).toHaveFocus();
   });

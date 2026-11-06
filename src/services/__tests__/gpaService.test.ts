@@ -23,7 +23,9 @@ describe('gpaService', () => {
 
     describe('DLUT 5.0 (SUBTRACTIVE)', () => {
       it('should calculate correctly: (Score - 50) / 10', () => {
-        expect(calculateCourseGpa(100, CalculationMethod.SUBTRACTIVE)).toBe(5.0);
+        expect(calculateCourseGpa(100, CalculationMethod.SUBTRACTIVE)).toBe(
+          5.0
+        );
         expect(calculateCourseGpa(85, CalculationMethod.SUBTRACTIVE)).toBe(3.5);
         expect(calculateCourseGpa(60, CalculationMethod.SUBTRACTIVE)).toBe(1.0);
       });
@@ -47,24 +49,24 @@ describe('gpaService', () => {
     });
 
     describe('WES 4.0 (WES)', () => {
-        // Based on common WES algorithm or the one implemented
-        // Implementation: >=85:4.0, >=75:3.0, >=60:2.0
-        it('uses 4.0 as both the perfect-score GPA and the scale ceiling', () => {
-            expect(calculateCourseGpa(100, CalculationMethod.WES)).toBe(4);
-            expect(getMaximumGpa(CalculationMethod.WES)).toBe(4);
-        });
-        it('should return 4.0 for >= 85', () => {
-            expect(calculateCourseGpa(85, CalculationMethod.WES)).toBe(4.0);
-            expect(calculateCourseGpa(90, CalculationMethod.WES)).toBe(4.0);
-        });
-        it('should return 3.0 for 75-84', () => {
-            expect(calculateCourseGpa(75, CalculationMethod.WES)).toBe(3.0);
-            expect(calculateCourseGpa(84, CalculationMethod.WES)).toBe(3.0);
-        });
-        it('should return 2.0 for 60-74', () => {
-            expect(calculateCourseGpa(60, CalculationMethod.WES)).toBe(2.0);
-            expect(calculateCourseGpa(74, CalculationMethod.WES)).toBe(2.0);
-        });
+      // Based on common WES algorithm or the one implemented
+      // Implementation: >=85:4.0, >=75:3.0, >=60:2.0
+      it('uses 4.0 as both the perfect-score GPA and the scale ceiling', () => {
+        expect(calculateCourseGpa(100, CalculationMethod.WES)).toBe(4);
+        expect(getMaximumGpa(CalculationMethod.WES)).toBe(4);
+      });
+      it('should return 4.0 for >= 85', () => {
+        expect(calculateCourseGpa(85, CalculationMethod.WES)).toBe(4.0);
+        expect(calculateCourseGpa(90, CalculationMethod.WES)).toBe(4.0);
+      });
+      it('should return 3.0 for 75-84', () => {
+        expect(calculateCourseGpa(75, CalculationMethod.WES)).toBe(3.0);
+        expect(calculateCourseGpa(84, CalculationMethod.WES)).toBe(3.0);
+      });
+      it('should return 2.0 for 60-74', () => {
+        expect(calculateCourseGpa(60, CalculationMethod.WES)).toBe(2.0);
+        expect(calculateCourseGpa(74, CalculationMethod.WES)).toBe(2.0);
+      });
     });
   });
 
@@ -79,7 +81,7 @@ describe('gpaService', () => {
         isActive: true,
         semester: '1-1',
         type: '必修',
-        isCore: true
+        isCore: true,
       },
       {
         id: '2',
@@ -90,7 +92,7 @@ describe('gpaService', () => {
         isActive: true,
         semester: '1-1',
         type: '选修',
-        isCore: false
+        isCore: false,
       },
       {
         id: '3',
@@ -101,8 +103,8 @@ describe('gpaService', () => {
         isActive: false, // Should be ignored
         semester: '1-1',
         type: '必修',
-        isCore: false
-      }
+        isCore: false,
+      },
     ];
 
     it('should calculate weighted GPA correctly', () => {
@@ -127,8 +129,8 @@ describe('gpaService', () => {
     });
 
     it('should count courses correctly', () => {
-        const stats = calculateStats(mockCourses);
-        expect(stats.courseCount).toBe(2);
+      const stats = calculateStats(mockCourses);
+      expect(stats.courseCount).toBe(2);
     });
 
     it('includes credit totals and course share in every distribution bucket', () => {
@@ -200,7 +202,11 @@ describe('gpaService', () => {
     it.each([
       ['zero future credits', { futureCredits: 0 }, 'futureCredits'],
       ['target above scale', { targetGpa: 5.1 }, 'targetGpa'],
-      ['non-finite expected GPA', { expectedFutureGpa: Number.NaN }, 'expectedFutureGpa'],
+      [
+        'non-finite expected GPA',
+        { expectedFutureGpa: Number.NaN },
+        'expectedFutureGpa',
+      ],
     ])('returns a field error for %s', (_label, overrides, field) => {
       expect(
         calculateTargetGpa({
@@ -216,11 +222,33 @@ describe('gpaService', () => {
     });
 
     it('rejects a current GPA outside the selected scale', () => {
-      expect(calculateTargetGpa({ currentGpa: 5.1, currentCredits: 10, targetGpa: 4, futureCredits: 10, expectedFutureGpa: 4, maximumGpa: 5 })).toMatchObject({ status: 'invalid', field: 'currentGpa' });
+      expect(
+        calculateTargetGpa({
+          currentGpa: 5.1,
+          currentCredits: 10,
+          targetGpa: 4,
+          futureCredits: 10,
+          expectedFutureGpa: 4,
+          maximumGpa: 5,
+        })
+      ).toMatchObject({ status: 'invalid', field: 'currentGpa' });
     });
 
     it('clamps the required future GPA to zero when the target is already achieved', () => {
-      expect(calculateTargetGpa({ currentGpa: 4, currentCredits: 100, targetGpa: 3.5, futureCredits: 20, expectedFutureGpa: 3, maximumGpa: 5 })).toMatchObject({ status: 'reachable', outlook: 'achieved', requiredFutureGpa: 0 });
+      expect(
+        calculateTargetGpa({
+          currentGpa: 4,
+          currentCredits: 100,
+          targetGpa: 3.5,
+          futureCredits: 20,
+          expectedFutureGpa: 3,
+          maximumGpa: 5,
+        })
+      ).toMatchObject({
+        status: 'reachable',
+        outlook: 'achieved',
+        requiredFutureGpa: 0,
+      });
     });
   });
 
@@ -232,9 +260,12 @@ describe('gpaService', () => {
       [CalculationMethod.WES, 4],
       [CalculationMethod.STD_4_0, 4],
       [CalculationMethod.PKU_4_0, 4],
-    ])('maps %s to its actual GPA ceiling instead of a shared default', (method, expected) => {
-      expect(getMaximumGpa(method)).toBe(expected);
-    });
+    ])(
+      'maps %s to its actual GPA ceiling instead of a shared default',
+      (method, expected) => {
+        expect(getMaximumGpa(method)).toBe(expected);
+      }
+    );
   });
 
   describe('calculateTargetScorePlan', () => {
@@ -246,7 +277,12 @@ describe('gpaService', () => {
           targetGpa: 3.7,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'automatic', name: 'Automatic', credits: 10, score: { mode: 'auto' } },
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 10,
+              score: { mode: 'auto' },
+            },
           ],
         })
       ).toEqual({
@@ -266,7 +302,12 @@ describe('gpaService', () => {
           targetGpa: 2.5,
           method: CalculationMethod.WES,
           courses: [
-            { id: 'wes-course', name: 'WES Course', credits: 10, score: { mode: 'auto' } },
+            {
+              id: 'wes-course',
+              name: 'WES Course',
+              credits: 10,
+              score: { mode: 'auto' },
+            },
           ],
         })
       ).toEqual({
@@ -292,7 +333,12 @@ describe('gpaService', () => {
           targetGpa,
           method,
           courses: [
-            { id: 'automatic', name: 'Automatic', credits: 1, score: { mode: 'auto' } },
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 1,
+              score: { mode: 'auto' },
+            },
           ],
         });
 
@@ -303,7 +349,9 @@ describe('gpaService', () => {
           requiredAutoGpa: targetGpa,
           courseScores: [{ courseId: 'automatic', score: expectedScore }],
         });
-        expect(result.status === 'feasible' && result.projectedGpa >= targetGpa).toBe(true);
+        expect(
+          result.status === 'feasible' && result.projectedGpa >= targetGpa
+        ).toBe(true);
       }
     );
 
@@ -332,14 +380,12 @@ describe('gpaService', () => {
           status: 'unreachable',
           courseScores: [{ courseId: 'fixed-boundary', score: 79.9 }],
         });
-        expect(result.status === 'unreachable' ? result.bestPossibleGpa : Number.NaN).toBeCloseTo(
-          expectedBestPossibleGpa,
-          10
-        );
-        expect(result.status === 'unreachable' ? result.shortfall : Number.NaN).toBeCloseTo(
-          expectedShortfall,
-          10
-        );
+        expect(
+          result.status === 'unreachable' ? result.bestPossibleGpa : Number.NaN
+        ).toBeCloseTo(expectedBestPossibleGpa, 10);
+        expect(
+          result.status === 'unreachable' ? result.shortfall : Number.NaN
+        ).toBeCloseTo(expectedShortfall, 10);
       }
     );
 
@@ -351,7 +397,12 @@ describe('gpaService', () => {
         targetGpa,
         method: CalculationMethod.SUBTRACTIVE,
         courses: [
-          { id: 'automatic', name: 'Automatic', credits: 1, score: { mode: 'auto' } },
+          {
+            id: 'automatic',
+            name: 'Automatic',
+            credits: 1,
+            score: { mode: 'auto' },
+          },
         ],
       });
 
@@ -360,7 +411,9 @@ describe('gpaService', () => {
         recommendedScore: 60,
         courseScores: [{ courseId: 'automatic', score: 60 }],
       });
-      expect(result.status === 'feasible' && result.projectedGpa >= targetGpa).toBe(true);
+      expect(
+        result.status === 'feasible' && result.projectedGpa >= targetGpa
+      ).toBe(true);
     });
 
     it('subtracts fixed-course quality before assigning one score to every automatic course', () => {
@@ -370,9 +423,24 @@ describe('gpaService', () => {
         targetGpa: 3.5,
         method: CalculationMethod.SUBTRACTIVE,
         courses: [
-          { id: 'auto-first', name: 'Auto First', credits: 2, score: { mode: 'auto' } },
-          { id: 'fixed', name: 'Fixed', credits: 2, score: { mode: 'fixed', value: 90 } },
-          { id: 'auto-last', name: 'Auto Last', credits: 1, score: { mode: 'auto' } },
+          {
+            id: 'auto-first',
+            name: 'Auto First',
+            credits: 2,
+            score: { mode: 'auto' },
+          },
+          {
+            id: 'fixed',
+            name: 'Fixed',
+            credits: 2,
+            score: { mode: 'fixed', value: 90 },
+          },
+          {
+            id: 'auto-last',
+            name: 'Auto Last',
+            credits: 1,
+            score: { mode: 'auto' },
+          },
         ],
       });
 
@@ -386,10 +454,9 @@ describe('gpaService', () => {
           { courseId: 'auto-last', score: 98.4 },
         ],
       });
-      expect(result.status === 'feasible' ? result.projectedGpa : 0).toBeCloseTo(
-        3.5013333333,
-        10
-      );
+      expect(
+        result.status === 'feasible' ? result.projectedGpa : 0
+      ).toBeCloseTo(3.5013333333, 10);
     });
 
     it('returns null automatic requirements when a fixed-only plan already reaches the target', () => {
@@ -400,7 +467,12 @@ describe('gpaService', () => {
           targetGpa: 3.5,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'fixed', name: 'Fixed', credits: 10, score: { mode: 'fixed', value: 90 } },
+            {
+              id: 'fixed',
+              name: 'Fixed',
+              credits: 10,
+              score: { mode: 'fixed', value: 90 },
+            },
           ],
         })
       ).toEqual({
@@ -419,7 +491,12 @@ describe('gpaService', () => {
         targetGpa: 3.6,
         method: CalculationMethod.SUBTRACTIVE,
         courses: [
-          { id: 'fixed', name: 'Fixed', credits: 10, score: { mode: 'fixed', value: 90 } },
+          {
+            id: 'fixed',
+            name: 'Fixed',
+            credits: 10,
+            score: { mode: 'fixed', value: 90 },
+          },
         ],
       });
 
@@ -428,7 +505,9 @@ describe('gpaService', () => {
         bestPossibleGpa: 3.5,
         courseScores: [{ courseId: 'fixed', score: 90 }],
       });
-      expect(result.status === 'unreachable' ? result.shortfall : 0).toBeCloseTo(0.1, 10);
+      expect(
+        result.status === 'unreachable' ? result.shortfall : 0
+      ).toBeCloseTo(0.1, 10);
     });
 
     it('reports the best possible GPA when automatic courses at 100 still miss the target', () => {
@@ -439,7 +518,12 @@ describe('gpaService', () => {
           targetGpa: 3,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'automatic', name: 'Automatic', credits: 10, score: { mode: 'auto' } },
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 10,
+              score: { mode: 'auto' },
+            },
           ],
         })
       ).toEqual({
@@ -458,7 +542,12 @@ describe('gpaService', () => {
           targetGpa: 1,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'first-course', name: 'First Course', credits: 2, score: { mode: 'auto' } },
+            {
+              id: 'first-course',
+              name: 'First Course',
+              credits: 2,
+              score: { mode: 'auto' },
+            },
           ],
         })
       ).toEqual({
@@ -478,7 +567,12 @@ describe('gpaService', () => {
           targetGpa: 2,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'automatic', name: 'Automatic', credits: 10, score: { mode: 'auto' } },
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 10,
+              score: { mode: 'auto' },
+            },
           ],
         })
       ).toEqual({
@@ -498,7 +592,12 @@ describe('gpaService', () => {
           targetGpa: 0,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'automatic', name: 'Automatic', credits: 1, score: { mode: 'auto' } },
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 1,
+              score: { mode: 'auto' },
+            },
           ],
         })
       ).toEqual({
@@ -530,7 +629,12 @@ describe('gpaService', () => {
           targetGpa: 3.5,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'zero-credit', name: 'Zero Credit', credits: 0, score: { mode: 'auto' } },
+            {
+              id: 'zero-credit',
+              name: 'Zero Credit',
+              credits: 0,
+              score: { mode: 'auto' },
+            },
           ],
         })
       ).toEqual({
@@ -548,7 +652,9 @@ describe('gpaService', () => {
           currentCredits: 10,
           targetGpa: 3.5,
           method: CalculationMethod.SUBTRACTIVE,
-          courses: [{ id: '', name: 'Missing Id', credits: 1, score: { mode: 'auto' } }],
+          courses: [
+            { id: '', name: 'Missing Id', credits: 1, score: { mode: 'auto' } },
+          ],
         })
       ).toEqual({ status: 'invalid', field: 'courses', reason: 'required' });
     });
@@ -561,8 +667,18 @@ describe('gpaService', () => {
           targetGpa: 3.5,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'duplicate', name: 'First', credits: 1, score: { mode: 'auto' } },
-            { id: 'duplicate', name: 'Second', credits: 1, score: { mode: 'auto' } },
+            {
+              id: 'duplicate',
+              name: 'First',
+              credits: 1,
+              score: { mode: 'auto' },
+            },
+            {
+              id: 'duplicate',
+              name: 'Second',
+              credits: 1,
+              score: { mode: 'auto' },
+            },
           ],
         })
       ).toEqual({
@@ -586,10 +702,19 @@ describe('gpaService', () => {
           targetGpa: 1,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'automatic', name: 'Automatic', credits: 1, score: { mode: 'auto' } },
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 1,
+              score: { mode: 'auto' },
+            },
           ],
         },
-        expected: { status: 'invalid', field: 'currentCredits', reason: 'out-of-range' },
+        expected: {
+          status: 'invalid',
+          field: 'currentCredits',
+          reason: 'out-of-range',
+        },
       },
       {
         label: 'planned credits',
@@ -599,8 +724,18 @@ describe('gpaService', () => {
           targetGpa: 0,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'first-large', name: 'First Large', credits: Number.MAX_VALUE, score: { mode: 'auto' } },
-            { id: 'second-large', name: 'Second Large', credits: Number.MAX_VALUE, score: { mode: 'auto' } },
+            {
+              id: 'first-large',
+              name: 'First Large',
+              credits: Number.MAX_VALUE,
+              score: { mode: 'auto' },
+            },
+            {
+              id: 'second-large',
+              name: 'Second Large',
+              credits: Number.MAX_VALUE,
+              score: { mode: 'auto' },
+            },
           ],
         },
         expected: {
@@ -618,7 +753,12 @@ describe('gpaService', () => {
           targetGpa: 0,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'large-fixed', name: 'Large Fixed', credits: Number.MAX_VALUE, score: { mode: 'fixed', value: 100 } },
+            {
+              id: 'large-fixed',
+              name: 'Large Fixed',
+              credits: Number.MAX_VALUE,
+              score: { mode: 'fixed', value: 100 },
+            },
           ],
         },
         expected: {
@@ -636,7 +776,12 @@ describe('gpaService', () => {
           targetGpa: 0,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'combined-overflow', name: 'Combined Overflow', credits: Number.MAX_VALUE, score: { mode: 'auto' } },
+            {
+              id: 'combined-overflow',
+              name: 'Combined Overflow',
+              credits: Number.MAX_VALUE,
+              score: { mode: 'auto' },
+            },
           ],
         },
         expected: {
@@ -654,10 +799,19 @@ describe('gpaService', () => {
           targetGpa: 5,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'automatic', name: 'Automatic', credits: 1, score: { mode: 'auto' } },
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 1,
+              score: { mode: 'auto' },
+            },
           ],
         },
-        expected: { status: 'invalid', field: 'courses', reason: 'out-of-range' },
+        expected: {
+          status: 'invalid',
+          field: 'courses',
+          reason: 'out-of-range',
+        },
       },
       {
         label: 'best-score projection',
@@ -667,7 +821,12 @@ describe('gpaService', () => {
           targetGpa: 1.1,
           method: CalculationMethod.SUBTRACTIVE,
           courses: [
-            { id: 'projection-overflow', name: 'Projection Overflow', credits: Number.MAX_VALUE * 0.1, score: { mode: 'auto' } },
+            {
+              id: 'projection-overflow',
+              name: 'Projection Overflow',
+              credits: Number.MAX_VALUE * 0.1,
+              score: { mode: 'auto' },
+            },
           ],
         },
         expected: {
@@ -688,8 +847,18 @@ describe('gpaService', () => {
 
     it.each([
       ['current GPA', { currentGpa: Number.NaN }, 'currentGpa', undefined],
-      ['current credits', { currentCredits: Number.POSITIVE_INFINITY }, 'currentCredits', undefined],
-      ['target GPA', { targetGpa: Number.NEGATIVE_INFINITY }, 'targetGpa', undefined],
+      [
+        'current credits',
+        { currentCredits: Number.POSITIVE_INFINITY },
+        'currentCredits',
+        undefined,
+      ],
+      [
+        'target GPA',
+        { targetGpa: Number.NEGATIVE_INFINITY },
+        'targetGpa',
+        undefined,
+      ],
       [
         'course credits',
         {
@@ -713,37 +882,66 @@ describe('gpaService', () => {
               id: 'non-finite-score',
               name: 'Non-finite Score',
               credits: 1,
-              score: { mode: 'fixed' as const, value: Number.POSITIVE_INFINITY },
+              score: {
+                mode: 'fixed' as const,
+                value: Number.POSITIVE_INFINITY,
+              },
             },
           ],
         },
         'fixedScore',
         'non-finite-score',
       ],
-    ])('rejects a non-finite %s before numeric comparisons can pass it', (_label, overrides, field, courseId) => {
-      const result = calculateTargetScorePlan({
-        currentGpa: 3,
-        currentCredits: 10,
-        targetGpa: 3.5,
-        method: CalculationMethod.SUBTRACTIVE,
-        courses: [
-          { id: 'automatic', name: 'Automatic', credits: 10, score: { mode: 'auto' } },
-        ],
-        ...overrides,
-      });
+    ])(
+      'rejects a non-finite %s before numeric comparisons can pass it',
+      (_label, overrides, field, courseId) => {
+        const result = calculateTargetScorePlan({
+          currentGpa: 3,
+          currentCredits: 10,
+          targetGpa: 3.5,
+          method: CalculationMethod.SUBTRACTIVE,
+          courses: [
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 10,
+              score: { mode: 'auto' },
+            },
+          ],
+          ...overrides,
+        });
 
-      expect(result).toEqual({
-        status: 'invalid',
-        field,
-        reason: 'required',
-        ...(courseId ? { courseId } : {}),
-      });
-    });
+        expect(result).toEqual({
+          status: 'invalid',
+          field,
+          reason: 'required',
+          ...(courseId ? { courseId } : {}),
+        });
+      }
+    );
 
     it.each([
-      ['negative current credits', { currentCredits: -1 }, 'currentCredits', 'positive', undefined],
-      ['current GPA above the scale', { currentGpa: 5.1 }, 'currentGpa', 'out-of-range', undefined],
-      ['negative target GPA', { targetGpa: -0.1 }, 'targetGpa', 'out-of-range', undefined],
+      [
+        'negative current credits',
+        { currentCredits: -1 },
+        'currentCredits',
+        'positive',
+        undefined,
+      ],
+      [
+        'current GPA above the scale',
+        { currentGpa: 5.1 },
+        'currentGpa',
+        'out-of-range',
+        undefined,
+      ],
+      [
+        'negative target GPA',
+        { targetGpa: -0.1 },
+        'targetGpa',
+        'out-of-range',
+        undefined,
+      ],
       [
         'negative course credits',
         {
@@ -776,39 +974,104 @@ describe('gpaService', () => {
         'out-of-range',
         'high-score',
       ],
-    ])('returns the documented field error for %s', (_label, overrides, field, reason, courseId) => {
-      const result = calculateTargetScorePlan({
-        currentGpa: 3,
-        currentCredits: 10,
-        targetGpa: 3.5,
-        method: CalculationMethod.SUBTRACTIVE,
-        courses: [
-          { id: 'automatic', name: 'Automatic', credits: 10, score: { mode: 'auto' } },
-        ],
-        ...overrides,
-      });
+    ])(
+      'returns the documented field error for %s',
+      (_label, overrides, field, reason, courseId) => {
+        const result = calculateTargetScorePlan({
+          currentGpa: 3,
+          currentCredits: 10,
+          targetGpa: 3.5,
+          method: CalculationMethod.SUBTRACTIVE,
+          courses: [
+            {
+              id: 'automatic',
+              name: 'Automatic',
+              credits: 10,
+              score: { mode: 'auto' },
+            },
+          ],
+          ...overrides,
+        });
 
-      expect(result).toEqual({
-        status: 'invalid',
-        field,
-        reason,
-        ...(courseId ? { courseId } : {}),
-      });
-    });
+        expect(result).toEqual({
+          status: 'invalid',
+          field,
+          reason,
+          ...(courseId ? { courseId } : {}),
+        });
+      }
+    );
   });
 
   describe('calculateSemesterTrends', () => {
     it('aggregates valid active courses by semester and orders semesters naturally', () => {
       const courses: Course[] = [
-        { id: 'a', name: 'A', credits: 2, score: 80, gpa: 3, isActive: true, semester: '2-1', type: '必修' },
-        { id: 'b', name: 'B', credits: 4, score: 90, gpa: 4, isActive: true, semester: '1-2', type: '必修' },
-        { id: 'c', name: 'C', credits: 2, score: 70, gpa: 2, isActive: true, semester: '1-2', type: '选修' },
-        { id: 'd', name: 'D', credits: 3, score: 0, gpa: 0, isActive: true, semester: '1-2', type: '选修' },
-        { id: 'e', name: 'E', credits: 3, score: 100, gpa: 5, isActive: false, semester: '1-2', type: '选修' },
+        {
+          id: 'a',
+          name: 'A',
+          credits: 2,
+          score: 80,
+          gpa: 3,
+          isActive: true,
+          semester: '2-1',
+          type: '必修',
+        },
+        {
+          id: 'b',
+          name: 'B',
+          credits: 4,
+          score: 90,
+          gpa: 4,
+          isActive: true,
+          semester: '1-2',
+          type: '必修',
+        },
+        {
+          id: 'c',
+          name: 'C',
+          credits: 2,
+          score: 70,
+          gpa: 2,
+          isActive: true,
+          semester: '1-2',
+          type: '选修',
+        },
+        {
+          id: 'd',
+          name: 'D',
+          credits: 3,
+          score: 0,
+          gpa: 0,
+          isActive: true,
+          semester: '1-2',
+          type: '选修',
+        },
+        {
+          id: 'e',
+          name: 'E',
+          credits: 3,
+          score: 100,
+          gpa: 5,
+          isActive: false,
+          semester: '1-2',
+          type: '选修',
+        },
       ];
       expect(calculateSemesterTrends(courses)).toEqual([
-        { semester: '1-2', gpa: 20 / 9, averageScore: 500 / 9, credits: 9, courseCount: 3 },
-        { semester: '2-1', gpa: 3, averageScore: 80, credits: 2, courseCount: 1 },
+        {
+          semester: '1-2',
+          gpa: 20 / 9,
+          averageScore: 500 / 9,
+          credits: 9,
+          courseCount: 3,
+        },
+        {
+          semester: '2-1',
+          gpa: 3,
+          averageScore: 80,
+          credits: 2,
+          courseCount: 1,
+        },
       ]);
     });
   });

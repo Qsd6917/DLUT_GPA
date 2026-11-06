@@ -86,11 +86,32 @@ export const Header: React.FC<HeaderProps> = ({
     methodOptions.find(item => item.value === method)?.label ?? 'DLUT 5.0';
 
   const handleMethodKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const options = Array.from(methodOptionsRef.current?.querySelectorAll<HTMLElement>('[role="option"]') ?? []);
+    const options = Array.from(
+      methodOptionsRef.current?.querySelectorAll<HTMLElement>(
+        '[role="option"]'
+      ) ?? []
+    );
     if (!options.length) return;
-    const current = Math.max(0, options.findIndex(option => option.getAttribute('aria-selected') === 'true'));
-    const next = event.key === 'ArrowDown' ? (current + 1) % options.length : event.key === 'ArrowUp' ? (current - 1 + options.length) % options.length : event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1 : -1;
-    if (next >= 0) { event.preventDefault(); options[next].focus(); }
+    const current = Math.max(
+      0,
+      options.findIndex(
+        option => option.getAttribute('aria-selected') === 'true'
+      )
+    );
+    const next =
+      event.key === 'ArrowDown'
+        ? (current + 1) % options.length
+        : event.key === 'ArrowUp'
+          ? (current - 1 + options.length) % options.length
+          : event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? options.length - 1
+              : -1;
+    if (next >= 0) {
+      event.preventDefault();
+      options[next].focus();
+    }
   };
 
   return (
@@ -112,7 +133,10 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            <nav className="segmented-control responsive-primary-nav" aria-label={t('primary_nav')}>
+            <nav
+              className="segmented-control responsive-primary-nav"
+              aria-label={t('primary_nav')}
+            >
               {navItems.map(item => {
                 const Icon = item.icon;
                 const active = activeSection === item.id;
@@ -165,7 +189,11 @@ export const Header: React.FC<HeaderProps> = ({
                   data-tone="warn"
                 >
                   <FlaskConical size={15} />
-                  <span>{isExperimentActive ? t('experiment_return') : t('experiment_start')}</span>
+                  <span>
+                    {isExperimentActive
+                      ? t('experiment_return')
+                      : t('experiment_start')}
+                  </span>
                 </button>
 
                 <button
@@ -254,8 +282,15 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            <button type="button" className="toolbar-button lg:hidden" aria-label={t('open_tools')} aria-expanded={isUtilityOpen} onClick={() => setIsUtilityOpen(value => !value)}>
-              {isUtilityOpen ? <X size={15} /> : <Menu size={15} />}<span>{t('tools')}</span>
+            <button
+              type="button"
+              className="toolbar-button lg:hidden"
+              aria-label={t('open_tools')}
+              aria-expanded={isUtilityOpen}
+              onClick={() => setIsUtilityOpen(value => !value)}
+            >
+              {isUtilityOpen ? <X size={15} /> : <Menu size={15} />}
+              <span>{t('tools')}</span>
             </button>
             <a
               href="#experiment"
@@ -265,19 +300,61 @@ export const Header: React.FC<HeaderProps> = ({
                 event.preventDefault();
                 onOpenExperiment();
               }}
-              aria-label={isExperimentActive ? t('experiment_return') : t('experiment_start')}
+              aria-label={
+                isExperimentActive
+                  ? t('experiment_return')
+                  : t('experiment_start')
+              }
             >
               <FlaskConical size={15} />
-              <span>{isExperimentActive ? t('experiment_return') : t('experiment_start')}</span>
+              <span>
+                {isExperimentActive
+                  ? t('experiment_return')
+                  : t('experiment_start')}
+              </span>
             </a>
 
             <div className="hidden items-center gap-2 lg:flex">
-              {isExperimentActive ? <span className="status-chip text-[hsl(var(--color-accent))]">{t('experiment_status')}</span> : null}
+              {isExperimentActive ? (
+                <span className="status-chip text-[hsl(var(--color-accent))]">
+                  {t('experiment_status')}
+                </span>
+              ) : null}
             </div>
           </div>
         </div>
       </div>
-      {isUtilityOpen ? <div className="lg:hidden border-t border-primary/10 bg-[hsl(var(--surface-1))] p-3"><div className="mx-auto flex max-w-[94rem] flex-wrap gap-2"><button type="button" className="toolbar-button" onClick={onDataMgmt}><Database size={15} />{t('data_mgmt')}</button><button type="button" className="toolbar-button" onClick={onShare}><Share2 size={15} />{t('share')}</button><button type="button" className="toolbar-button" onClick={onReset}><RotateCcw size={15} />{t('reset')}</button><ThemeSelector /><button type="button" className="toolbar-button" onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}><Languages size={15} />{language}</button></div></div> : null}
+      {isUtilityOpen ? (
+        <div className="lg:hidden border-t border-primary/10 bg-[hsl(var(--surface-1))] p-3">
+          <div className="mx-auto flex max-w-[94rem] flex-wrap gap-2">
+            <button
+              type="button"
+              className="toolbar-button"
+              onClick={onDataMgmt}
+            >
+              <Database size={15} />
+              {t('data_mgmt')}
+            </button>
+            <button type="button" className="toolbar-button" onClick={onShare}>
+              <Share2 size={15} />
+              {t('share')}
+            </button>
+            <button type="button" className="toolbar-button" onClick={onReset}>
+              <RotateCcw size={15} />
+              {t('reset')}
+            </button>
+            <ThemeSelector />
+            <button
+              type="button"
+              className="toolbar-button"
+              onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+            >
+              <Languages size={15} />
+              {language}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 };

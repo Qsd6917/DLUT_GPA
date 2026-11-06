@@ -106,7 +106,11 @@ export function calculateTargetScorePlan(
 
   const currentQuality = input.currentGpa * input.currentCredits;
   if (!Number.isFinite(currentQuality)) {
-    return { status: 'invalid', field: 'currentCredits', reason: 'out-of-range' };
+    return {
+      status: 'invalid',
+      field: 'currentCredits',
+      reason: 'out-of-range',
+    };
   }
 
   let plannedCredits = 0;
@@ -183,7 +187,10 @@ export function calculateTargetScorePlan(
 
     const courseQuality = maximumGpa * course.credits;
     const nextBestPossibleQuality = bestPossibleQuality + courseQuality;
-    if (!Number.isFinite(courseQuality) || !Number.isFinite(nextBestPossibleQuality)) {
+    if (
+      !Number.isFinite(courseQuality) ||
+      !Number.isFinite(nextBestPossibleQuality)
+    ) {
       return {
         status: 'invalid',
         field: 'courseCredits',
@@ -200,7 +207,8 @@ export function calculateTargetScorePlan(
       score: course.score.mode === 'auto' ? automaticScore : course.score.value,
     }));
   const projectedGpaFor = (automaticScore: number) =>
-    (baseQuality + calculateCourseGpa(automaticScore, input.method) * autoCredits) /
+    (baseQuality +
+      calculateCourseGpa(automaticScore, input.method) * autoCredits) /
     combinedCredits;
 
   if (autoCredits === 0) {
@@ -260,7 +268,10 @@ export function calculateTargetScorePlan(
 }
 
 export function calculateTargetGpa(input: TargetGpaInput): TargetGpaResult {
-  const numericFields = Object.entries(input) as [keyof TargetGpaInput, number][];
+  const numericFields = Object.entries(input) as [
+    keyof TargetGpaInput,
+    number,
+  ][];
   const missing = numericFields.find(([, value]) => !Number.isFinite(value));
   if (missing) {
     return { status: 'invalid', field: missing[0], reason: 'required' };
@@ -301,9 +312,17 @@ export function calculateTargetGpa(input: TargetGpaInput): TargetGpaResult {
       input.expectedFutureGpa * input.futureCredits) /
     combinedCredits;
   if (input.currentGpa >= input.targetGpa) {
-    return { status: 'reachable', outlook: 'achieved', requiredFutureGpa: 0, projectedGpa };
+    return {
+      status: 'reachable',
+      outlook: 'achieved',
+      requiredFutureGpa: 0,
+      projectedGpa,
+    };
   }
-  const shared = { requiredFutureGpa: Math.max(0, requiredFutureGpa), projectedGpa };
+  const shared = {
+    requiredFutureGpa: Math.max(0, requiredFutureGpa),
+    projectedGpa,
+  };
 
   if (requiredFutureGpa > input.maximumGpa) {
     return { status: 'unreachable', ...shared };
@@ -322,31 +341,47 @@ export function calculateSemesterTrends(courses: Course[]): SemesterTrend[] {
   const groups = new Map<string, Course[]>();
   courses
     .filter(course => course.isActive && course.credits > 0)
-    .forEach(course => groups.set(course.semester, [...(groups.get(course.semester) ?? []), course]));
+    .forEach(course =>
+      groups.set(course.semester, [
+        ...(groups.get(course.semester) ?? []),
+        course,
+      ])
+    );
   return [...groups.entries()]
-    .sort(([left], [right]) => left.localeCompare(right, undefined, { numeric: true }))
+    .sort(([left], [right]) =>
+      left.localeCompare(right, undefined, { numeric: true })
+    )
     .map(([semester, items]) => {
       const credits = items.reduce((sum, course) => sum + course.credits, 0);
       return {
         semester,
-        gpa: items.reduce((sum, course) => sum + course.gpa * course.credits, 0) / credits,
-        averageScore: items.reduce((sum, course) => sum + course.score * course.credits, 0) / credits,
+        gpa:
+          items.reduce((sum, course) => sum + course.gpa * course.credits, 0) /
+          credits,
+        averageScore:
+          items.reduce(
+            (sum, course) => sum + course.score * course.credits,
+            0
+          ) / credits,
         credits,
         courseCount: items.length,
       };
     });
 }
 
-export function calculateCourseGpa(score: number, method: CalculationMethod): number {
+export function calculateCourseGpa(
+  score: number,
+  method: CalculationMethod
+): number {
   if (score < 60) return 0;
 
   switch (method) {
     case CalculationMethod.SUBTRACTIVE: // DLUT 5.0
       return (score - 50) / 10;
-    
+
     case CalculationMethod.LINEAR: // 5.0
       return score / 20;
-    
+
     case CalculationMethod.WES: // WES 4.0
       if (score >= 85) return 4.0;
       if (score >= 75) return 3.0;
@@ -372,7 +407,7 @@ export function calculateCourseGpa(score: number, method: CalculationMethod): nu
       if (score >= 65) return 2.0;
       if (score >= 60) return 1.5;
       return 0;
-      
+
     default:
       return (score - 50) / 10;
   }
@@ -380,14 +415,26 @@ export function calculateCourseGpa(score: number, method: CalculationMethod): nu
 
 export function calculateStats(courses: Course[]): GpaStats {
   const activeCourses = courses.filter(c => c.isActive);
-  
+
   const totalCredits = activeCourses.reduce((sum, c) => sum + c.credits, 0);
-  const totalWeightedGpa = activeCourses.reduce((sum, c) => sum + c.gpa * c.credits, 0);
-  const totalWeightedScore = activeCourses.reduce((sum, c) => sum + c.score * c.credits, 0);
+  const totalWeightedGpa = activeCourses.reduce(
+    (sum, c) => sum + c.gpa * c.credits,
+    0
+  );
+  const totalWeightedScore = activeCourses.reduce(
+    (sum, c) => sum + c.score * c.credits,
+    0
+  );
 
   const compulsoryCourses = activeCourses.filter(c => c.type === '必修');
-  const compulsoryCredits = compulsoryCourses.reduce((sum, c) => sum + c.credits, 0);
-  const compulsoryWeightedGpa = compulsoryCourses.reduce((sum, c) => sum + c.gpa * c.credits, 0);
+  const compulsoryCredits = compulsoryCourses.reduce(
+    (sum, c) => sum + c.credits,
+    0
+  );
+  const compulsoryWeightedGpa = compulsoryCourses.reduce(
+    (sum, c) => sum + c.gpa * c.credits,
+    0
+  );
 
   // Score Distribution
   const distribution = [
@@ -399,23 +446,35 @@ export function calculateStats(courses: Course[]): GpaStats {
   ];
 
   activeCourses.forEach(c => {
-    const bucket = c.score >= 90 ? 0 : c.score >= 80 ? 1 : c.score >= 70 ? 2 : c.score >= 60 ? 3 : 4;
+    const bucket =
+      c.score >= 90
+        ? 0
+        : c.score >= 80
+          ? 1
+          : c.score >= 70
+            ? 2
+            : c.score >= 60
+              ? 3
+              : 4;
     distribution[bucket].value++;
     distribution[bucket].credits += c.credits;
   });
   distribution.forEach(bucket => {
-    bucket.percentage = activeCourses.length > 0
-      ? (bucket.value / activeCourses.length) * 100
-      : 0;
+    bucket.percentage =
+      activeCourses.length > 0
+        ? (bucket.value / activeCourses.length) * 100
+        : 0;
   });
 
   return {
     totalCredits,
     weightedGpa: totalCredits > 0 ? totalWeightedGpa / totalCredits : 0,
-    weightedAverageScore: totalCredits > 0 ? totalWeightedScore / totalCredits : 0,
+    weightedAverageScore:
+      totalCredits > 0 ? totalWeightedScore / totalCredits : 0,
     courseCount: activeCourses.length,
     scoreDistribution: distribution,
     compulsoryCredits,
-    compulsoryWeightedGpa: compulsoryCredits > 0 ? compulsoryWeightedGpa / compulsoryCredits : 0,
+    compulsoryWeightedGpa:
+      compulsoryCredits > 0 ? compulsoryWeightedGpa / compulsoryCredits : 0,
   };
 }

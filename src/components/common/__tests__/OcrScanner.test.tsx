@@ -30,8 +30,12 @@ describe('OcrScanner', () => {
     const onCoursesParsed = vi.fn();
     const file = new File(['image'], 'transcript.png', { type: 'image/png' });
 
-    const { container } = renderWithLanguage(<OcrScanner onCoursesParsed={onCoursesParsed} />);
-    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const { container } = renderWithLanguage(
+      <OcrScanner onCoursesParsed={onCoursesParsed} />
+    );
+    const input = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
 
     fireEvent.change(input, { target: { files: [file] } });
 
@@ -45,6 +49,8 @@ describe('OcrScanner', () => {
       ]);
     });
 
-    expect(screen.queryByText('未在图片中找到课程信息，请检查截图是否包含成绩单')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('未在图片中找到课程信息，请检查截图是否包含成绩单')
+    ).not.toBeInTheDocument();
   });
 });

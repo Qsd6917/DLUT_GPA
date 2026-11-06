@@ -7,7 +7,11 @@ import { renderWithProviders } from './renderWithProviders';
 const Probe = () => {
   const { theme } = useTheme();
   const { language } = useTranslation();
-  return <div>{theme}:{language}</div>;
+  return (
+    <div>
+      {theme}:{language}
+    </div>
+  );
 };
 
 const LanguageSwitcher = () => {
@@ -17,15 +21,22 @@ const LanguageSwitcher = () => {
 
 describe('renderWithProviders', () => {
   test('supports initial theme and language overrides', async () => {
-    renderWithProviders(<Probe />, { initialTheme: 'light', initialLanguage: 'en' });
+    renderWithProviders(<Probe />, {
+      initialTheme: 'light',
+      initialLanguage: 'en',
+    });
     expect(await screen.findByText('light:en')).toBeInTheDocument();
   });
 
   test('applies initial language once and preserves a later real language change', async () => {
-    const view = renderWithProviders(<LanguageSwitcher />, { initialLanguage: 'en' });
+    const view = renderWithProviders(<LanguageSwitcher />, {
+      initialLanguage: 'en',
+    });
     const button = await screen.findByRole('button', { name: 'en' });
     fireEvent.click(button);
-    expect(await screen.findByRole('button', { name: 'zh' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: 'zh' })
+    ).toBeInTheDocument();
 
     view.rerender(<LanguageSwitcher />);
     expect(screen.getByRole('button', { name: 'zh' })).toBeInTheDocument();

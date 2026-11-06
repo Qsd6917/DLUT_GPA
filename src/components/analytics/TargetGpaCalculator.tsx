@@ -102,8 +102,7 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
   const plannerResult = useMemo<TargetScorePlanResult>(() => {
     const courses: PlannedCourseInput[] = plannedCourses.map(course => ({
       id: course.id,
-      name:
-        course.name?.trim() || t('future_course_default', course.sequence),
+      name: course.name?.trim() || t('future_course_default', course.sequence),
       credits: parseNumber(course.credits),
       score:
         course.scoreMode === 'auto'
@@ -133,7 +132,8 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
     const currentIndex = modes.indexOf(currentMode);
     let nextIndex: number | null = null;
 
-    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % modes.length;
+    if (event.key === 'ArrowRight')
+      nextIndex = (currentIndex + 1) % modes.length;
     if (event.key === 'ArrowLeft') {
       nextIndex = (currentIndex - 1 + modes.length) % modes.length;
     }
@@ -221,10 +221,7 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
         field: 'fixedScore' as const,
         message:
           plannerResult.reason === 'required'
-            ? t(
-                'required_field',
-                t('planned_course_fixed_label', courseLabel)
-              )
+            ? t('required_field', t('planned_course_fixed_label', courseLabel))
             : t('fixed_score_range'),
       };
     }
@@ -318,7 +315,9 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
         <figcaption className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted sm:grid-cols-4">
           <span>{t('scale_current_value', currentGpa.toFixed(3))}</span>
           <span>{t('scale_target_value', target.toFixed(3))}</span>
-          <span>{t('scale_outcome_value', outcomeLabel, outcome.toFixed(3))}</span>
+          <span>
+            {t('scale_outcome_value', outcomeLabel, outcome.toFixed(3))}
+          </span>
           <span>{t('scale_maximum_value', maximumGpa.toFixed(3))}</span>
         </figcaption>
       </figure>
@@ -359,7 +358,10 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
               {t('planner_unreachable')}
             </div>
             <p className="type-body-sm mt-2">
-              {t('highest_possible_gpa', plannerResult.bestPossibleGpa.toFixed(3))}
+              {t(
+                'highest_possible_gpa',
+                plannerResult.bestPossibleGpa.toFixed(3)
+              )}
             </p>
             <p className="type-body-sm mt-1">
               {t('target_shortfall', plannerResult.shortfall.toFixed(3))}
@@ -428,10 +430,7 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
   ] as const;
 
   return (
-    <section
-      className="paper-panel p-5 sm:p-6"
-      aria-labelledby={headingId}
-    >
+    <section className="paper-panel p-5 sm:p-6" aria-labelledby={headingId}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-[0.95rem] border border-primary/10 bg-[hsl(var(--surface-2))] text-[hsl(var(--color-accent))]">
@@ -439,10 +438,7 @@ export const TargetGpaCalculator: React.FC<TargetGpaCalculatorProps> = ({
           </div>
           <div>
             <div className="section-kicker">{t('target_projection')}</div>
-            <h3
-              id={headingId}
-              className="type-section-title text-main"
-            >
+            <h3 id={headingId} className="type-section-title text-main">
               {t('target_score_planning')}
             </h3>
           </div>
