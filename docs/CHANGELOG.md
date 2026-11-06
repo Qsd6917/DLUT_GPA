@@ -9,7 +9,9 @@
 - 补齐 agent 基础设施：新增 `AGENTS.md`（工作规则、质量门、领域事实、已知坑）与 `docs/agents/` 三件套
   （issue-tracker / triage-labels / domain）。
 - 修复 CI 从未成功运行的问题：`package-lock.json` 长期被 `.git/info/exclude` 排除，而 CI 的
-  `cache: npm` 与 `npm ci` 都依赖它。现已纳入版本控制。
+  `cache: npm` 与 `npm ci` 都依赖它。现已纳入版本控制，CI 首次全绿（run `42234877441`）。
+- 修复 `ShareableReportModal` 生成时间断言的时区依赖：测试硬编码了 UTC+8 的结果，导致 CI（UTC）
+  渲染为 01:30 而失败。改为由同一套本地格式化逻辑推导期望值，断言与运行时区无关。
 - CI 触发分支从仅 `main` 改为 `['**']`，feature 分支的推送同样会被验证。
 - 新增 `format:check` 到 CI，并完成一次全仓格式化（`src` 51 个文件）。`docs/archive/` 经
   `.prettierignore` 排除，历史文档不做格式改写。

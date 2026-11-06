@@ -5,6 +5,9 @@
 > 2026-11-06 复核：下列数值在本地重新实测，与记录一致（`type-check` / `lint` / `test:run` 171 项 /
 > `build` 主入口 gzip 28.84 kB / 覆盖率 89.32-78.48-69.33）。本轮同时修复了 CI 从未成功运行的问题，
 > 详见 `CHANGELOG.md` 的「工程治理（2026-11-06）」。
+>
+> **CI 已首次全绿**：run `42234877441`，9 个步骤（Setup / Install / Type check / Lint / Format check /
+> Test / Build）全部 success。此前自 2026-08-02 起 CI 一直卡在 Setup Node.js 失败。
 
 ## 质量命令
 
