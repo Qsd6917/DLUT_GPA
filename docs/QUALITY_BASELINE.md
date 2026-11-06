@@ -2,6 +2,10 @@
 
 记录日期：2026-08-08
 
+> 2026-11-06 复核：下列数值在本地重新实测，与记录一致（`type-check` / `lint` / `test:run` 171 项 /
+> `build` 主入口 gzip 28.84 kB / 覆盖率 89.32-78.48-69.33）。本轮同时修复了 CI 从未成功运行的问题，
+> 详见 `CHANGELOG.md` 的「工程治理（2026-11-06）」。
+
 ## 质量命令
 
 本地和 CI 使用同一组质量命令：
@@ -10,6 +14,7 @@
 npm ci
 npm run type-check
 npm run lint
+npm run format:check
 npm run test:run
 npm run build
 ```
@@ -18,10 +23,10 @@ npm run build
 
 - `npm run type-check`：通过
 - `npm run lint`：通过
+- `npm run format:check`：通过（2026-11-06 完成全仓格式化后；此前为 64 个文件不通过，现已纳入 CI）
 - `npm run test:run`：20 个测试文件、171 项测试通过
 - `npm run test:coverage`：通过
 - `npm run build`：通过，转换 2461 个模块；本次串行快照用时 8.77 秒
-- `npm run format:check`：退出码 `1`。Phase 0 与当前检查均报告同一组 64 个文件级问题（`src` 51 个、文档 13 个，`README.md` 通过）；本轮 15 个修改文件中，除 `README.md` 外的其他触及文件仍在该全局格式债务列表中。该命令当前不在 CI 中，本轮未执行全仓库格式重写（broad rewrite）
 
 构建输出包含 `caniuse-lite is outdated` 提示；该提示不影响本轮类型检查、测试、覆盖率或生产构建结果。
 
@@ -29,11 +34,11 @@ npm run build
 
 `npm run test:coverage` 使用 Vitest + V8 coverage。
 
-| 范围 | Statements | Branches | Functions | Lines |
-| --- | ---: | ---: | ---: | ---: |
-| All files | 89.32% | 78.48% | 69.33% | 89.32% |
-| `TargetGpaCalculator.tsx` | 99.13% | 96.15% | 100.00% | 99.13% |
-| `gpaService.ts` | 91.44% | 92.98% | 100.00% | 91.44% |
+| 范围                      | Statements | Branches | Functions |  Lines |
+| ------------------------- | ---------: | -------: | --------: | -----: |
+| All files                 |     89.32% |   78.48% |    69.33% | 89.32% |
+| `TargetGpaCalculator.tsx` |     99.13% |   96.15% |   100.00% | 99.13% |
+| `gpaService.ts`           |     91.44% |   92.98% |   100.00% | 91.44% |
 
 本轮不设置任意全局 80% CI 阈值。后续新增或重构时，优先守住以下关键逻辑：
 
@@ -46,14 +51,14 @@ npm run build
 
 `npm run build` 当前主要输出如下。Vite 资源体积使用十进制 `kB`；PWA precache 汇总保留构建工具输出的 `KiB`。
 
-| Chunk | 原始体积 | gzip |
-| --- | ---: | ---: |
-| `assets/index-*.js` | 95.87 kB | 28.84 kB |
-| `assets/TargetGpaCalculator-*.js` | 14.42 kB | 3.97 kB |
-| `assets/react-vendor-*.js` | 133.93 kB | 43.13 kB |
-| `assets/generateCategoricalChart-*.js` | 350.45 kB | 98.55 kB |
-| `assets/xlsx-*.js` | 429.03 kB | 143.08 kB |
-| `assets/index-*.css` | 48.95 kB | 9.67 kB |
+| Chunk                                  |  原始体积 |      gzip |
+| -------------------------------------- | --------: | --------: |
+| `assets/index-*.js`                    |  95.87 kB |  28.84 kB |
+| `assets/TargetGpaCalculator-*.js`      |  14.42 kB |   3.97 kB |
+| `assets/react-vendor-*.js`             | 133.93 kB |  43.13 kB |
+| `assets/generateCategoricalChart-*.js` | 350.45 kB |  98.55 kB |
+| `assets/xlsx-*.js`                     | 429.03 kB | 143.08 kB |
+| `assets/index-*.css`                   |  48.95 kB |   9.67 kB |
 
 PWA precache：24 个条目，共 1443.61 KiB。
 

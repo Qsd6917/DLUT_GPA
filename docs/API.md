@@ -346,11 +346,23 @@ const {
 定义位置：`src/types/index.ts`；差异计算：`src/services/experimentService.ts`
 
 ```typescript
-interface ExperimentSession { baselineCourses: Course[]; draftCourses: Course[]; }
-type ExperimentChangeKind = 'added' | 'removed' | 'score' | 'included' | 'metadata';
+interface ExperimentSession {
+  baselineCourses: Course[];
+  draftCourses: Course[];
+}
+type ExperimentChangeKind =
+  | 'added'
+  | 'removed'
+  | 'score'
+  | 'included'
+  | 'metadata';
 interface ExperimentComparison {
-  baselineStats: GpaStats; draftStats: GpaStats; gpaDelta: number;
-  averageScoreDelta: number; creditsDelta: number; changes: ExperimentCourseChange[];
+  baselineStats: GpaStats;
+  draftStats: GpaStats;
+  gpaDelta: number;
+  averageScoreDelta: number;
+  creditsDelta: number;
+  changes: ExperimentCourseChange[];
 }
 ```
 

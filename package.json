@@ -83,10 +83,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/dlut-gpa.git"
+    "url": "git+https://github.com/Qsd6917/DLUT_GPA.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/dlut-gpa/issues"
+    "url": "https://github.com/Qsd6917/DLUT_GPA/issues"
   },
-  "homepage": "https://github.com/your-username/dlut-gpa#readme"
+  "homepage": "https://github.com/Qsd6917/DLUT_GPA#readme"
 }
