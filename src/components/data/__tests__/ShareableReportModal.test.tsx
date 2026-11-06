@@ -130,8 +130,18 @@ describe('ShareableReportModal', () => {
   test('shows report metadata, experiment plan, current scope, and the same metrics as the page', () => {
     renderReport({ isExperiment: true });
 
+    // 生成时间按本地时区渲染（getHours/getDate），因此期望值必须由同一逻辑推导，
+    // 不能硬编码某个时区的结果——否则 CI(UTC) 与本地(UTC+8) 会得出不同字符串。
+    const generatedAt = new Date('2026-07-12T01:30:00.000Z');
+    const pad2 = (n: number) => String(n).padStart(2, '0');
+    const expectedGeneratedAt = `${generatedAt.getFullYear()}-${pad2(
+      generatedAt.getMonth() + 1
+    )}-${pad2(generatedAt.getDate())} ${pad2(generatedAt.getHours())}:${pad2(
+      generatedAt.getMinutes()
+    )}`;
+
     expect(screen.getByText('生成时间')).toBeInTheDocument();
-    expect(screen.getByText('2026-07-12 09:30')).toBeInTheDocument();
+    expect(screen.getByText(expectedGeneratedAt)).toBeInTheDocument();
     expect(screen.getByText('计算方法')).toBeInTheDocument();
     expect(screen.getAllByText('DLUT 5.0').length).toBeGreaterThan(0);
     expect(screen.getByText('数据模式')).toBeInTheDocument();
