@@ -18,8 +18,8 @@
   现改为 `/build/` 只匹配根目录。
 - 修正 `package.json` 中 `repository` / `bugs` / `homepage` 的占位地址 `your-username`，
   改为实际仓库 `Qsd6917/DLUT_GPA`。
-- 移除 `一键启动.bat`（功能由 `scripts/start-dev.ps1` 承接），README 同步改指向；
-  同时补记该移除，避免后续会话按旧 README 重建 `.bat`。
+- README 的一键启动说明同时给出 `一键启动.bat` 与 `scripts/start-dev.ps1` 两种等价方式，
+  并注明改动启动流程需同步维护两者。`一键启动.bat` 经用户决定保留，未移除。
 - 在 GitHub 仓库创建 `needs-triage`、`needs-info`、`ready-for-agent`、`ready-for-human`
   四个 triage 标签（`wontfix` 为 GitHub 默认自带）。
 
