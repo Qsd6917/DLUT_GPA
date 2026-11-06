@@ -32,7 +32,9 @@ describe('useCourseData', () => {
     await waitFor(() => expect(result.current.hydrated).toBe(true));
 
     expect(result.current.courses).toHaveLength(83);
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toHaveLength(83);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toHaveLength(
+      83
+    );
     expect(localStorage.getItem(SEED_KEY)).toBe(CURRENT_SEED);
   });
 
@@ -61,12 +63,17 @@ describe('useCourseData', () => {
     const { result } = renderHook(() => useCourseData());
     await waitFor(() => expect(result.current.courses).toHaveLength(83));
     const storedBaseline = localStorage.getItem(STORAGE_KEY);
-    const modified = { ...result.current.courses[20], name: '摘要不变但内容已修改' };
+    const modified = {
+      ...result.current.courses[20],
+      name: '摘要不变但内容已修改',
+    };
 
     localStorage.setItem(SEED_KEY, 'external-old-seed');
     act(() => result.current.updateCourse(modified));
 
-    await waitFor(() => expect(result.current.courses[20].name).toBe(modified.name));
+    await waitFor(() =>
+      expect(result.current.courses[20].name).toBe(modified.name)
+    );
     expect(localStorage.getItem(SEED_KEY)).toBe('external-old-seed');
     expect(localStorage.getItem(STORAGE_KEY)).toBe(storedBaseline);
   });
@@ -89,7 +96,9 @@ describe('useCourseData', () => {
     await waitFor(() => expect(result.current.hydrated).toBe(true));
 
     expect(result.current.courses).toHaveLength(83);
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toHaveLength(83);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toHaveLength(
+      83
+    );
   });
 
   test('resetData restores and persists the transcript baseline', async () => {
@@ -102,7 +111,9 @@ describe('useCourseData', () => {
 
     await waitFor(() => {
       expect(result.current.courses).toHaveLength(83);
-      expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toHaveLength(83);
+      expect(
+        JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
+      ).toHaveLength(83);
     });
   });
 
@@ -119,7 +130,9 @@ describe('useCourseData', () => {
     expect(result.current.experiment?.baselineCourses).toEqual([savedCourse]);
     expect(result.current.experiment?.draftCourses).toEqual([]);
     expect(result.current.courses).toEqual([]);
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toEqual([savedCourse]);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toEqual([
+      savedCourse,
+    ]);
   });
 
   test('re-entering an experiment preserves its original baseline and current draft', async () => {
@@ -147,7 +160,9 @@ describe('useCourseData', () => {
     act(() => result.current.updateCourseScore(savedCourse.id, 0));
 
     expect(result.current.courses[0]).toMatchObject({ score: 0, gpa: 0 });
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toEqual([savedCourse]);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')).toEqual([
+      savedCourse,
+    ]);
   });
 
   test('applies all working-course mutators to the draft and discard restores official data', async () => {
@@ -160,10 +175,19 @@ describe('useCourseData', () => {
     act(() => result.current.startExperiment());
     act(() => {
       result.current.toggleCourse(savedCourse.id);
-      result.current.saveCourse(savedCourse.id, '草稿课程', 4, 88, '2-1', '选修', true);
-      result.current.importData([
-        { ...savedCourse, id: 'imported', name: '导入课程' },
-      ], 'merge');
+      result.current.saveCourse(
+        savedCourse.id,
+        '草稿课程',
+        4,
+        88,
+        '2-1',
+        '选修',
+        true
+      );
+      result.current.importData(
+        [{ ...savedCourse, id: 'imported', name: '导入课程' }],
+        'merge'
+      );
       result.current.setAllActive(false);
     });
 
@@ -177,7 +201,10 @@ describe('useCourseData', () => {
       isCore: true,
       isActive: false,
     });
-    expect(result.current.courses[1]).toMatchObject({ name: '导入课程', isActive: false });
+    expect(result.current.courses[1]).toMatchObject({
+      name: '导入课程',
+      isActive: false,
+    });
     expect(localStorage.getItem(STORAGE_KEY)).toBe(persisted);
 
     act(() => result.current.discardExperiment());
@@ -226,7 +253,9 @@ describe('useCourseData', () => {
       result.current.removeCourse(secondCourse.id);
       result.current.addCourse('新增课程', 2, 86, '4-1', '选修', false);
     });
-    const addedCourse = result.current.courses.find(item => item.name === '新增课程');
+    const addedCourse = result.current.courses.find(
+      item => item.name === '新增课程'
+    );
 
     expect(addedCourse).toBeDefined();
     act(() => {
@@ -272,14 +301,18 @@ describe('useCourseData', () => {
 
     act(() => result.current.startExperiment());
     act(() => result.current.updateCourseScore(savedCourse.id, 92));
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')[0].score).toBe(80);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')[0].score).toBe(
+      80
+    );
 
     act(() => result.current.commitExperiment());
 
     expect(result.current.isExperimentActive).toBe(false);
     expect(result.current.courses[0].score).toBe(92);
     await waitFor(() => {
-      expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')[0].score).toBe(92);
+      expect(
+        JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')[0].score
+      ).toBe(92);
     });
   });
 

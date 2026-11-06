@@ -23,10 +23,12 @@ describe('DataManagementModal', () => {
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '关闭数据管理' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '关闭数据管理' })
+    ).toBeInTheDocument();
 
-    const actionGrid = Array.from(container.querySelectorAll('div')).find((element) =>
-      element.className.includes('grid grid-cols-2 gap-3')
+    const actionGrid = Array.from(container.querySelectorAll('div')).find(
+      element => element.className.includes('grid grid-cols-2 gap-3')
     );
     expect(actionGrid).toBeTruthy();
   });
@@ -42,11 +44,9 @@ describe('DataManagementModal', () => {
     XLSX.utils.book_append_sheet(workbook, sheet, '课程');
 
     const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const file = new File(
-      [new Uint8Array(buffer)],
-      'courses.xlsx',
-      { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
-    );
+    const file = new File([new Uint8Array(buffer)], 'courses.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
 
     const { container } = render(
       <LanguageProvider>

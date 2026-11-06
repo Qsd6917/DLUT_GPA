@@ -7,7 +7,8 @@ interface OcrScannerProps {
   onCoursesParsed: (courses: Course[]) => void;
 }
 
-let tesseractModulePromise: Promise<typeof import('tesseract.js')> | null = null;
+let tesseractModulePromise: Promise<typeof import('tesseract.js')> | null =
+  null;
 
 const loadTesseractModule = () => {
   if (!tesseractModulePromise) {
@@ -24,10 +25,10 @@ const parseOcrResult = (text: string): Course[] => {
 
   const lines = text
     .split(/\r?\n/)
-    .map((line) => line.trim())
+    .map(line => line.trim())
     .filter(Boolean);
 
-  lines.forEach((line) => {
+  lines.forEach(line => {
     const match = line.match(lineRegex);
     if (!match) return;
 
@@ -36,7 +37,14 @@ const parseOcrResult = (text: string): Course[] => {
     const credits = parseFloat(creditsStr);
     const score = parseFloat(scoreStr);
 
-    if (!cleanName || Number.isNaN(credits) || Number.isNaN(score) || credits < 0 || score < 0 || score > 100) {
+    if (
+      !cleanName ||
+      Number.isNaN(credits) ||
+      Number.isNaN(score) ||
+      credits < 0 ||
+      score < 0 ||
+      score > 100
+    ) {
       return;
     }
 
@@ -45,7 +53,12 @@ const parseOcrResult = (text: string): Course[] => {
     keys.add(dedupeKey);
 
     let type: '必修' | '选修' | '任选' = '选修';
-    if (cleanName.includes('必修') || cleanName.includes('数学') || cleanName.includes('英语') || cleanName.includes('政治')) {
+    if (
+      cleanName.includes('必修') ||
+      cleanName.includes('数学') ||
+      cleanName.includes('英语') ||
+      cleanName.includes('政治')
+    ) {
       type = '必修';
     } else if (cleanName.includes('任选') || cleanName.includes('讲座')) {
       type = '任选';
@@ -59,7 +72,8 @@ const parseOcrResult = (text: string): Course[] => {
       cleanName.includes('算法');
 
     courses.push({
-      id: globalThis.crypto?.randomUUID?.() ?? `${cleanName}-${credits}-${score}`,
+      id:
+        globalThis.crypto?.randomUUID?.() ?? `${cleanName}-${credits}-${score}`,
       name: cleanName,
       credits,
       score,
@@ -81,7 +95,9 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
     event.target.value = '';
@@ -93,7 +109,7 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
     try {
       const { recognize } = await loadTesseractModule();
       const result = await recognize(file, 'chi_sim+eng', {
-        logger: (message) => {
+        logger: message => {
           if (message.status === 'recognizing text') {
             setProgress(Math.round(message.progress * 100));
           }
@@ -128,7 +144,7 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
         </h3>
       </div>
 
-      <div 
+      <div
         className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
           isScanning
             ? 'border-primary/40 bg-primary/10'
@@ -144,10 +160,13 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
           className="hidden"
           disabled={isScanning}
         />
-        
+
         <div className="flex flex-col items-center justify-center gap-3">
-          <Camera size={48} className={`mx-auto ${isScanning ? 'text-primary' : 'text-muted'}`} />
-          
+          <Camera
+            size={48}
+            className={`mx-auto ${isScanning ? 'text-primary' : 'text-muted'}`}
+          />
+
           {isScanning ? (
             <div className="w-full max-w-xs">
               <div className="flex justify-between text-sm mb-1">
@@ -155,8 +174,8 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
                 <span>{progress}%</span>
               </div>
               <div className="h-2.5 w-full rounded-full bg-slate-200/80 dark:bg-white/10">
-                <div 
-                  className="h-2.5 rounded-full bg-primary transition-all duration-300" 
+                <div
+                  className="h-2.5 rounded-full bg-primary transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
@@ -165,9 +184,9 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
             <>
               <p className="font-medium text-main">{t('ocr_upload_prompt')}</p>
               <p className="text-sm text-muted">{t('ocr_supported_formats')}</p>
-              <button 
+              <button
                 className="mt-4 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-on-primary transition-opacity hover:opacity-90"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   triggerFileSelect();
                 }}

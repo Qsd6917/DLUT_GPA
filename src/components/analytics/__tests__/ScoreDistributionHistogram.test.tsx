@@ -20,10 +20,10 @@ const mockStats = {
     { name: '80-89', value: 1 },
     { name: '70-79', value: 1 },
     { name: '60-69', value: 0 },
-    { name: '<60', value: 1 }
+    { name: '<60', value: 1 },
   ],
   compulsoryCredits: 20,
-  compulsoryWeightedGpa: 3.2
+  compulsoryWeightedGpa: 3.2,
 };
 
 // Mock the ResponsiveContainer to avoid issues with dimensions in tests
@@ -68,12 +68,24 @@ describe('ScoreDistributionHistogram', () => {
 
   it('shows course count, credits and share with the score range', () => {
     render(
-      <ThemeProvider><LanguageProvider><ScoreDistributionHistogram stats={mockStats} /></LanguageProvider></ThemeProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <ScoreDistributionHistogram stats={mockStats} />
+        </LanguageProvider>
+      </ThemeProvider>
     );
     expect(screen.getByText('2 门 · 10.0 学分 · 40.0%')).toBeInTheDocument();
   });
   it('exposes a screen-reader table labelled with course share', () => {
-    render(<ThemeProvider><LanguageProvider><ScoreDistributionHistogram stats={mockStats} /></LanguageProvider></ThemeProvider>);
-    expect(screen.getByRole('table', { name: '成绩分布数据' })).toHaveTextContent('课程占比');
+    render(
+      <ThemeProvider>
+        <LanguageProvider>
+          <ScoreDistributionHistogram stats={mockStats} />
+        </LanguageProvider>
+      </ThemeProvider>
+    );
+    expect(
+      screen.getByRole('table', { name: '成绩分布数据' })
+    ).toHaveTextContent('课程占比');
   });
 });

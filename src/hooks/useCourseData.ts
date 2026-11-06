@@ -12,14 +12,17 @@ import { SAMPLE_COURSES, DEFAULT_CALCULATION_METHOD } from '../utils/constants';
 const STORAGE_KEY = 'dlut_gpa_courses_transcript_20260704';
 const STORAGE_SEED_KEY = 'dlut_gpa_courses_seed';
 const CURRENT_SEED_ID = 'transcript-20260704-qian-dayu-v2';
-const createCourseId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const createCourseId = () =>
+  globalThis.crypto?.randomUUID?.() ??
+  `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 interface CourseDataState {
   officialCourses: Course[];
   experiment: ExperimentSession | null;
 }
 
-const cloneCourses = (courses: Course[]) => courses.map(course => ({ ...course }));
+const cloneCourses = (courses: Course[]) =>
+  courses.map(course => ({ ...course }));
 
 const getInitialTranscriptCourses = (method: CalculationMethod): Course[] =>
   SAMPLE_COURSES.map(c => ({
@@ -28,16 +31,19 @@ const getInitialTranscriptCourses = (method: CalculationMethod): Course[] =>
   }));
 
 const isInitialTranscriptCourses = (courses: Course[]) =>
-  courses.length === SAMPLE_COURSES.length && courses.every((course, index) => {
+  courses.length === SAMPLE_COURSES.length &&
+  courses.every((course, index) => {
     const baseline = SAMPLE_COURSES[index];
-    return course.id === baseline.id &&
+    return (
+      course.id === baseline.id &&
       course.name === baseline.name &&
       course.credits === baseline.credits &&
       course.score === baseline.score &&
       course.isActive === baseline.isActive &&
       course.semester === baseline.semester &&
       course.type === baseline.type &&
-      course.isCore === baseline.isCore;
+      course.isCore === baseline.isCore
+    );
   });
 
 export const useCourseData = () => {
@@ -46,23 +52,30 @@ export const useCourseData = () => {
     experiment: null,
   });
   const [hydrated, setHydrated] = useState(false);
-  const [method, setMethod] = useState<CalculationMethod>(DEFAULT_CALCULATION_METHOD);
+  const [method, setMethod] = useState<CalculationMethod>(
+    DEFAULT_CALCULATION_METHOD
+  );
   const courses = data.experiment?.draftCourses ?? data.officialCourses;
   const isExperimentActive = data.experiment !== null;
 
   // Initialize data
   useEffect(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
-    const isCurrentSeed = localStorage.getItem(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
+    const isCurrentSeed =
+      localStorage.getItem(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
     const hasSavedData = savedData !== null && isCurrentSeed;
-    let initialCourses: Course[] = getInitialTranscriptCourses(DEFAULT_CALCULATION_METHOD);
+    let initialCourses: Course[] = getInitialTranscriptCourses(
+      DEFAULT_CALCULATION_METHOD
+    );
 
     if (hasSavedData) {
       try {
         const parsed = JSON.parse(savedData as string);
         initialCourses = Array.isArray(parsed) ? parsed : [];
       } catch (e) {
-        initialCourses = getInitialTranscriptCourses(DEFAULT_CALCULATION_METHOD);
+        initialCourses = getInitialTranscriptCourses(
+          DEFAULT_CALCULATION_METHOD
+        );
       }
 
       if (initialCourses.length > 0) {
@@ -71,7 +84,7 @@ export const useCourseData = () => {
           ...c,
           type: c.type || '必修',
           isCore: c.isCore !== undefined ? c.isCore : false,
-          gpa: calculateCourseGpa(c.score, DEFAULT_CALCULATION_METHOD)
+          gpa: calculateCourseGpa(c.score, DEFAULT_CALCULATION_METHOD),
         }));
       }
     }
@@ -88,7 +101,8 @@ export const useCourseData = () => {
   // Persist courses
   useEffect(() => {
     if (hydrated && !data.experiment) {
-      const isCurrentSeed = localStorage.getItem(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
+      const isCurrentSeed =
+        localStorage.getItem(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
       if (!isCurrentSeed && !isInitialTranscriptCourses(data.officialCourses)) {
         return;
       }
@@ -101,10 +115,11 @@ export const useCourseData = () => {
   // Recalculate GPAs when method changes
   useEffect(() => {
     if (!hydrated) return;
-    const recalculate = (items: Course[]) => items.map(course => ({
-      ...course,
-      gpa: calculateCourseGpa(course.score, method),
-    }));
+    const recalculate = (items: Course[]) =>
+      items.map(course => ({
+        ...course,
+        gpa: calculateCourseGpa(course.score, method),
+      }));
     setData(prev => ({
       officialCourses: recalculate(prev.officialCourses),
       experiment: prev.experiment
@@ -134,78 +149,124 @@ export const useCourseData = () => {
     []
   );
 
-  const addCourse = useCallback((name: string, credits: number, score: number, semester: string, type: CourseType, isCore: boolean) => {
-    const newCourse: Course = {
-      id: createCourseId(),
-      name,
-      credits,
-      score,
-      semester,
-      type,
-      isCore,
-      gpa: calculateCourseGpa(score, method),
-      isActive: true
-    };
-    updateWorkingCourses(prev => [...prev, newCourse]);
-  }, [method, updateWorkingCourses]);
+  const addCourse = useCallback(
+    (
+      name: string,
+      credits: number,
+      score: number,
+      semester: string,
+      type: CourseType,
+      isCore: boolean
+    ) => {
+      const newCourse: Course = {
+        id: createCourseId(),
+        name,
+        credits,
+        score,
+        semester,
+        type,
+        isCore,
+        gpa: calculateCourseGpa(score, method),
+        isActive: true,
+      };
+      updateWorkingCourses(prev => [...prev, newCourse]);
+    },
+    [method, updateWorkingCourses]
+  );
 
-  const removeCourse = useCallback((id: string) => {
-    updateWorkingCourses(prev => prev.filter(c => c.id !== id));
-  }, [updateWorkingCourses]);
+  const removeCourse = useCallback(
+    (id: string) => {
+      updateWorkingCourses(prev => prev.filter(c => c.id !== id));
+    },
+    [updateWorkingCourses]
+  );
 
-  const toggleCourse = useCallback((id: string) => {
-    updateWorkingCourses(prev => prev.map(c => c.id === id ? { ...c, isActive: !c.isActive } : c));
-  }, [updateWorkingCourses]);
+  const toggleCourse = useCallback(
+    (id: string) => {
+      updateWorkingCourses(prev =>
+        prev.map(c => (c.id === id ? { ...c, isActive: !c.isActive } : c))
+      );
+    },
+    [updateWorkingCourses]
+  );
 
-  const updateCourse = useCallback((updated: Course) => {
-    updateWorkingCourses(prev => prev.map(c => c.id === updated.id ? updated : c));
-  }, [updateWorkingCourses]);
+  const updateCourse = useCallback(
+    (updated: Course) => {
+      updateWorkingCourses(prev =>
+        prev.map(c => (c.id === updated.id ? updated : c))
+      );
+    },
+    [updateWorkingCourses]
+  );
 
-  const saveCourse = useCallback((id: string, name: string, credits: number, score: number, semester: string, type: CourseType, isCore: boolean) => {
-    updateWorkingCourses(prev => prev.map(c => {
-      if (c.id === id) {
-        return {
-          ...c,
-          name,
-          credits,
-          score,
-          semester,
-          type,
-          isCore,
-          gpa: calculateCourseGpa(score, method)
-        };
-      }
-      return c;
-    }));
-  }, [method, updateWorkingCourses]);
+  const saveCourse = useCallback(
+    (
+      id: string,
+      name: string,
+      credits: number,
+      score: number,
+      semester: string,
+      type: CourseType,
+      isCore: boolean
+    ) => {
+      updateWorkingCourses(prev =>
+        prev.map(c => {
+          if (c.id === id) {
+            return {
+              ...c,
+              name,
+              credits,
+              score,
+              semester,
+              type,
+              isCore,
+              gpa: calculateCourseGpa(score, method),
+            };
+          }
+          return c;
+        })
+      );
+    },
+    [method, updateWorkingCourses]
+  );
 
-  const updateCourseScore = useCallback((id: string, score: number) => {
-    updateWorkingCourses(prev => prev.map(course => course.id === id
-      ? { ...course, score, gpa: calculateCourseGpa(score, method) }
-      : course));
-  }, [method, updateWorkingCourses]);
+  const updateCourseScore = useCallback(
+    (id: string, score: number) => {
+      updateWorkingCourses(prev =>
+        prev.map(course =>
+          course.id === id
+            ? { ...course, score, gpa: calculateCourseGpa(score, method) }
+            : course
+        )
+      );
+    },
+    [method, updateWorkingCourses]
+  );
 
-  const importData = useCallback((importedCourses: Course[], mode: 'replace' | 'merge') => {
-    const processedCourses = importedCourses.map(c => ({
-      ...c,
-      id: c.id || createCourseId(),
-      isActive: c.isActive !== undefined ? c.isActive : true,
-      semester: c.semester || '未知学期',
-      type: c.type || '必修',
-      isCore: c.isCore ?? false,
-      gpa: calculateCourseGpa(c.score, method)
-    }));
-
-    if (mode === 'replace') {
-      updateWorkingCourses(() => processedCourses);
-    } else {
-      const newCourses = processedCourses.map(c => ({ 
-        ...c, 
-        id: createCourseId()
+  const importData = useCallback(
+    (importedCourses: Course[], mode: 'replace' | 'merge') => {
+      const processedCourses = importedCourses.map(c => ({
+        ...c,
+        id: c.id || createCourseId(),
+        isActive: c.isActive !== undefined ? c.isActive : true,
+        semester: c.semester || '未知学期',
+        type: c.type || '必修',
+        isCore: c.isCore ?? false,
+        gpa: calculateCourseGpa(c.score, method),
       }));
-      updateWorkingCourses(prev => [...prev, ...newCourses]);
-    }
-  }, [method, updateWorkingCourses]);
+
+      if (mode === 'replace') {
+        updateWorkingCourses(() => processedCourses);
+      } else {
+        const newCourses = processedCourses.map(c => ({
+          ...c,
+          id: createCourseId(),
+        }));
+        updateWorkingCourses(prev => [...prev, ...newCourses]);
+      }
+    },
+    [method, updateWorkingCourses]
+  );
 
   const resetData = useCallback(() => {
     if (!data.experiment) {
@@ -229,15 +290,17 @@ export const useCourseData = () => {
   }, []);
 
   const resetExperiment = useCallback(() => {
-    setData(prev => prev.experiment
-      ? {
-          ...prev,
-          experiment: {
-            ...prev.experiment,
-            draftCourses: cloneCourses(prev.experiment.baselineCourses),
-          },
-        }
-      : prev);
+    setData(prev =>
+      prev.experiment
+        ? {
+            ...prev,
+            experiment: {
+              ...prev.experiment,
+              draftCourses: cloneCourses(prev.experiment.baselineCourses),
+            },
+          }
+        : prev
+    );
   }, []);
 
   const restoreExperimentCourse = useCallback((course: Course) => {
@@ -253,7 +316,9 @@ export const useCourseData = () => {
         ...prev.experiment.baselineCourses[baselineIndex],
       };
       const draftCourses = cloneCourses(prev.experiment.draftCourses);
-      const existingIndex = draftCourses.findIndex(item => item.id === course.id);
+      const existingIndex = draftCourses.findIndex(
+        item => item.id === course.id
+      );
 
       if (existingIndex >= 0) {
         draftCourses[existingIndex] = baselineCourse;
@@ -265,10 +330,14 @@ export const useCourseData = () => {
           const itemIndex = baselineOrder.get(item.id);
           return itemIndex !== undefined && itemIndex > baselineIndex;
         });
-        const insertionIndex = nextBaselineIndex >= 0
-          ? nextBaselineIndex
-          : draftCourses.reduce((lastIndex, item, index) =>
-              baselineOrder.has(item.id) ? index + 1 : lastIndex, 0);
+        const insertionIndex =
+          nextBaselineIndex >= 0
+            ? nextBaselineIndex
+            : draftCourses.reduce(
+                (lastIndex, item, index) =>
+                  baselineOrder.has(item.id) ? index + 1 : lastIndex,
+                0
+              );
         draftCourses.splice(insertionIndex, 0, baselineCourse);
       }
 
@@ -283,33 +352,45 @@ export const useCourseData = () => {
   }, []);
 
   const discardExperiment = useCallback(() => {
-    setData(prev => prev.experiment ? { ...prev, experiment: null } : prev);
+    setData(prev => (prev.experiment ? { ...prev, experiment: null } : prev));
   }, []);
 
   const commitExperiment = useCallback(() => {
-    setData(prev => prev.experiment
-      ? {
-          officialCourses: cloneCourses(prev.experiment.draftCourses),
-          experiment: null,
-        }
-      : prev);
+    setData(prev =>
+      prev.experiment
+        ? {
+            officialCourses: cloneCourses(prev.experiment.draftCourses),
+            experiment: null,
+          }
+        : prev
+    );
   }, []);
 
-  const setAllActive = useCallback((active: boolean, filteredIds?: Set<string>) => {
-    if (filteredIds) {
-        updateWorkingCourses(prev => prev.map(c => filteredIds.has(c.id) ? { ...c, isActive: active } : c));
-    } else {
-        updateWorkingCourses(prev => prev.map(c => ({ ...c, isActive: active })));
-    }
-  }, [updateWorkingCourses]);
+  const setAllActive = useCallback(
+    (active: boolean, filteredIds?: Set<string>) => {
+      if (filteredIds) {
+        updateWorkingCourses(prev =>
+          prev.map(c =>
+            filteredIds.has(c.id) ? { ...c, isActive: active } : c
+          )
+        );
+      } else {
+        updateWorkingCourses(prev =>
+          prev.map(c => ({ ...c, isActive: active }))
+        );
+      }
+    },
+    [updateWorkingCourses]
+  );
 
   const hasUnsavedExperimentChanges = useMemo(
-    () => data.experiment
-      ? compareExperimentCourses(
-          data.experiment.baselineCourses,
-          data.experiment.draftCourses
-        ).changes.length > 0
-      : false,
+    () =>
+      data.experiment
+        ? compareExperimentCourses(
+            data.experiment.baselineCourses,
+            data.experiment.draftCourses
+          ).changes.length > 0
+        : false,
     [data.experiment]
   );
 

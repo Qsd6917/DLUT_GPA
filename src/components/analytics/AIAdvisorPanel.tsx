@@ -63,7 +63,9 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({
       <div className="paper-panel p-8 text-center">
         <Brain className="mx-auto h-10 w-10 text-muted/40" />
         <h2 className="type-section-title mt-3 text-main">暂无可分析课程</h2>
-        <p className="type-body-sm mt-2">请先添加有效成绩并将课程设为计入 GPA，再生成本地学业建议。</p>
+        <p className="type-body-sm mt-2">
+          请先添加有效成绩并将课程设为计入 GPA，再生成本地学业建议。
+        </p>
       </div>
     );
   }
@@ -332,7 +334,13 @@ const AnalysisTab: React.FC<{
   targetGPA: number;
   currentGPA: number;
   maximumGpa: number;
-}> = ({ academicRisks, skillGapAnalysis, targetGPA, currentGPA, maximumGpa }) => {
+}> = ({
+  academicRisks,
+  skillGapAnalysis,
+  targetGPA,
+  currentGPA,
+  maximumGpa,
+}) => {
   const sortedSkills = [...skillGapAnalysis].sort(
     (a, b) => b.improvementPriority - a.improvementPriority
   );

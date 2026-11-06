@@ -1,19 +1,41 @@
 import { CalculationMethod, CourseType } from '../types';
 
 export const DEFAULT_CALCULATION_METHOD = CalculationMethod.SUBTRACTIVE;
-export const DEFAULT_SEMESTER_FILTER_OPTIONS = ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3', '3-1', '3-2', '3-3'] as const;
+export const DEFAULT_SEMESTER_FILTER_OPTIONS = [
+  '1-1',
+  '1-2',
+  '1-3',
+  '2-1',
+  '2-2',
+  '2-3',
+  '3-1',
+  '3-2',
+  '3-3',
+] as const;
 
 // Helper to handle "通过" or "0" scores by default inactive
 // Updated to include 'type' with default '必修'
-const c = (id: string, semester: string, name: string, credits: number, score: number | string, type: CourseType = '必修', isCore: boolean = false, isActiveOverride?: boolean) => ({
+const c = (
+  id: string,
+  semester: string,
+  name: string,
+  credits: number,
+  score: number | string,
+  type: CourseType = '必修',
+  isCore: boolean = false,
+  isActiveOverride?: boolean
+) => ({
   id,
   semester,
   name,
   credits,
   score: typeof score === 'string' ? 0 : score, // "通过" becomes 0
-  isActive: isActiveOverride !== undefined ? isActiveOverride : (typeof score === 'number' && score > 0), // Auto-active only if numeric > 0
+  isActive:
+    isActiveOverride !== undefined
+      ? isActiveOverride
+      : typeof score === 'number' && score > 0, // Auto-active only if numeric > 0
   type,
-  isCore
+  isCore,
 });
 
 export const SAMPLE_COURSES = [

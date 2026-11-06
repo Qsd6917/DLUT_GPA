@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Course } from '../../types';
-import { X, Upload, FileJson, AlertTriangle, FileSpreadsheet } from 'lucide-react';
+import {
+  X,
+  Upload,
+  FileJson,
+  AlertTriangle,
+  FileSpreadsheet,
+} from 'lucide-react';
 import { OcrScanner } from '../common/OcrScanner';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
@@ -78,13 +84,24 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
   const handleExportJson = () => {
     const dataStr = JSON.stringify(courses, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
-    downloadBlob(blob, `dlut_gpa_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    downloadBlob(
+      blob,
+      `dlut_gpa_backup_${new Date().toISOString().slice(0, 10)}.json`
+    );
   };
 
   const handleExportExcel = async () => {
     const XLSX = await loadXlsxModule();
-    const header = ['课程名', '学分', '成绩', '学期', '属性', '是否核心', '是否计入'];
-    const rows = courses.map((c) => [
+    const header = [
+      '课程名',
+      '学分',
+      '成绩',
+      '学期',
+      '属性',
+      '是否核心',
+      '是否计入',
+    ];
+    const rows = courses.map(c => [
       c.name ?? '',
       c.credits ?? '',
       c.score ?? '',
@@ -98,11 +115,17 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, '课程');
 
-    const arrayBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const arrayBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
     const blob = new Blob([arrayBuffer], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    downloadBlob(blob, `dlut_gpa_courses_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    downloadBlob(
+      blob,
+      `dlut_gpa_courses_${new Date().toISOString().slice(0, 10)}.xlsx`
+    );
   };
 
   const normalizeHeader = (value: unknown) =>
@@ -119,10 +142,14 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       return null;
     }
 
-    const raw = String(value ?? '').trim().toLowerCase();
+    const raw = String(value ?? '')
+      .trim()
+      .toLowerCase();
     if (!raw) return null;
-    if (['true', 't', 'yes', 'y', '是', '√', '1', '计入'].includes(raw)) return true;
-    if (['false', 'f', 'no', 'n', '否', '×', '0', '不计入'].includes(raw)) return false;
+    if (['true', 't', 'yes', 'y', '是', '√', '1', '计入'].includes(raw))
+      return true;
+    if (['false', 'f', 'no', 'n', '否', '×', '0', '不计入'].includes(raw))
+      return false;
     return null;
   };
 
@@ -140,7 +167,8 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     if (!raw) return null;
     if (raw === '必修' || raw === '选修' || raw === '任选') return raw;
     const lower = raw.toLowerCase();
-    if (lower.includes('compulsory') || lower.includes('required')) return '必修';
+    if (lower.includes('compulsory') || lower.includes('required'))
+      return '必修';
     if (lower.includes('elective')) return '选修';
     if (lower.includes('optional')) return '任选';
     if (raw.includes('必修')) return '必修';
@@ -155,7 +183,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     e.target.value = '';
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = event => {
       try {
         const json = JSON.parse(event.target?.result as string);
         if (Array.isArray(json)) {
@@ -168,7 +196,8 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             const score = parseNumber(c?.score);
 
             if (!name) errors.push(`第 ${index + 1} 条：课程名为空`);
-            if (credits === null) errors.push(`第 ${index + 1} 条：学分不是数字`);
+            if (credits === null)
+              errors.push(`第 ${index + 1} 条：学分不是数字`);
             if (score === null) errors.push(`第 ${index + 1} 条：成绩不是数字`);
 
             if (name && credits !== null && score !== null) {
@@ -178,13 +207,19 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
 
           if (validCourses.length === 0) {
             setMessage('');
-            setError(errors.length > 0 ? `导入失败：\n${errors.slice(0, 8).join('\n')}` : '导入失败：文件为空');
+            setError(
+              errors.length > 0
+                ? `导入失败：\n${errors.slice(0, 8).join('\n')}`
+                : '导入失败：文件为空'
+            );
             return;
           }
 
           if (importMode === 'replace' && errors.length > 0) {
             setMessage('');
-            setError(`覆盖导入已取消：发现 ${errors.length} 条格式问题。\n${errors.slice(0, 8).join('\n')}`);
+            setError(
+              `覆盖导入已取消：发现 ${errors.length} 条格式问题。\n${errors.slice(0, 8).join('\n')}`
+            );
             return;
           }
 
@@ -205,7 +240,9 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     reader.readAsText(file);
   };
 
-  const handleExcelFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExcelFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
@@ -225,14 +262,17 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       }
 
       const sheet = workbook.Sheets[firstSheetName];
-      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as unknown[][];
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        defval: '',
+      }) as unknown[][];
       if (rows.length < 2) {
         setError('导入失败：Excel 内容为空或只有表头');
         return;
       }
 
       const headerRow = rows[0] ?? [];
-      const headerCells = headerRow.map((cell) => normalizeHeader(cell));
+      const headerCells = headerRow.map(cell => normalizeHeader(cell));
 
       const aliases: Record<string, string[]> = {
         name: ['课程名', '课程名称', '课程', 'name'],
@@ -244,18 +284,25 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
         isActive: ['是否计入', '计入', 'isactive', 'active'],
       };
 
-      const columnIndexByKey: Partial<Record<keyof typeof aliases, number>> = {};
-      (Object.keys(aliases) as (keyof typeof aliases)[]).forEach((key) => {
-        const normalizedAliases = aliases[key].map((a) => normalizeHeader(a));
-        const idx = headerCells.findIndex((h) => normalizedAliases.includes(h));
+      const columnIndexByKey: Partial<Record<keyof typeof aliases, number>> =
+        {};
+      (Object.keys(aliases) as (keyof typeof aliases)[]).forEach(key => {
+        const normalizedAliases = aliases[key].map(a => normalizeHeader(a));
+        const idx = headerCells.findIndex(h => normalizedAliases.includes(h));
         if (idx >= 0) columnIndexByKey[key] = idx;
       });
 
-      const requiredKeys: (keyof typeof aliases)[] = ['name', 'credits', 'score'];
-      const missing = requiredKeys.filter((k) => columnIndexByKey[k] === undefined);
+      const requiredKeys: (keyof typeof aliases)[] = [
+        'name',
+        'credits',
+        'score',
+      ];
+      const missing = requiredKeys.filter(
+        k => columnIndexByKey[k] === undefined
+      );
       if (missing.length > 0) {
         const missingLabels = missing
-          .map((k) => ({ name: '课程名', credits: '学分', score: '成绩' }[k]))
+          .map(k => ({ name: '课程名', credits: '学分', score: '成绩' })[k])
           .filter(Boolean)
           .join('、');
         setError(`导入失败：缺少必要列：${missingLabels}`);
@@ -267,7 +314,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
 
       for (let r = 1; r < rows.length; r += 1) {
         const row = rows[r] ?? [];
-        const isEmptyRow = row.every((cell) => String(cell ?? '').trim() === '');
+        const isEmptyRow = row.every(cell => String(cell ?? '').trim() === '');
         if (isEmptyRow) continue;
 
         const excelRowNumber = r + 1;
@@ -284,7 +331,8 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
         if (credits === null) rowErrors.push('学分不是数字');
         if (credits !== null && credits < 0) rowErrors.push('学分不能小于 0');
         if (score === null) rowErrors.push('成绩不是数字');
-        if (score !== null && (score < 0 || score > 100)) rowErrors.push('成绩需在 0-100 之间');
+        if (score !== null && (score < 0 || score > 100))
+          rowErrors.push('成绩需在 0-100 之间');
 
         let semester = '未知学期';
         if (columnIndexByKey.semester !== undefined) {
@@ -298,7 +346,8 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           const typeValue = row[columnIndexByKey.type];
           const parsedType = parseCourseType(typeValue);
           if (parsedType) type = parsedType;
-          else if (String(typeValue ?? '').trim()) rowErrors.push('属性无法识别（必修/选修/任选）');
+          else if (String(typeValue ?? '').trim())
+            rowErrors.push('属性无法识别（必修/选修/任选）');
         }
 
         let isCore = false;
@@ -306,7 +355,8 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           const coreValue = row[columnIndexByKey.isCore];
           const parsedCore = parseBoolean(coreValue);
           if (parsedCore !== null) isCore = parsedCore;
-          else if (String(coreValue ?? '').trim()) rowErrors.push('是否核心无法识别（是/否）');
+          else if (String(coreValue ?? '').trim())
+            rowErrors.push('是否核心无法识别（是/否）');
         }
 
         let isActive = true;
@@ -314,7 +364,8 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           const activeValue = row[columnIndexByKey.isActive];
           const parsedActive = parseBoolean(activeValue);
           if (parsedActive !== null) isActive = parsedActive;
-          else if (String(activeValue ?? '').trim()) rowErrors.push('是否计入无法识别（是/否）');
+          else if (String(activeValue ?? '').trim())
+            rowErrors.push('是否计入无法识别（是/否）');
         }
 
         if (rowErrors.length > 0) {
@@ -336,12 +387,18 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       }
 
       if (validCourses.length === 0) {
-        setError(errors.length > 0 ? `导入失败：\n${errors.slice(0, 8).join('\n')}` : '导入失败：没有可导入的有效数据');
+        setError(
+          errors.length > 0
+            ? `导入失败：\n${errors.slice(0, 8).join('\n')}`
+            : '导入失败：没有可导入的有效数据'
+        );
         return;
       }
 
       if (importMode === 'replace' && errors.length > 0) {
-        setError(`覆盖导入已取消：发现 ${errors.length} 行格式问题。\n${errors.slice(0, 8).join('\n')}`);
+        setError(
+          `覆盖导入已取消：发现 ${errors.length} 行格式问题。\n${errors.slice(0, 8).join('\n')}`
+        );
         return;
       }
 
@@ -376,10 +433,15 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
         </button>
 
         <div className="border-b border-primary/10 px-6 pb-5 pt-6 sm:px-7">
-          <h3 id="data-management-modal-title" className="pr-12 text-lg font-bold text-main sm:text-xl">
+          <h3
+            id="data-management-modal-title"
+            className="pr-12 text-lg font-bold text-main sm:text-xl"
+          >
             数据管理
           </h3>
-          <p className="mt-2 pr-10 text-sm text-muted">导入、导出和 OCR 识别都在同一个工作台完成。</p>
+          <p className="mt-2 pr-10 text-sm text-muted">
+            导入、导出和 OCR 识别都在同一个工作台完成。
+          </p>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 sm:px-7">
@@ -398,7 +460,9 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             )}
 
             <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 dark:bg-white/[0.03]">
-              <div className="text-xs font-bold uppercase tracking-wider text-muted">导入模式</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-muted">
+                导入模式
+              </div>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -479,7 +543,9 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
                 <div className="rounded-full bg-white/80 p-3 text-primary shadow-sm transition-transform group-hover:scale-110 dark:bg-white/5">
                   <Upload size={20} />
                 </div>
-                <span className="font-bold text-main">{isProcessing ? '正在导入...' : '导入 Excel'}</span>
+                <span className="font-bold text-main">
+                  {isProcessing ? '正在导入...' : '导入 Excel'}
+                </span>
                 <input
                   type="file"
                   ref={excelFileInputRef}
@@ -492,7 +558,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
 
             <div className="border-t border-primary/10 pt-4">
               <OcrScanner
-                onCoursesParsed={(courses) => {
+                onCoursesParsed={courses => {
                   onImport(courses, importMode);
                   setMessage(`通过OCR成功导入 ${courses.length} 门课程`);
                 }}

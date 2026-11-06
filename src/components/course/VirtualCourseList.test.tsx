@@ -4,21 +4,24 @@ import { renderWithProviders } from '../../test/renderWithProviders';
 import VirtualCourseList from './VirtualCourseList';
 import type { Course } from '../../types';
 
-const makeCourses = (count: number): Course[] => Array.from({ length: count }, (_, index) => ({
-  id: `course-${index}`,
-  name: `课程 ${index + 1}`,
-  credits: 2,
-  score: 80,
-  gpa: 3,
-  isActive: true,
-  semester: '1-1',
-  type: '必修',
-  isCore: false,
-}));
+const makeCourses = (count: number): Course[] =>
+  Array.from({ length: count }, (_, index) => ({
+    id: `course-${index}`,
+    name: `课程 ${index + 1}`,
+    credits: 2,
+    score: 80,
+    gpa: 3,
+    isActive: true,
+    semester: '1-1',
+    type: '必修',
+    isCore: false,
+  }));
 
 const renderList = (courses: Course[], initialLanguage: 'zh' | 'en' = 'zh') => {
   const callbacks = { onRemove: vi.fn(), onEdit: vi.fn(), onToggle: vi.fn() };
-  renderWithProviders(<VirtualCourseList courses={courses} {...callbacks} />, { initialLanguage });
+  renderWithProviders(<VirtualCourseList courses={courses} {...callbacks} />, {
+    initialLanguage,
+  });
   return callbacks;
 };
 
@@ -28,7 +31,9 @@ describe('VirtualCourseList', () => {
 
     const region = screen.getByRole('region', { name: '课程列表' });
     expect(region).toHaveAttribute('tabindex', '0');
-    expect(screen.getAllByRole('button', { name: /排除课程/ }).length).toBeLessThan(83);
+    expect(
+      screen.getAllByRole('button', { name: /排除课程/ }).length
+    ).toBeLessThan(83);
     expect(screen.getByText('课程 1')).toBeInTheDocument();
     expect(screen.queryByText('课程 83')).not.toBeInTheDocument();
   });
@@ -39,8 +44,12 @@ describe('VirtualCourseList', () => {
 
     fireEvent.scroll(scroller, { target: { scrollTop: 4440 } });
 
-    await waitFor(() => expect(screen.queryByText('课程 1')).not.toBeInTheDocument());
-    expect(screen.getAllByRole('button', { name: /排除课程/ }).length).toBeLessThan(83);
+    await waitFor(() =>
+      expect(screen.queryByText('课程 1')).not.toBeInTheDocument()
+    );
+    expect(
+      screen.getAllByRole('button', { name: /排除课程/ }).length
+    ).toBeLessThan(83);
   });
 
   test('forwards toggle, edit and remove actions for the selected course', () => {
@@ -59,20 +68,37 @@ describe('VirtualCourseList', () => {
   test('uses course-specific English action labels', () => {
     renderList(makeCourses(1), 'en');
 
-    expect(screen.getByRole('region', { name: 'Course list' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Exclude course: 课程 1' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Edit course: 课程 1' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Delete course: 课程 1' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('region', { name: 'Course list' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Exclude course: 课程 1' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Edit course: 课程 1' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Delete course: 课程 1' })
+    ).toBeInTheDocument();
   });
 
   test('uses the minimum viewport height for empty and short lists', () => {
     const { unmount } = renderWithProviders(
-      <VirtualCourseList courses={[]} onRemove={vi.fn()} onEdit={vi.fn()} onToggle={vi.fn()} />
+      <VirtualCourseList
+        courses={[]}
+        onRemove={vi.fn()}
+        onEdit={vi.fn()}
+        onToggle={vi.fn()}
+      />
     );
-    expect(screen.getByRole('region', { name: '课程列表' })).toHaveStyle({ height: '360px' });
+    expect(screen.getByRole('region', { name: '课程列表' })).toHaveStyle({
+      height: '360px',
+    });
 
     unmount();
     renderList(makeCourses(2));
-    expect(screen.getByRole('region', { name: '课程列表' })).toHaveStyle({ height: '360px' });
+    expect(screen.getByRole('region', { name: '课程列表' })).toHaveStyle({
+      height: '360px',
+    });
   });
 });

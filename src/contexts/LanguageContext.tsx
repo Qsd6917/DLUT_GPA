@@ -77,8 +77,10 @@ const translations: Record<Language, TranslationMap> = {
     analysis_advisor_sublabel: '辅助建议',
     experiment_label: '实验工作区',
     experiment_title: '成绩实验室',
-    experiment_inactive_desc: '复制当前正式数据作为基线，在独立草稿中调整成绩并实时比较；只有明确应用后才会保存。',
-    experiment_active_desc: '调整实验成绩并观察 GPA、均分与学分变化，正式数据保持不变。',
+    experiment_inactive_desc:
+      '复制当前正式数据作为基线，在独立草稿中调整成绩并实时比较；只有明确应用后才会保存。',
+    experiment_active_desc:
+      '调整实验成绩并观察 GPA、均分与学分变化，正式数据保持不变。',
     experiment_start: '开始实验',
     experiment_return: '返回实验室',
     experiment_status: '实验进行中',
@@ -143,75 +145,121 @@ const translations: Record<Language, TranslationMap> = {
     empty_courses_title: '暂无课程',
     empty_courses_desc: '添加第一门课程或导入现有成绩单。',
     empty_filtered_courses_title: '暂无匹配课程',
-    empty_filtered_courses_desc: '当前筛选条件下没有课程，尝试清除筛选或切换其他条件。',
+    empty_filtered_courses_desc:
+      '当前筛选条件下没有课程，尝试清除筛选或切换其他条件。',
     import_courses: '导入数据',
     close_panel: '关闭面板',
     language_toggle: '切换语言',
     chart_loading: '模块加载中...',
     theme_light_short: '亮',
-    theme_dark_short: '暗'
-    ,primary_nav: '主导航'
-    ,primary_navigation: '主导航'
-    ,analysis_views: '分析视图'
-    ,gpa_method: 'GPA 算法'
-    ,enabled: '启用'
-    ,open_tools: '打开工具'
-    ,tools: '工具'
-    ,academic_console: 'Academic Console'
-    ,overview_intro: '主绩点、关键摘要和下一步操作都压进了首屏。'
-    ,current_gpa: '当前 GPA'
-    ,included_credits: '已计入学分'
-    ,included_now: '当前计入'
-    ,total_credits: '累计学分'
-    ,recorded_terms: '已记录学期'
-    ,included_in_gpa: '当前计入 GPA'
-    ,experiment_draft: '实验草稿'
-    ,target_projection: '目标推算'
-    ,target_gpa_calculator: '目标 GPA 计算器'
-    ,current_gpa_short: '当前 GPA'
-    ,included_credits_short: '已计入学分'
-    ,target_required: '目标 GPA 应在 0–{0} 之间'
-    ,expected_gpa_range: '请输入 0–{0} 之间的预期绩点'
-    ,required_field: '请输入{0}'
-    ,remaining_credits_positive: '剩余学分必须大于 0'
-    ,not_reachable: '在当前剩余学分下无法达到'
-    ,target_achieved: '当前已达到目标'
-    ,plan_reaches_target: '按当前计划可达到目标'
-    ,higher_future_gpa_required: '需要提高后续课程表现'
-    ,required_future_projected: '所需后续平均绩点 {0} · 预计累计 GPA {1}'
-    ,target_gpa: '目标 GPA'
-    ,remaining_credits: '剩余学分'
-    ,expected_average_gpa: '预期平均绩点'
-    ,overview_current_gpa: '当前 GPA'
-    ,overview_experiment_isolated: '当前实验草稿与正式数据隔离，只有应用实验结果后才会保存。'
-    ,overview_autosave_hint: '本地自动保存已启用，先录入课程，再回到分析区查看结构变化。'
-    ,total_credits_detail: '累计学分'
-    ,included_now_detail: '当前计入'
-    ,recorded_terms_detail: '已记录学期'
-    ,terms_recorded_detail: '按已记录学期统计'
-    ,course_workspace_hint: '搜索、筛选与课程总表压成一个真正的操作台，首屏优先给你可扫描的信息。'
-    ,courses_included: '计入 {0} 门'
-    ,analysis_data_label: '学业数据分析'
-    ,analysis_workspace_hint: '查看成绩结构、推算目标，并在独立实验中比较调整方案。'
-    ,included_in_gpa_detail: '当前计入 GPA'
-    ,included_metrics_detail: '以下统计仅使用已启用的 {0} / {1} 门课程'
-    ,weighted_gpa: '加权 GPA'
-    ,weighted_average: '加权平均分'
-    ,included_credits_detail: '已计入学分'
-    ,included_courses_detail: '计入课程数'
-    ,enabled_courses_only: '仅启用课程'
-    ,all_courses_total: '全部 {0} 门'
-    ,no_courses_to_analyze: '暂无可分析课程'
-    ,add_or_include_course: '请先添加课程或将课程设为计入 GPA。'
-    ,reset_data_detail: '此操作会清除当前课程数据。'
-    ,experiment_draft_removed: '已从草稿删除'
-    ,experiment_restore_hint: '恢复后将按原课程顺序插回实验草稿。'
-    ,score_points: '分'
+    theme_dark_short: '暗',
+    primary_nav: '主导航',
+    primary_navigation: '主导航',
+    analysis_views: '分析视图',
+    gpa_method: 'GPA 算法',
+    enabled: '启用',
+    open_tools: '打开工具',
+    tools: '工具',
+    academic_console: 'Academic Console',
+    overview_intro: '主绩点、关键摘要和下一步操作都压进了首屏。',
+    current_gpa: '当前 GPA',
+    included_credits: '已计入学分',
+    included_now: '当前计入',
+    total_credits: '累计学分',
+    recorded_terms: '已记录学期',
+    included_in_gpa: '当前计入 GPA',
+    experiment_draft: '实验草稿',
+    target_projection: '目标推算',
+    target_gpa_calculator: '目标 GPA 计算器',
+    current_gpa_short: '当前 GPA',
+    included_credits_short: '已计入学分',
+    target_required: '目标 GPA 应在 0–{0} 之间',
+    expected_gpa_range: '请输入 0–{0} 之间的预期绩点',
+    required_field: '请输入{0}',
+    remaining_credits_positive: '剩余学分必须大于 0',
+    not_reachable: '在当前剩余学分下无法达到',
+    target_achieved: '当前已达到目标',
+    plan_reaches_target: '按当前计划可达到目标',
+    higher_future_gpa_required: '需要提高后续课程表现',
+    required_future_projected: '所需后续平均绩点 {0} · 预计累计 GPA {1}',
+    target_gpa: '目标 GPA',
+    remaining_credits: '剩余学分',
+    expected_average_gpa: '预期平均绩点',
+    overview_current_gpa: '当前 GPA',
+    overview_experiment_isolated:
+      '当前实验草稿与正式数据隔离，只有应用实验结果后才会保存。',
+    overview_autosave_hint:
+      '本地自动保存已启用，先录入课程，再回到分析区查看结构变化。',
+    total_credits_detail: '累计学分',
+    included_now_detail: '当前计入',
+    recorded_terms_detail: '已记录学期',
+    terms_recorded_detail: '按已记录学期统计',
+    course_workspace_hint:
+      '搜索、筛选与课程总表压成一个真正的操作台，首屏优先给你可扫描的信息。',
+    courses_included: '计入 {0} 门',
+    analysis_data_label: '学业数据分析',
+    analysis_workspace_hint:
+      '查看成绩结构、推算目标，并在独立实验中比较调整方案。',
+    included_in_gpa_detail: '当前计入 GPA',
+    included_metrics_detail: '以下统计仅使用已启用的 {0} / {1} 门课程',
+    weighted_gpa: '加权 GPA',
+    weighted_average: '加权平均分',
+    included_credits_detail: '已计入学分',
+    included_courses_detail: '计入课程数',
+    enabled_courses_only: '仅启用课程',
+    all_courses_total: '全部 {0} 门',
+    no_courses_to_analyze: '暂无可分析课程',
+    add_or_include_course: '请先添加课程或将课程设为计入 GPA。',
+    reset_data_detail: '此操作会清除当前课程数据。',
+    experiment_draft_removed: '已从草稿删除',
+    experiment_restore_hint: '恢复后将按原课程顺序插回实验草稿。',
+    score_points: '分',
+    target_score_planning: '目标成绩规划',
+    target_planning_modes: '目标成绩规划模式',
+    quick_estimate: '快速估算',
+    per_course_plan: '逐课规划',
+    planner_baseline_gpa: '规划基线当前 GPA',
+    planner_baseline_credits: '规划基线已计入学分',
+    future_course_default: '未来课程 {0}',
+    planned_course_name_label: '{0} 名称',
+    planned_course_credits_label: '{0} 学分',
+    planned_course_auto_label: '{0} 自动规划',
+    planned_course_fixed_label: '{0} 固定分数',
+    planned_course_fixed_score_label: '{0} 固定分数值',
+    planned_course_credits_positive: '{0} 学分必须大于 0',
+    fixed_score_range: '固定分数应在 0–100 之间',
+    auto_plan: '自动规划',
+    fixed_score: '固定分数',
+    score_plan: '成绩方式',
+    course_name: '课程名称',
+    add_future_course: '添加未来课程',
+    remove_future_course: '删除{0}',
+    remove: '删除',
+    no_planned_courses: '请添加至少一门未来课程开始规划。',
+    minimum_balanced_score: '最低均衡建议分数',
+    fixed_plan_reaches_target: '固定方案已达标',
+    projected_cumulative_gpa: '预计累计 GPA {0}',
+    planner_unreachable: '当前方案无法达标',
+    highest_possible_gpa: '最高可能 GPA {0}',
+    target_shortfall: '距离目标 {0}',
+    planned_course_scores: '逐课建议',
+    course_score_line: '{0}：{1} 分',
+    scale_projected: '预计',
+    scale_highest: '最高',
+    target_scale_projected_label:
+      '达标刻度线：当前 GPA {0}，目标 GPA {1}，预计 GPA {2}，理论上限 {3}',
+    target_scale_highest_label:
+      '达标刻度线：当前 GPA {0}，目标 GPA {1}，最高 GPA {2}，理论上限 {3}',
+    scale_current_value: '当前 {0}',
+    scale_target_value: '目标 {0}',
+    scale_outcome_value: '{0} {1}',
+    scale_maximum_value: '上限 {0}',
   },
   en: {
     app_title: 'DLUT-GPA',
     app_desc: 'DLUT-GPA',
-    confirm_reset: 'Are you sure you want to reset all data? This action cannot be undone.',
+    confirm_reset:
+      'Are you sure you want to reset all data? This action cannot be undone.',
     reset: 'Reset',
     data_mgmt: 'Data Mgmt',
     share: 'Share Report',
@@ -240,10 +288,14 @@ const translations: Record<Language, TranslationMap> = {
     ocr_supported_formats: 'Supports JPG, PNG, WEBP formats',
     upload_image: 'Upload Image',
     ocr_scanning: 'Scanning',
-    ocr_no_courses_found: 'No course information found in the image, please check if the screenshot contains transcript',
-    ocr_error_occurred: 'An error occurred during OCR recognition, please try again later',
-    ocr_instruction_line1: '1. Screenshot the academic record page from academic system',
-    ocr_instruction_line2: '2. Ensure the screenshot includes course name, credits, and grades',
+    ocr_no_courses_found:
+      'No course information found in the image, please check if the screenshot contains transcript',
+    ocr_error_occurred:
+      'An error occurred during OCR recognition, please try again later',
+    ocr_instruction_line1:
+      '1. Screenshot the academic record page from academic system',
+    ocr_instruction_line2:
+      '2. Ensure the screenshot includes course name, credits, and grades',
     credits: 'Credits',
     current_score: 'Current Score',
     show_radar: 'Show Radar',
@@ -274,8 +326,10 @@ const translations: Record<Language, TranslationMap> = {
     analysis_advisor_sublabel: 'Notes',
     experiment_label: 'Experiment workspace',
     experiment_title: 'Grade Experiment Lab',
-    experiment_inactive_desc: 'Copy saved courses into an isolated draft, compare changes live, and save only when you explicitly apply them.',
-    experiment_active_desc: 'Adjust experimental scores and compare GPA, average, and credits while saved data stays untouched.',
+    experiment_inactive_desc:
+      'Copy saved courses into an isolated draft, compare changes live, and save only when you explicitly apply them.',
+    experiment_active_desc:
+      'Adjust experimental scores and compare GPA, average, and credits while saved data stays untouched.',
     experiment_start: 'Start Experiment',
     experiment_return: 'Return to Lab',
     experiment_status: 'Experiment active',
@@ -292,7 +346,8 @@ const translations: Record<Language, TranslationMap> = {
     experiment_direction_down: 'Experiment GPA decreased',
     experiment_direction_same: 'Experiment GPA unchanged',
     experiment_editor_title: 'Course Workbench',
-    experiment_editor_desc: 'Type or drag a score to update the current experiment draft immediately.',
+    experiment_editor_desc:
+      'Type or drag a score to update the current experiment draft immediately.',
     experiment_search_label: 'Search experiment courses',
     experiment_search_placeholder: 'Search course name…',
     experiment_semester: 'Experiment semester',
@@ -312,9 +367,11 @@ const translations: Record<Language, TranslationMap> = {
     experiment_commit: 'Apply to Saved Data',
     experiment_cancel: 'Cancel',
     experiment_discard_title: 'Discard experiment?',
-    experiment_discard_desc: 'All experiment adjustments will be lost. Saved data will remain unchanged.',
+    experiment_discard_desc:
+      'All experiment adjustments will be lost. Saved data will remain unchanged.',
     experiment_commit_title: 'Apply experiment results?',
-    experiment_commit_desc: 'The current draft will replace your saved course data on this device.',
+    experiment_commit_desc:
+      'The current draft will replace your saved course data on this device.',
     experiment_confirm_discard: 'Confirm Discard',
     experiment_confirm_commit: 'Confirm Apply',
     overview_title: 'Academic Control Center',
@@ -327,7 +384,8 @@ const translations: Record<Language, TranslationMap> = {
     section_status: 'Status',
     quick_metrics: 'Core Metrics',
     course_workspace_title: 'Course Console',
-    course_workspace_desc: 'Input, filters, and the ledger live in one operational space.',
+    course_workspace_desc:
+      'Input, filters, and the ledger live in one operational space.',
     new_course: 'New Course',
     close_entry: 'Close Entry',
     course_entry: 'Course Entry',
@@ -340,76 +398,128 @@ const translations: Record<Language, TranslationMap> = {
     empty_courses_title: 'No Courses Yet',
     empty_courses_desc: 'Add the first course or import an existing record.',
     empty_filtered_courses_title: 'No Matching Courses',
-    empty_filtered_courses_desc: 'No courses match the current filters. Clear them or switch to another combination.',
+    empty_filtered_courses_desc:
+      'No courses match the current filters. Clear them or switch to another combination.',
     import_courses: 'Import Data',
     close_panel: 'Close panel',
     language_toggle: 'Switch language',
     chart_loading: 'Loading module...',
     theme_light_short: 'Light',
-    theme_dark_short: 'Dark'
-    ,primary_nav: 'Primary'
-    ,primary_navigation: 'Primary navigation'
-    ,analysis_views: 'Analysis views'
-    ,gpa_method: 'GPA Method'
-    ,enabled: 'On'
-    ,open_tools: 'Open tools'
-    ,tools: 'Tools'
-    ,academic_console: 'Academic Console'
-    ,overview_intro: 'The first screen is driven by GPA, key metrics, and the next useful action.'
-    ,current_gpa: 'Current GPA'
-    ,included_credits: 'Included credits'
-    ,included_now: 'Included now'
-    ,total_credits: 'Total credits'
-    ,recorded_terms: 'Recorded terms'
-    ,included_in_gpa: 'Included in GPA'
-    ,experiment_draft: 'Experiment draft'
-    ,target_projection: 'Projection'
-    ,target_gpa_calculator: 'Target GPA calculator'
-    ,current_gpa_short: 'Current GPA'
-    ,included_credits_short: 'Included credits'
-    ,target_required: 'Target GPA must be between 0 and {0}'
-    ,expected_gpa_range: 'Expected GPA must be between 0 and {0}'
-    ,required_field: 'This field is required'
-    ,remaining_credits_positive: 'Remaining credits must be greater than 0'
-    ,not_reachable: 'Not reachable with these credits'
-    ,target_achieved: 'Target already achieved'
-    ,plan_reaches_target: 'The current plan reaches the target'
-    ,higher_future_gpa_required: 'A higher future GPA is required'
-    ,required_future_projected: 'Required future GPA {0} · Projected cumulative GPA {1}'
-    ,target_gpa: 'Target GPA'
-    ,remaining_credits: 'Remaining credits'
-    ,expected_average_gpa: 'Expected average GPA'
-    ,overview_current_gpa: 'Current GPA'
-    ,overview_experiment_isolated: 'The current experiment draft stays isolated until you explicitly apply it.'
-    ,overview_autosave_hint: 'Local autosave is active. Record courses first, then come back to analysis for structure changes.'
-    ,total_credits_detail: 'Total credits'
-    ,included_now_detail: 'Included now'
-    ,recorded_terms_detail: 'Recorded terms'
-    ,terms_recorded_detail: 'Calculated from recorded terms'
-    ,course_workspace_hint: 'Search, filters, and the ledger now behave like one operational workspace.'
-    ,courses_included: '{0} active'
-    ,analysis_data_label: 'Academic data analysis'
-    ,analysis_workspace_hint: 'Review academic structure, project targets, and compare changes in an isolated experiment.'
-    ,included_in_gpa_detail: 'Included in GPA'
-    ,included_metrics_detail: 'Metrics use {0} of {1} enabled courses'
-    ,weighted_gpa: 'Weighted GPA'
-    ,weighted_average: 'Weighted average'
-    ,included_credits_detail: 'Included credits'
-    ,included_courses_detail: 'Included courses'
-    ,enabled_courses_only: 'Enabled courses only'
-    ,all_courses_total: '{0} total'
-    ,no_courses_to_analyze: 'No courses to analyze'
-    ,add_or_include_course: 'Add a course or include one in GPA first.'
-    ,reset_data_detail: 'This clears the current course data.'
-    ,experiment_draft_removed: 'Removed from draft'
-    ,experiment_restore_hint: 'Restore this course to its original position in the draft.'
-    ,score_points: 'points'
-  }
+    theme_dark_short: 'Dark',
+    primary_nav: 'Primary',
+    primary_navigation: 'Primary navigation',
+    analysis_views: 'Analysis views',
+    gpa_method: 'GPA Method',
+    enabled: 'On',
+    open_tools: 'Open tools',
+    tools: 'Tools',
+    academic_console: 'Academic Console',
+    overview_intro:
+      'The first screen is driven by GPA, key metrics, and the next useful action.',
+    current_gpa: 'Current GPA',
+    included_credits: 'Included credits',
+    included_now: 'Included now',
+    total_credits: 'Total credits',
+    recorded_terms: 'Recorded terms',
+    included_in_gpa: 'Included in GPA',
+    experiment_draft: 'Experiment draft',
+    target_projection: 'Projection',
+    target_gpa_calculator: 'Target GPA calculator',
+    current_gpa_short: 'Current GPA',
+    included_credits_short: 'Included credits',
+    target_required: 'Target GPA must be between 0 and {0}',
+    expected_gpa_range: 'Expected GPA must be between 0 and {0}',
+    required_field: 'This field is required',
+    remaining_credits_positive: 'Remaining credits must be greater than 0',
+    not_reachable: 'Not reachable with these credits',
+    target_achieved: 'Target already achieved',
+    plan_reaches_target: 'The current plan reaches the target',
+    higher_future_gpa_required: 'A higher future GPA is required',
+    required_future_projected:
+      'Required future GPA {0} · Projected cumulative GPA {1}',
+    target_gpa: 'Target GPA',
+    remaining_credits: 'Remaining credits',
+    expected_average_gpa: 'Expected average GPA',
+    overview_current_gpa: 'Current GPA',
+    overview_experiment_isolated:
+      'The current experiment draft stays isolated until you explicitly apply it.',
+    overview_autosave_hint:
+      'Local autosave is active. Record courses first, then come back to analysis for structure changes.',
+    total_credits_detail: 'Total credits',
+    included_now_detail: 'Included now',
+    recorded_terms_detail: 'Recorded terms',
+    terms_recorded_detail: 'Calculated from recorded terms',
+    course_workspace_hint:
+      'Search, filters, and the ledger now behave like one operational workspace.',
+    courses_included: '{0} active',
+    analysis_data_label: 'Academic data analysis',
+    analysis_workspace_hint:
+      'Review academic structure, project targets, and compare changes in an isolated experiment.',
+    included_in_gpa_detail: 'Included in GPA',
+    included_metrics_detail: 'Metrics use {0} of {1} enabled courses',
+    weighted_gpa: 'Weighted GPA',
+    weighted_average: 'Weighted average',
+    included_credits_detail: 'Included credits',
+    included_courses_detail: 'Included courses',
+    enabled_courses_only: 'Enabled courses only',
+    all_courses_total: '{0} total',
+    no_courses_to_analyze: 'No courses to analyze',
+    add_or_include_course: 'Add a course or include one in GPA first.',
+    reset_data_detail: 'This clears the current course data.',
+    experiment_draft_removed: 'Removed from draft',
+    experiment_restore_hint:
+      'Restore this course to its original position in the draft.',
+    score_points: 'points',
+    target_score_planning: 'Target score planning',
+    target_planning_modes: 'Target score planning modes',
+    quick_estimate: 'Quick estimate',
+    per_course_plan: 'Per-course plan',
+    planner_baseline_gpa: 'Planner baseline current GPA',
+    planner_baseline_credits: 'Planner baseline included credits',
+    future_course_default: 'Future course {0}',
+    planned_course_name_label: '{0} name',
+    planned_course_credits_label: '{0} credits',
+    planned_course_auto_label: '{0} Auto plan',
+    planned_course_fixed_label: '{0} Fixed score',
+    planned_course_fixed_score_label: '{0} fixed score value',
+    planned_course_credits_positive: '{0} credits must be greater than 0',
+    fixed_score_range: 'Fixed score must be between 0 and 100',
+    auto_plan: 'Auto plan',
+    fixed_score: 'Fixed score',
+    score_plan: 'Score plan',
+    course_name: 'Course name',
+    add_future_course: 'Add future course',
+    remove_future_course: 'Remove {0}',
+    remove: 'Remove',
+    no_planned_courses: 'Add at least one future course to start planning.',
+    minimum_balanced_score: 'Minimum balanced score',
+    fixed_plan_reaches_target: 'Fixed plan reaches the target',
+    projected_cumulative_gpa: 'Projected cumulative GPA {0}',
+    planner_unreachable: 'This plan cannot reach the target',
+    highest_possible_gpa: 'Highest possible GPA {0}',
+    target_shortfall: 'Target gap {0}',
+    planned_course_scores: 'Per-course recommendations',
+    course_score_line: '{0}: {1} points',
+    scale_projected: 'Projected',
+    scale_highest: 'Highest',
+    target_scale_projected_label:
+      'Target scale: current GPA {0}, target GPA {1}, projected GPA {2}, theoretical maximum {3}',
+    target_scale_highest_label:
+      'Target scale: current GPA {0}, target GPA {1}, highest GPA {2}, theoretical maximum {3}',
+    scale_current_value: 'Current {0}',
+    scale_target_value: 'Target {0}',
+    scale_outcome_value: '{0} {1}',
+    scale_maximum_value: 'Maximum {0}',
+  },
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
-export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const LanguageProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [language, setLanguage] = useState<Language>('zh');
 
   const t = (key: string, ...args: Array<string | number>) => {
@@ -422,7 +532,11 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     return translation;
   };
 
-  return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>;
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
 };
 
 export const useTranslation = () => {

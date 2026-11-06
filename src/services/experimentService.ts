@@ -19,7 +19,9 @@ export function compareExperimentCourses(
 ): ExperimentComparison {
   const baselineStats = calculateStats(baselineCourses);
   const draftStats = calculateStats(draftCourses);
-  const baselineById = new Map(baselineCourses.map(course => [course.id, course]));
+  const baselineById = new Map(
+    baselineCourses.map(course => [course.id, course])
+  );
   const draftById = new Map(draftCourses.map(course => [course.id, course]));
   const changes: ExperimentCourseChange[] = [];
 
@@ -36,7 +38,8 @@ export function compareExperimentCourses(
 
     const kinds: ExperimentChangeKind[] = [];
     if (baselineCourse.score !== draftCourse.score) kinds.push('score');
-    if (baselineCourse.isActive !== draftCourse.isActive) kinds.push('included');
+    if (baselineCourse.isActive !== draftCourse.isActive)
+      kinds.push('included');
     if (hasMetadataChange(baselineCourse, draftCourse)) kinds.push('metadata');
     if (kinds.length > 0) {
       changes.push({

@@ -5,17 +5,20 @@
 ## 开发环境设置
 
 ### 1. 克隆仓库
+
 ```bash
 git clone https://github.com/your-username/dlut-gpa.git
 cd dlut-gpa
 ```
 
 ### 2. 安装依赖
+
 ```bash
 npm install
 ```
 
 ### 3. 启动开发服务器
+
 ```bash
 npm run dev
 ```
@@ -23,16 +26,19 @@ npm run dev
 ## 代码规范
 
 ### TypeScript
+
 - 使用 TypeScript 编写所有组件和逻辑
 - 为所有公共 API 提供类型定义
 - 遵循严格的 TypeScript 配置
 
 ### React 最佳实践
+
 - 使用函数组件和 Hooks
 - 组件保持单一职责原则
 - 合理使用 memo、useCallback、useMemo 进行性能优化
 
 ### 代码风格
+
 - 使用 ESLint 和 Prettier 进行代码格式化
 - 遵循 Airbnb JavaScript Style Guide
 - 使用有意义的变量和函数命名
@@ -40,12 +46,14 @@ npm run dev
 ## 分支管理
 
 ### 分支命名规范
+
 - `feature/your-feature-name` - 新功能开发
 - `bugfix/issue-description` - 修复错误
 - `hotfix/critical-fix` - 紧急修复
 - `docs/update-documentation` - 文档更新
 
 ### 开发流程
+
 1. 从 `main` 分支创建新分支
 2. 提交你的修改
 3. 推送到远程仓库
@@ -64,6 +72,7 @@ npm run dev
 ```
 
 类型说明：
+
 - `feat`: 新功能
 - `fix`: 错误修复
 - `docs`: 文档更新
@@ -75,6 +84,7 @@ npm run dev
 ## 测试
 
 ### 运行测试
+
 ```bash
 # 运行所有测试
 npm run test:run
@@ -89,6 +99,7 @@ npm run build
 ```
 
 ### 测试原则
+
 - 为新增功能编写单元测试
 - 关键逻辑优先覆盖：课程持久化、GPA 服务、目标 GPA 计算、报告导出与焦点行为
 - 当前不使用任意全局 80% 阈值阻断 CI；覆盖率基线记录在 `docs/QUALITY_BASELINE.md`
@@ -98,6 +109,7 @@ npm run build
 ## Pull Request 指南
 
 ### PR 描述模板
+
 ```
 ## 描述变更
 简要描述本次 PR 解决的问题或新增的功能。
@@ -118,6 +130,7 @@ npm run build
 ## Issue 报告
 
 ### Bug 报告模板
+
 ```
 **版本信息**:
 **浏览器**:
@@ -135,6 +148,7 @@ npm run build
 ```
 
 ### 功能请求模板
+
 ```
 **问题描述**
 
@@ -173,17 +187,20 @@ npm run build
 ## 常见任务
 
 ### 添加新组件
+
 1. 在对应的组件目录下创建新文件
 2. 编写组件并提供 TypeScript 类型定义
 3. 为组件添加必要的测试
 4. 在父组件中导入并使用
 
 ### 修改现有功能
+
 1. 确保有相应的测试覆盖
 2. 修改代码并更新相关测试
 3. 验证修改不会影响其他功能
 
 ### 发布新版本
+
 1. 更新 CHANGELOG.md
 2. 更新 package.json 中的版本号
 3. 创建 Git 标签

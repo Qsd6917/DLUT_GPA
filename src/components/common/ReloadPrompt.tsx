@@ -31,18 +31,21 @@ export const ReloadPrompt: React.FC = () => {
             {offlineReady ? '应用已就绪' : '发现新版本'}
           </h3>
           <p className="mt-1 text-xs text-muted">
-            {offlineReady 
-              ? '应用已缓存，可离线使用。' 
+            {offlineReady
+              ? '应用已缓存，可离线使用。'
               : '有新的内容可用，点击刷新以更新。'}
           </p>
         </div>
-        <button onClick={close} className="text-slate-400 transition-colors hover:text-slate-700 dark:hover:text-white">
+        <button
+          onClick={close}
+          className="text-slate-400 transition-colors hover:text-slate-700 dark:hover:text-white"
+        >
           <X size={16} />
         </button>
       </div>
-      
+
       {needRefresh && (
-        <button 
+        <button
           onClick={() => updateServiceWorker(true)}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary/90"
         >

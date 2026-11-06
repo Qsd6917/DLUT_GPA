@@ -1,4 +1,3 @@
-
 export type CourseType = '必修' | '选修' | '任选';
 
 export interface Course {
@@ -16,7 +15,7 @@ export interface Course {
 export enum CalculationMethod {
   SUBTRACTIVE = 'SUBTRACTIVE', // 5.0 (Score - 50) / 10
   LINEAR = 'LINEAR', // 5.0 (Score / 20)
-  WES = 'WES', // WES 5.0
+  WES = 'WES', // WES 4.0
   STD_4_0 = 'STD_4_0', // Standard 4.0 (90-100=4.0, 80-89=3.0...)
   PKU_4_0 = 'PKU_4_0', // Peking Univ 4.0 Formula
   SCALE_4_5 = 'SCALE_4_5', // 4.5 Scale
@@ -33,7 +32,7 @@ export interface GpaStats {
     credits?: number;
     percentage?: number;
   }[];
-  
+
   // New fields for compulsory courses
   compulsoryCredits: number;
   compulsoryWeightedGpa: number;
@@ -107,4 +106,48 @@ export type TargetGpaResult =
       status: 'invalid';
       field: keyof TargetGpaInput;
       reason: 'required' | 'positive' | 'out-of-range';
+    };
+
+export interface PlannedCourseInput {
+  id: string;
+  name: string;
+  credits: number;
+  score: { mode: 'auto' } | { mode: 'fixed'; value: number };
+}
+
+export interface TargetScorePlanInput {
+  currentGpa: number;
+  currentCredits: number;
+  targetGpa: number;
+  method: CalculationMethod;
+  courses: PlannedCourseInput[];
+}
+
+export type TargetScorePlanField =
+  | 'currentGpa'
+  | 'currentCredits'
+  | 'targetGpa'
+  | 'courses'
+  | 'courseCredits'
+  | 'fixedScore';
+
+export type TargetScorePlanResult =
+  | {
+      status: 'invalid';
+      field: TargetScorePlanField;
+      reason: 'required' | 'positive' | 'out-of-range' | 'no-courses';
+      courseId?: string;
+    }
+  | {
+      status: 'feasible';
+      recommendedScore: number | null;
+      projectedGpa: number;
+      requiredAutoGpa: number | null;
+      courseScores: { courseId: string; score: number }[];
+    }
+  | {
+      status: 'unreachable';
+      bestPossibleGpa: number;
+      shortfall: number;
+      courseScores: { courseId: string; score: number }[];
     };

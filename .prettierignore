@@ -1,0 +1,27 @@
+# Prettier 忽略清单
+# 注意：.git/info/exclude 里有一条 `.prettierignore` 忽略规则，会让本文件默认不入库。
+# 本文件需要显式 `git add` 才能提交。
+
+# 归档文档：记录当时的事实，不做格式改写（改格式会污染历史 diff）
+docs/archive/
+
+# 自动生成或第三方产物
+dist/
+build/
+coverage/
+node_modules/
+package-lock.json
+
+# 二进制与媒体
+docs/archive/images/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.ico
+*.pdf
+
+# 依赖锁与缓存
+*.log
+.cache/
