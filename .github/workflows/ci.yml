@@ -2,7 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # 不再只监听 main：当前主要工作在 feature 分支，只监听 main 会让分支工作完全失去验证。
+    branches: ['**']
   pull_request:
     branches: [main]
 
@@ -18,6 +19,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          # cache: npm 与下面的 npm ci 都依赖 package-lock.json。
+          # 该文件曾长期被 .git/info/exclude 排除，导致 CI 一直卡在本步骤失败。
           cache: npm
 
       - name: Install dependencies
@@ -28,6 +31,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
 
       - name: Test
         run: npm run test:run
