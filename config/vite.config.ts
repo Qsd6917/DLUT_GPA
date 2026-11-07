@@ -24,7 +24,6 @@ export default defineConfig(() => {
           manualChunks: {
             'react-vendor': ['react', 'react-dom'],
             'icon-vendor': ['lucide-react'],
-            'motion-vendor': ['framer-motion'],
           },
         },
       },
@@ -46,7 +45,9 @@ export default defineConfig(() => {
           name: 'DLUT GPA Calculator',
           short_name: 'DLUT GPA',
           description: 'GPA Calculator for Dalian University of Technology',
-          theme_color: '#ffffff',
+          // 默认主题是 dark，启动画面用深色底才不会闪白
+          theme_color: '#0f172a',
+          background_color: '#0f172a',
           icons: [
             {
               src: 'icons/pwa-192x192.png',
