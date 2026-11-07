@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BookOpen,
   CheckSquare,
@@ -11,6 +11,13 @@ import {
 } from 'lucide-react';
 import { Course } from '../../types';
 import { useTranslation } from '../../contexts/LanguageContext';
+import {
+  formatCreditTotal,
+  formatCredits,
+  formatGpa,
+  sumCredits,
+} from '../../utils/courseDisplay';
+import { ConfirmDialog } from '../common/ConfirmDialog';
 import VirtualCourseList from './VirtualCourseList';
 
 interface CourseListProps {
@@ -39,6 +46,19 @@ export const CourseList: React.FC<CourseListProps> = ({
   onClearFilters,
 }) => {
   const { t, language } = useTranslation();
+  // 删除单门课程此前无任何确认，手滑点错就丢一门课且无法恢复。
+  // 统一在这里拦一道：先记下待删课程，由 ConfirmDialog 确认后再真正删除。
+  const [pendingRemoval, setPendingRemoval] = useState<Course | null>(null);
+
+  const requestRemoval = (id: string) => {
+    const target = courses.find(course => course.id === id);
+    if (target) setPendingRemoval(target);
+  };
+
+  const confirmRemoval = () => {
+    if (pendingRemoval) onRemove(pendingRemoval.id);
+    setPendingRemoval(null);
+  };
 
   const getTypeBadgeClass = (type: Course['type']) => {
     if (type === '必修') {
@@ -56,7 +76,8 @@ export const CourseList: React.FC<CourseListProps> = ({
   const activeCount = courses.filter(course => course.isActive).length;
   const activeCredits = courses
     .filter(course => course.isActive)
-    .reduce((sum, course) => sum + course.credits, 0);
+    .reduce((sum, course) => sum + sumCredits(course.credits), 0);
+  const activeCreditsText = formatCreditTotal(activeCredits);
 
   if (courses.length === 0) {
     if (totalCourses > 0 && isFiltered) {
@@ -135,12 +156,27 @@ export const CourseList: React.FC<CourseListProps> = ({
 
   if (courses.length > 50) {
     return (
-      <VirtualCourseList
-        courses={courses}
-        onRemove={onRemove}
-        onEdit={onEdit}
-        onToggle={onToggle}
-      />
+      <>
+        <VirtualCourseList
+          courses={courses}
+          onRemove={requestRemoval}
+          onEdit={onEdit}
+          onToggle={onToggle}
+        />
+        <ConfirmDialog
+          open={pendingRemoval !== null}
+          title={language === 'zh' ? '删除课程' : 'Delete course'}
+          description={
+            language === 'zh'
+              ? `确定要删除「${pendingRemoval?.name ?? ''}」吗？删除后无法恢复。`
+              : `Delete "${pendingRemoval?.name ?? ''}"? This cannot be undone.`
+          }
+          confirmLabel={language === 'zh' ? '删除' : 'Delete'}
+          cancelLabel={language === 'zh' ? '取消' : 'Cancel'}
+          onConfirm={confirmRemoval}
+          onCancel={() => setPendingRemoval(null)}
+        />
+      </>
     );
   }
 
@@ -158,8 +194,8 @@ export const CourseList: React.FC<CourseListProps> = ({
           </div>
           <p className="type-body-sm mt-1 max-w-2xl">
             {language === 'zh'
-              ? `已计学分 ${activeCredits.toFixed(1)}，表格优先保留课程、成绩、绩点、状态与操作。`
-              : `${activeCredits.toFixed(1)} active credits. The table stays focused on the decisions you make most often.`}
+              ? `已计学分 ${activeCreditsText}，表格优先保留课程、成绩、绩点、状态与操作。`
+              : `${activeCreditsText} active credits. The table stays focused on the decisions you make most often.`}
           </p>
         </div>
 
@@ -171,8 +207,8 @@ export const CourseList: React.FC<CourseListProps> = ({
           </span>
           <span className="status-chip">
             {language === 'zh'
-              ? `学分 ${activeCredits.toFixed(1)}`
-              : `${activeCredits.toFixed(1)} credits`}
+              ? `学分 ${activeCreditsText}`
+              : `${activeCreditsText} credits`}
           </span>
         </div>
       </div>
@@ -270,7 +306,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                 </td>
                 <td className="px-4 py-2.5 text-right">
                   <span className="num-inline text-sm font-semibold text-main">
-                    {course.credits.toFixed(course.credits % 1 === 0 ? 0 : 1)}
+                    {formatCredits(course.credits)}
                   </span>
                 </td>
                 <td className="px-4 py-2.5 text-right">
@@ -288,7 +324,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                 </td>
                 <td className="px-4 py-2.5 text-right">
                   <span className="num-inline text-sm font-semibold text-primary">
-                    {course.gpa.toFixed(2)}
+                    {formatGpa(course.gpa)}
                   </span>
                 </td>
                 <td className="px-4 py-2.5 text-center">
@@ -316,7 +352,7 @@ export const CourseList: React.FC<CourseListProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => onRemove(course.id)}
+                      onClick={() => requestRemoval(course.id)}
                       className="rounded-[0.72rem] border border-primary/10 bg-[hsl(var(--surface-2))] p-2 text-muted transition-colors hover:border-rose-500/20 hover:text-rose-600 dark:hover:text-rose-300"
                       title={language === 'zh' ? '删除课程' : 'Delete course'}
                       aria-label={
@@ -349,6 +385,19 @@ export const CourseList: React.FC<CourseListProps> = ({
               : 'Use the left selection column to include or exclude courses'}
         </div>
       </div>
+      <ConfirmDialog
+        open={pendingRemoval !== null}
+        title={language === 'zh' ? '删除课程' : 'Delete course'}
+        description={
+          language === 'zh'
+            ? `确定要删除「${pendingRemoval?.name ?? ''}」吗？删除后无法恢复。`
+            : `Delete "${pendingRemoval?.name ?? ''}"? This cannot be undone.`
+        }
+        confirmLabel={language === 'zh' ? '删除' : 'Delete'}
+        cancelLabel={language === 'zh' ? '取消' : 'Cancel'}
+        onConfirm={confirmRemoval}
+        onCancel={() => setPendingRemoval(null)}
+      />
     </section>
   );
 };

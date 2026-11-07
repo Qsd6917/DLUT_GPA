@@ -9,6 +9,7 @@ import React, {
 import { CheckSquare, Edit, Square, Trash2 } from 'lucide-react';
 import { Course } from '../../types';
 import { useTranslation } from '../../contexts/LanguageContext';
+import { formatCredits, formatGpa } from '../../utils/courseDisplay';
 
 const ROW_HEIGHT = 74;
 const MAX_LIST_HEIGHT = 672;
@@ -91,13 +92,13 @@ const VirtualCourseRow = memo(
             </span>
             <span className="table-chip">{course.semester}</span>
             <span className="table-chip shrink-0">
-              {course.credits.toFixed(course.credits % 1 === 0 ? 0 : 1)} 学分
+              {formatCredits(course.credits)} 学分
             </span>
             <span className="table-chip hidden shrink-0 sm:inline-flex">
               {course.score} 分
             </span>
             <span className="table-chip hidden shrink-0 text-primary md:inline-flex">
-              {course.gpa.toFixed(2)} GPA
+              {formatGpa(course.gpa)} GPA
             </span>
           </div>
         </div>
