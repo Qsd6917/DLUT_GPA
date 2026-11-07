@@ -4,6 +4,54 @@
 
 ## [未发布]
 
+### 上线前审查（2026-11-07）
+
+一次只读全量审查发现 4 个 P0、12 个 P1、14 个 P2。P0 全部实测复现后修复。
+
+**P0（阻断上线，已全部修复）**
+
+- **编辑课程清空数字框 → 刷新后永久白屏**：`parseFloat('')` 得到 NaN，`JSON.stringify` 落盘为 `null`，
+  刷新后 `CourseList` 执行 `credits.toFixed()` 抛 `TypeError`，用户只能靠「重置」丢数据自救。
+  现加字段级校验，并把裸 `toFixed` 换成带 `Number.isFinite` 守卫的 `formatCredits` / `formatGpa`。
+  顺带修了编辑弹窗打开时 `course.credits.toString()` 对 `null` 同样抛错的同类问题。
+- **JSON 导入即白屏**：导入时把原始对象塞进课程数组，解析结果只用于校验不回写。
+  `{"credits":"3"}` 会以字符串入库，`reduce` 变成字符串拼接得 `"032"`，随后 `toFixed()` 崩。
+  `{"credits":-2,"score":200}` 也照样通过，GPA 可算出 15.0。现改用解析值重建对象并补齐范围校验。
+- **OCR 误触清空全部数据**：OCR 结果直接 `onImport(courses, importMode)`，而 `importMode` 默认
+  `replace`。用户试一下 OCR、识别出 1 门课，83 门课程就被覆盖，无确认无撤销。
+  现改为先落预览区、用户点「追加」才写入，且 OCR 路径强制 `merge`。
+- **首访展示他人真实成绩单**：新用户打开就看到 83 门示例课程（GPA 3.867），界面无任何标注，
+  还能一键导出带「大连理工大学 GPA 摘要」的分享图；seed id 里还带着真实姓名。
+  现新增 `SampleDataBanner` 常驻提示「这不是你的成绩」，seed id 改为 `sample-v3`。
+
+**P1（已修）**
+
+- `localStorage` 全部读写零 try/catch：隐私模式或配额满时直接白屏或静默丢数据。
+  新增 `utils/safeStorage.ts`（读写内部捕获、绝不外抛、探测结果缓存），
+  并加 `StorageBlockedBanner` 明确告知「修改不会被保存，请先导出备份」。
+- 计算层对越界值不设防：`calculateCourseGpa(150)` 返回 10.0（满格 5.0），PKU 公式返回 -0.6875。
+  现入口拦截非有限数并钳制到 `[0,100]`；`calculateStats` 加两层过滤与安全除法。
+- `xlsx@0.18.5` 两个 HIGH 漏洞：切到官方 CDN 的 0.20.3；`lodash` 经 `overrides` 升到 4.18.1。
+  生产依赖漏洞清零。
+- OCR 上传区是可点击 `div`，键盘完全不可用（被关掉的两条 a11y 规则掩盖）：
+  改为原生 `button`，并重新启用那两条规则。
+- 「智能建议」用 4 门假课程与硬编码 `confidence=0.8` 却展示「成功率 87%」：
+  改为明确标注演示数据；顺带修 `App.tsx` 硬编码的 `targetGPA={3.8}`。
+- 删除单门课程无确认：改为先弹 `ConfirmDialog`。
+
+**P2（已修）**
+
+- 删除 `ScoreDistributionHistogram.tsx`（191 行零引用死代码）与其测试。
+- 删除 `framer-motion`（全仓零 import）及 vite 里专为它留的 `motion-vendor` 分块。
+- `index.html` 补 `meta description` 与 `theme-color`；manifest 的 `theme_color` /
+  `background_color` 改为暗色底，避免 PWA 启动闪白。
+
+**P2（记录未修，见 issue）**
+
+- 双层防抖导致实际 600ms 延迟；内联箭头函数破坏 memo 边界；虚拟列表对读屏不可达；
+  导出 Excel 的懒加载无 catch；首屏字体 `@import` 串行阻塞；英文界面残留硬编码中文；
+  `App.test.tsx` 的 WES 用例对机器负载敏感；毕业进度阈值硬编码。
+
 ### 工程治理（2026-11-06）
 
 - 补齐 agent 基础设施：新增 `AGENTS.md`（工作规则、质量门、领域事实、已知坑）与 `docs/agents/` 三件套

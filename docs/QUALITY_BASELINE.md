@@ -27,9 +27,9 @@ npm run build
 - `npm run type-check`：通过
 - `npm run lint`：通过
 - `npm run format:check`：通过（2026-11-06 完成全仓格式化后；此前为 64 个文件不通过，现已纳入 CI）
-- `npm run test:run`：25 个测试文件、223 项测试通过
-- `npm run test:coverage`：通过
-- `npm run build`：通过，转换 2461 个模块；本次串行快照用时 8.77 秒
+- `npm run test:run`：31 个测试文件、338 项测试通过
+- `npm run test:coverage`：通过，`All files` 93.09% statements
+- `npm run build`：通过，转换 2462 个模块
 
 构建输出包含 `caniuse-lite is outdated` 提示；该提示不影响本轮类型检查、测试、覆盖率或生产构建结果。
 
@@ -39,14 +39,26 @@ npm run build
 
 | 范围                      | Statements | Branches | Functions |  Lines |
 | ------------------------- | ---------: | -------: | --------: | -----: |
-| All files                 |     90.22% |   80.24% |    76.33% | 90.22% |
+| All files                 |     93.09% |   81.26% |    79.32% | 93.09% |
 | `TargetGpaCalculator.tsx` |     99.13% |   96.15% |   100.00% | 99.13% |
-| `gpaService.ts`           |     92.50% |   92.98% |   100.00% | 92.50% |
+| `gpaService.ts`           |     97.24% |   94.74% |   100.00% | 97.24% |
+| `safeStorage.ts`          |    100.00% |   93.75% |   100.00% |   100% |
+| `courseDisplay.ts`        |    100.00% |  100.00% |   100.00% |   100% |
 | `LanguageContext.tsx`     |    100.00% |  100.00% |   100.00% |   100% |
 | `LoadingContext.tsx`      |    100.00% |  100.00% |   100.00% |   100% |
 | `ConfirmDialog.tsx`       |    100.00% |   94.11% |   100.00% |   100% |
 | `ReloadPrompt.tsx`        |    100.00% |  100.00% |   100.00% |   100% |
 | `Header.tsx`              |    100.00% |   96.66% |   100.00% |   100% |
+| `ErrorBoundary.tsx`       |    100.00% |  100.00% |   100.00% |   100% |
+
+2026-11-07 上线前审查与修复（第二轮）：
+
+- 测试总数 223 → **338**，文件数 25 → **31**；`All files` 90.22/80.24/76.33 → **93.09/81.26/79.32**。
+- 新增测试文件：`ErrorBoundary`(5)、`SampleDataBanner`(5)、`StorageBlockedBanner`(3)、
+  `safeStorage`(26)、`gpaService.edge`(41)、`EditCourseModal`(13)、`CourseList.dirtyData`(6)，
+  以及 `OcrScanner` 1→7、`DataManagementModal` 3→10、`ThemeContext` +3、`useCourseData` +4。
+- 删除 `ScoreDistributionHistogram.tsx`（191 行零引用死代码）及其测试。
+- 审查报告列出的 4 个 P0 与 12 个 P1 的处理情况见 `CHANGELOG.md`。
 
 2026-11-06 补测说明：
 
@@ -90,20 +102,27 @@ npm run build
 
 | Chunk                                  |  原始体积 |      gzip |
 | -------------------------------------- | --------: | --------: |
-| `assets/index-*.js`                    |  95.87 kB |  28.84 kB |
+| `assets/index-*.js`（主入口）          | 104.54 kB |  32.37 kB |
+| `assets/index-*.js`（异步小 chunk）    |  14.93 kB |   6.50 kB |
 | `assets/TargetGpaCalculator-*.js`      |  14.42 kB |   3.97 kB |
 | `assets/react-vendor-*.js`             | 133.93 kB |  43.13 kB |
 | `assets/generateCategoricalChart-*.js` | 350.45 kB |  98.55 kB |
-| `assets/xlsx-*.js`                     | 429.03 kB | 143.08 kB |
-| `assets/index-*.css`                   |  48.95 kB |   9.67 kB |
+| `assets/xlsx-*.js`                     | 499.55 kB | 163.12 kB |
+| `assets/index-*.css`                   |  49.43 kB |   9.78 kB |
 
-PWA precache：24 个条目，共 1443.61 KiB。
+PWA precache：26 个条目，共 1522.98 KiB。
 
-功能开发前的 Phase 0 实测基线为主入口 `27.14 kB`、目标计算器懒加载 chunk `1.36 kB`。最终主入口为 `28.84 kB`，增长约 `6.3%`，低于 15% 的变更说明阈值；目标计算器 chunk 增至 `3.97 kB`。后者增长来自逐课编辑器、可访问标签页与刻度、字段级错误提示和完整结果展示，仍保持独立懒加载，没有把规划器实现并入主入口。
+2026-11-07 变更说明（两处增长均超 15%，按约束在此解释）：
 
-约束：
+- **主入口 gzip 28.84 → 32.37 kB（+12.2%）**：新增 ErrorBoundary、SampleDataBanner、
+  StorageBlockedBanner、safeStorage 与 courseDisplay。前两者是上线必需的兜底与提示，
+  safeStorage 是所有持久化路径的防护层，均无法再拆成懒加载。
+- **xlsx chunk gzip 143.08 → 163.12 kB（+14.0%）**：0.18.5 → 0.20.3 的安全升级
+  （消除两个 HIGH 漏洞），代价是包体增长。该 chunk 仍是独立懒加载，未进入主入口。
 
-- 主入口 gzip 以当前 `28.84 kB` 为基线；后续增长超过 15% 时，需要在变更说明中解释原因。
+功能开发前的 Phase 0 实测基线为主入口 `27.14 kB`。约束不变：
+
+- 主入口 gzip 以当前 `32.37 kB` 为基线；后续增长超过 15% 时，需要在变更说明中解释原因。
 - `xlsx`、`html2canvas` 和大型 Recharts 图表代码不得进入主入口。
 - 懒加载 chunk 增长超过 15% 时，需要在变更说明中解释原因。
 
@@ -118,4 +137,18 @@ PWA precache：24 个条目，共 1443.61 KiB。
 - `@vitest/ui` 1.6.1
 - jsdom 28.1.0
 
-CI 在 Node 24 与 26 两条 LTS 线上运行（Node 20 已于 2026-04-30 EOL，不再测试）。`package.json` 的 `engines` 已与 `jsdom@28.1.0` 的要求 `^20.19.0 || ^22.12.0 || >=24.0.0` 对齐，`package-lock.json` 同步更新。`@vitejs/plugin-react@latest` 当前要求 Vite 8 和 Node 20.19+，不作为本轮升级目标。
+CI 在 Node 24 与 26 两条 LTS 线上运行（Node 20 已于 2026-04-30 EOL，不再测试）。
+`package.json` 的 `engines` 为 `^22.12.0 || >=24.0.0`，仍是 `jsdom@28.1.0` 要求
+`^20.19.0 || ^22.12.0 || >=24.0.0` 的子集；上界收紧是为了让 Vercel 不会解析到
+已于 2026-10-01 停止构建支持的 Node 20。`@vitejs/plugin-react@latest` 要求 Vite 8，
+不作为本轮升级目标。
+
+安全相关依赖（2026-11-07）：
+
+- `xlsx` 改为 `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`。npm 上的 xlsx 已停维护，
+  0.18.5 命中 GHSA-4r6h-8v6p-xvw6（原型污染）与 GHSA-5pgg-2g8v-p4x9（ReDoS），
+  0.20.3 已修复。API 兼容，调用方零改动。
+- `overrides.lodash = ^4.18.1`，覆盖 recharts 与 workbox-build 传递引入的 4.17.23
+  （GHSA-r5fr-rjxr-66jc 代码注入、GHSA-f23m-r3pf-42rh 原型污染）。
+- `npm audit --omit=dev` 的生产依赖漏洞数为 **0**。devDependencies 里的构建工具链
+  （vite/rollup/babel/postcss 等）告警不进生产包，未处理。
