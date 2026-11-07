@@ -70,6 +70,11 @@ export default defineConfig(() => {
       // transform 从 3s 涨到 20s、整轮 47s 的超时失败（随后 6 次未复现）。
       // 放宽到 10s 吸收机器负载抖动；真卡死的用例仍会失败，不用 retry 掩盖。
       testTimeout: 10000,
+      coverage: {
+        // 覆盖率报告默认相对 root 解析，而 root 指向 ../src，会把报告写进 src/coverage/
+        // 污染源码树。这里显式指到仓库根的 coverage/（已被 .gitignore 忽略）。
+        reportsDirectory: path.resolve(__dirname, '../coverage'),
+      },
     },
     resolve: {
       alias: {
