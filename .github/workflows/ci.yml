@@ -10,15 +10,21 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 24 = 长期 LTS（EOL 2028-04），26 = 当前 LTS（本机开发版本）。
+        # Node 20 已于 2026-04-30 EOL，不再测试。
+        node-version: [24, 26]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           # cache: npm 与下面的 npm ci 都依赖 package-lock.json。
           # 该文件曾长期被 .git/info/exclude 排除，导致 CI 一直卡在本步骤失败。
           cache: npm

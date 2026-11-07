@@ -66,6 +66,10 @@ export default defineConfig(() => {
       globals: true,
       environment: 'jsdom',
       setupFiles: path.resolve(__dirname, '../src/test/setup.ts'),
+      // 默认 5s。当前最慢的单例约 1.5s，但 2026-11-07 观察到一次高负载下
+      // transform 从 3s 涨到 20s、整轮 47s 的超时失败（随后 6 次未复现）。
+      // 放宽到 10s 吸收机器负载抖动；真卡死的用例仍会失败，不用 retry 掩盖。
+      testTimeout: 10000,
     },
     resolve: {
       alias: {
