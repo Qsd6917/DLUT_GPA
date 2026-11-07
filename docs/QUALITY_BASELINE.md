@@ -39,9 +39,22 @@ npm run build
 
 | 范围                      | Statements | Branches | Functions |  Lines |
 | ------------------------- | ---------: | -------: | --------: | -----: |
-| All files                 |     89.32% |   78.48% |    69.33% | 89.32% |
+| All files                 |     89.92% |   80.03% |    74.55% | 89.92% |
 | `TargetGpaCalculator.tsx` |     99.13% |   96.15% |   100.00% | 99.13% |
-| `gpaService.ts`           |     91.44% |   92.98% |   100.00% | 91.44% |
+| `gpaService.ts`           |     92.50% |   92.98% |   100.00% | 92.50% |
+| `LanguageContext.tsx`     |    100.00% |  100.00% |   100.00% |   100% |
+| `ConfirmDialog.tsx`       |    100.00% |   93.10% |   100.00% |   100% |
+| `ReloadPrompt.tsx`        |    100.00% |  100.00% |   100.00% |   100% |
+| `Header.tsx`              |    100.00% |   96.66% |   100.00% |   100% |
+| `LoadingContext.tsx`      |     56.92% |   50.00% |    20.00% | 56.92% |
+
+2026-11-06 补测说明：
+
+- 本轮新增 4 个测试文件、42 个用例，测试总数 171 → 213，文件数 20 → 24。
+  `LanguageContext` 99.45%→100%、`ConfirmDialog` 50.5%→100%、`ReloadPrompt` 0%→100%、`Header` 83.61%→100%。
+- 删除 `src/utils/contrast.ts`（零引用死代码，35 行），`utils` 目录覆盖率由 78.14% 升至 99.28%。
+- **`LoadingContext.tsx` 是当前唯一低于 80% 的模块**（56.92%），未覆盖行为 33、42-53（loading overlay JSX）
+  与 60-65（`useLoading` 的 Provider 外抛错）。它是下一个应补测的目标。
 
 本轮不设置任意全局 80% CI 阈值。后续新增或重构时，优先守住以下关键逻辑：
 
@@ -49,6 +62,8 @@ npm run build
 - `gpaService`：课程绩点、统计口径、学期趋势、目标 GPA 结果类型
 - `ShareableReportModal`：页面与报告指标一致、导出失败可恢复、焦点恢复、滚动锁
 - `VirtualCourseList`：83 门课程窗口化渲染和编辑/删除/计入回调
+- `ConfirmDialog`：焦点进入/恢复、Tab 困焦、Escape 关闭、滚动锁保存与恢复
+- `Header`：分区切换、主题与语言切换、下拉 roving 键盘、移动端工具面板
 
 ## 生产包体基线
 

@@ -25,6 +25,21 @@
 - 在 GitHub 仓库创建 `needs-triage`、`needs-info`、`ready-for-agent`、`ready-for-human`
   四个 triage 标签（`wontfix` 为 GitHub 默认自带）。
 
+### 测试覆盖补强（2026-11-06）
+
+- 删除 `src/utils/contrast.ts`（全项目零引用的死代码，35 行）。无障碍审计脚本用的是独立
+  `wcag-contrast` 包，不依赖此文件。`utils` 覆盖率 78.14% → 99.28%。
+- 新增 4 个测试文件、42 个用例，测试总数 171 → 213：
+  - `LanguageContext.test.tsx`（7 例）：语言切换、文案完整性、位置参数替换、Provider 外抛错。
+    该 Provider **没有 localStorage 持久化**（只有 `useState<Language>('zh')`），因此「持久化」
+    与「无效值回退」两条写成锁定当前行为的 tripwire 用例，注释已说明将来补上持久化时需改断言。
+  - `ConfirmDialog.test.tsx`（14 例）：焦点进入/恢复、Tab 困焦、Escape、滚动锁、回调更新。
+  - `ReloadPrompt.test.tsx`（6 例）：mock `virtual:pwa-register/react` 虚拟模块（测试文件内
+    `vi.hoisted` + `vi.mock`，无需改共享配置），覆盖离线就绪/需刷新/关闭/回调透传。
+  - `Header.test.tsx`（15 例）：分区切换、主题与语言、下拉 roving 键盘、移动端工具面板。
+- 全项目覆盖率：88.29% → 89.92% statements，78.48% → 80.03% branches，69.33% → 74.55% functions。
+- `LoadingContext.tsx` 仍为 56.92%，是当前唯一低于 80% 的模块，列为后续补测目标。
+
 ### 新增功能
 
 - 新增目标成绩规划器，在“快速估算”和“逐课规划”之间切换；未来课程可分别选择自动规划或固定百分制分数。
