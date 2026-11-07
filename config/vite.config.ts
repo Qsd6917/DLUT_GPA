@@ -31,7 +31,9 @@ export default defineConfig(() => {
     css: {
       postcss: {
         plugins: [
-          tailwindcss({ config: path.resolve(__dirname, 'tailwind.config.js') }),
+          tailwindcss({
+            config: path.resolve(__dirname, 'tailwind.config.js'),
+          }),
           autoprefixer(),
         ],
       },
@@ -40,7 +42,12 @@ export default defineConfig(() => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'icons/*.png'],
+        includeAssets: [
+          'favicon.ico',
+          'apple-touch-icon.png',
+          'mask-icon.svg',
+          'icons/*.png',
+        ],
         manifest: {
           name: 'DLUT GPA Calculator',
           short_name: 'DLUT GPA',
@@ -52,16 +59,16 @@ export default defineConfig(() => {
             {
               src: 'icons/pwa-192x192.png',
               sizes: '192x192',
-              type: 'image/png'
+              type: 'image/png',
             },
             {
               src: 'icons/pwa-512x512.png',
               sizes: '512x512',
-              type: 'image/png'
-            }
-          ]
-        }
-      })
+              type: 'image/png',
+            },
+          ],
+        },
+      }),
     ],
     test: {
       globals: true,
