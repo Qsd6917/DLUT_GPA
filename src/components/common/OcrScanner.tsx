@@ -144,60 +144,67 @@ export const OcrScanner: React.FC<OcrScannerProps> = ({ onCoursesParsed }) => {
         </h3>
       </div>
 
-      <div
-        className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+      {/*
+        文件输入必须留在按钮外部：交互元素不能嵌套。
+        用 sr-only 而不是 hidden，避免 display:none 让控件无法被辅助技术访问；
+        它保持可聚焦，并带 aria-label，键盘/读屏用户也能直接定位到它。
+      */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageUpload}
+        accept="image/*"
+        className="sr-only"
+        aria-label={t('upload_image')}
+        disabled={isScanning}
+      />
+
+      <button
+        type="button"
+        onClick={triggerFileSelect}
+        disabled={isScanning}
+        className={`w-full cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
           isScanning
             ? 'border-primary/40 bg-primary/10'
             : 'border-slate-300/80 bg-white/45 hover:border-primary/40 dark:border-white/10 dark:bg-white/[0.02]'
         }`}
-        onClick={triggerFileSelect}
       >
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleImageUpload}
-          accept="image/*"
-          className="hidden"
-          disabled={isScanning}
-        />
-
-        <div className="flex flex-col items-center justify-center gap-3">
+        <span className="flex flex-col items-center justify-center gap-3">
           <Camera
             size={48}
             className={`mx-auto ${isScanning ? 'text-primary' : 'text-muted'}`}
           />
 
           {isScanning ? (
-            <div className="w-full max-w-xs">
-              <div className="flex justify-between text-sm mb-1">
+            <span className="block w-full max-w-xs">
+              <span className="flex justify-between text-sm mb-1">
                 <span>{t('ocr_scanning')}...</span>
                 <span>{progress}%</span>
-              </div>
-              <div className="h-2.5 w-full rounded-full bg-slate-200/80 dark:bg-white/10">
-                <div
-                  className="h-2.5 rounded-full bg-primary transition-all duration-300"
+              </span>
+              <span className="block h-2.5 w-full rounded-full bg-slate-200/80 dark:bg-white/10">
+                <span
+                  className="block h-2.5 rounded-full bg-primary transition-all duration-300"
                   style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            </div>
+                ></span>
+              </span>
+            </span>
           ) : (
             <>
-              <p className="font-medium text-main">{t('ocr_upload_prompt')}</p>
-              <p className="text-sm text-muted">{t('ocr_supported_formats')}</p>
-              <button
-                className="mt-4 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-on-primary transition-opacity hover:opacity-90"
-                onClick={e => {
-                  e.stopPropagation();
-                  triggerFileSelect();
-                }}
-              >
+              <span className="block font-medium text-main">
+                {t('ocr_upload_prompt')}
+              </span>
+              <span className="block text-sm text-muted">
+                {t('ocr_supported_formats')}
+              </span>
+              {/* 纯装饰：点击区域已由外层按钮承担，这里不能再放交互元素 */}
+              <span className="mt-4 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-on-primary transition-opacity hover:opacity-90">
                 <Upload size={16} />
                 {t('upload_image')}
-              </button>
+              </span>
             </>
           )}
-        </div>
-      </div>
+        </span>
+      </button>
 
       {error && (
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-red-700 dark:text-red-300">

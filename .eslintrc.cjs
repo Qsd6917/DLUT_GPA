@@ -54,7 +54,6 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
-    'jsx-a11y/click-events-have-key-events': 'off',
     'jsx-a11y/no-noninteractive-element-interactions': 'off',
     'react/prop-types': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -64,7 +63,6 @@ module.exports = {
     'object-shorthand': 'error',
     'prefer-template': 'error',
     'no-console': 'off',
-    'jsx-a11y/no-static-element-interactions': 'off',
   },
   overrides: [
     {
