@@ -27,7 +27,7 @@ npm run build
 - `npm run type-check`：通过
 - `npm run lint`：通过
 - `npm run format:check`：通过（2026-11-06 完成全仓格式化后；此前为 64 个文件不通过，现已纳入 CI）
-- `npm run test:run`：24 个测试文件、215 项测试通过
+- `npm run test:run`：25 个测试文件、223 项测试通过
 - `npm run test:coverage`：通过
 - `npm run build`：通过，转换 2461 个模块；本次串行快照用时 8.77 秒
 
@@ -39,22 +39,21 @@ npm run build
 
 | 范围                      | Statements | Branches | Functions |  Lines |
 | ------------------------- | ---------: | -------: | --------: | -----: |
-| All files                 |     89.94% |   80.07% |    74.55% | 89.94% |
+| All files                 |     90.22% |   80.24% |    76.33% | 90.22% |
 | `TargetGpaCalculator.tsx` |     99.13% |   96.15% |   100.00% | 99.13% |
 | `gpaService.ts`           |     92.50% |   92.98% |   100.00% | 92.50% |
 | `LanguageContext.tsx`     |    100.00% |  100.00% |   100.00% |   100% |
+| `LoadingContext.tsx`      |    100.00% |  100.00% |   100.00% |   100% |
 | `ConfirmDialog.tsx`       |    100.00% |   94.11% |   100.00% |   100% |
 | `ReloadPrompt.tsx`        |    100.00% |  100.00% |   100.00% |   100% |
 | `Header.tsx`              |    100.00% |   96.66% |   100.00% |   100% |
-| `LoadingContext.tsx`      |     56.92% |   50.00% |    20.00% | 56.92% |
 
 2026-11-06 补测说明：
 
 - 本轮新增 4 个测试文件、42 个用例，测试总数 171 → 213，文件数 20 → 24。
   `LanguageContext` 99.45%→100%、`ConfirmDialog` 50.5%→100%、`ReloadPrompt` 0%→100%、`Header` 83.61%→100%。
 - 删除 `src/utils/contrast.ts`（零引用死代码，35 行），`utils` 目录覆盖率由 78.14% 升至 99.28%。
-- **`LoadingContext.tsx` 是当前唯一低于 80% 的模块**（56.92%），未覆盖行为 33、42-53（loading overlay JSX）
-  与 60-65（`useLoading` 的 Provider 外抛错）。它是下一个应补测的目标。
+- 当时 `LoadingContext.tsx` 是唯一低于 80% 的模块（56.92%），已于 2026-11-07 补齐至 100%，见下。
 
 2026-11-07 修复说明：
 
@@ -66,6 +65,15 @@ npm run build
 - `Header` 移动端工具面板的语言按钮补 `title` / `aria-label`，与桌面版一致；测试同步改为按可访问名
   定位并断言按钮文本显示当前语言，用例数不变（15 例）。
 
+2026-11-07 补测说明（`LoadingContext`）：
+
+- 新增 `src/contexts/__tests__/LoadingContext.test.tsx`（8 例），模块覆盖率 56.92% → **100%**（四项全满）。
+  覆盖：初始空态无遮罩、单任务注册并渲染消息、多任务并发全部列出、按 id 只移除目标任务、
+  最后一个任务移除后遮罩消失、同 id 二次 `showLoading` 覆盖消息而不新增条目、隐藏未知 id 为空操作、
+  Provider 外调用 `useLoading` 抛错。
+- 测试总数 215 → **223**，文件数 24 → **25**；`All files` 89.94/80.07/74.55 → **90.22/80.24/76.33**。
+- 至此 `contexts/` 目录只剩 `ThemeContext.tsx` 的 45-46 两行未覆盖。
+
 本轮不设置任意全局 80% CI 阈值。后续新增或重构时，优先守住以下关键逻辑：
 
 - `useCourseData`：默认 seed、旧缓存迁移、空数组、损坏 JSON、重置、沙盒隔离
@@ -73,6 +81,7 @@ npm run build
 - `ShareableReportModal`：页面与报告指标一致、导出失败可恢复、焦点恢复、滚动锁
 - `VirtualCourseList`：83 门课程窗口化渲染和编辑/删除/计入回调
 - `ConfirmDialog`：焦点进入/恢复、Tab 困焦、Escape 关闭（不向 window 冒泡）、滚动锁引用计数
+- `LoadingContext`：多任务并发计数、按 id 移除、同 id 覆盖、空态不渲染遮罩
 - `Header`：分区切换、主题与语言切换、下拉 roving 键盘、移动端工具面板
 
 ## 生产包体基线
