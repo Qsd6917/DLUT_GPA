@@ -99,4 +99,4 @@ PWA precache：24 个条目，共 1443.61 KiB。
 - `@vitest/ui` 1.6.1
 - jsdom 28.1.0
 
-当前 CI 使用 Node 20。仓库 `package.json` 仍声明 Node `>=18.0.0`，但锁定的 `jsdom@28.1.0` 要求 Node `^20.19.0 || ^22.12.0 || >=24.0.0`；这是已知的开发/测试环境契约不一致，本轮未更改 `engines` 或依赖版本。`@vitejs/plugin-react@latest` 当前要求 Vite 8 和 Node 20.19+，不作为本轮升级目标。
+CI 在 Node 24 与 26 两条 LTS 线上运行（Node 20 已于 2026-04-30 EOL，不再测试）。`package.json` 的 `engines` 已与 `jsdom@28.1.0` 的要求 `^20.19.0 || ^22.12.0 || >=24.0.0` 对齐，`package-lock.json` 同步更新。`@vitejs/plugin-react@latest` 当前要求 Vite 8 和 Node 20.19+，不作为本轮升级目标。

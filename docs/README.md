@@ -422,7 +422,7 @@ npm run test:run
 npm run build
 ```
 
-CI 位于 `.github/workflows/ci.yml`，使用 Node 20 和 `npm ci` 复现上述质量门。覆盖率基线可通过 `npm run test:coverage` 生成，当前基线记录在 [QUALITY_BASELINE.md](./QUALITY_BASELINE.md)。
+CI 位于 `.github/workflows/ci.yml`，在 Node 24 与 26 两条 LTS 线上用 `npm ci` 复现上述质量门。覆盖率基线可通过 `npm run test:coverage` 生成，当前基线记录在 [QUALITY_BASELINE.md](./QUALITY_BASELINE.md)。
 
 ### 报告问题
 

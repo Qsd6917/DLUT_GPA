@@ -89,8 +89,8 @@ GPA 计算口径是本项目的核心正确性来源，改动前必须核对。
 
 - `scripts/build/` 与根目录 `build/` 同名。`.gitignore` 与 `.git/info/exclude` 里的 `build/`
   **必须写成 `/build/` 锚定根目录**，否则会连带忽略 `scripts/build/`，且 `git status` 看不见。
-- CI 用 Node 20，本机可能是更高版本。`jsdom@28` 要求 Node `^20.19 || ^22.12 || >=24`，
-  `package.json` 的 `engines` 仍写 `>=18`，这是已知契约不一致，改动前先确认。
+- CI 在 Node 24 与 26 两条 LTS 线上跑（Node 20 已于 2026-04-30 EOL，不再测试）。
+  `engines` 已与 `jsdom@28` 的要求对齐为 `^20.19.0 || ^22.12.0 || >=24.0.0`，改依赖时保持同步。
 - `format:check` 已在 CI 中，全仓格式化于 2026-11-06 完成。新增代码必须符合 prettier 风格；
   `docs/archive/` 经 `.prettierignore` 排除，不要对它格式化。
 - 涉及时间的测试断言必须与运行时区无关：`ShareableReportModal` 用 `getHours()/getDate()` 渲染本地时间，

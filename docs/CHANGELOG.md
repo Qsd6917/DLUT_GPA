@@ -40,6 +40,19 @@
 - 全项目覆盖率：88.29% → 89.92% statements，78.48% → 80.03% branches，69.33% → 74.55% functions。
 - `LoadingContext.tsx` 仍为 56.92%，是当前唯一低于 80% 的模块，列为后续补测目标。
 
+### 工具链与运行时契约（2026-11-07）
+
+- CI 的 `actions/checkout` 与 `actions/setup-node` 从 `v4` 升到 `v5`。v4 目标 Node 20 运行时，
+  GitHub 已强制其在 Node 24 上运行并给出弃用警告；v5 的原生运行时即 Node 24。
+  本项目 `package.json` 无 `packageManager` 字段，setup-node v5 的自动缓存不会触发，行为与 v4 一致。
+- CI 测试矩阵从固定 Node 20 改为 Node 24 与 26 两条 LTS 线。Node 20 已于 2026-04-30 EOL。
+- `package.json` 的 `engines.node` 从 `>=18.0.0` 改为 `^20.19.0 || ^22.12.0 || >=24.0.0`，
+  与锁定的 `jsdom@28.1.0` 要求对齐，`package-lock.json` 同步更新。此前声明允许 Node 18，
+  但该版本下 `jsdom@28` 无法运行，属契约不一致。
+- Vitest `testTimeout` 从默认 5000ms 放宽到 10000ms。2026-11-07 观察到一次高负载下
+  transform 从 3s 涨到 20s、整轮 47s 导致的超时失败（随后 6 次串行与并发运行均未复现），
+  当前最慢单例约 1.5s。未启用 `retry`，真卡死的用例仍会失败。
+
 ### 新增功能
 
 - 新增目标成绩规划器，在“快速估算”和“逐课规划”之间切换；未来课程可分别选择自动规划或固定百分制分数。

@@ -7,7 +7,7 @@
 - 单一前端工程入口：根目录安装依赖并运行命令
 - 技术栈：React 18、TypeScript、Vite、Tailwind CSS、Vitest
 - 当前质量基线：以仓库现有 CI 命令为准（`type-check`、`lint`、`test:run`、`build`）；本次文档不虚构未运行结果
-- CI：`.github/workflows/ci.yml` 使用 Node 20，按 `npm ci → type-check → lint → test:run → build` 顺序复现本地质量门
+- CI：`.github/workflows/ci.yml` 在 Node 24 与 26 两条 LTS 线上按 `npm ci → type-check → lint → format:check → test:run → build` 顺序复现本地质量门
 
 ## 默认课程数据
 
