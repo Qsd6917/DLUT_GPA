@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { OcrScanner } from '../common/OcrScanner';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
+import { calculateCourseGpa } from '../../services/gpaService';
+import { DEFAULT_CALCULATION_METHOD } from '../../utils/constants';
 
 interface DataManagementModalProps {
   isOpen: boolean;
@@ -16,6 +18,9 @@ interface DataManagementModalProps {
   courses: Course[];
   onImport: (courses: Course[], mode: 'replace' | 'merge') => void;
 }
+
+/** Excel 导入的文件大小上限：超过 10 MB 直接拒绝，避免解析超大文件阻塞主线程 */
+const MAX_EXCEL_FILE_BYTES = 10 * 1024 * 1024;
 
 let xlsxModulePromise: Promise<typeof import('xlsx')> | null = null;
 
@@ -25,6 +30,17 @@ const loadXlsxModule = () => {
   }
 
   return xlsxModulePromise;
+};
+
+// JSON 导入只接受三种课程属性，其余值一律回退为「必修」
+const JSON_COURSE_TYPES: readonly Course['type'][] = ['必修', '选修', '任选'];
+const JSON_DEFAULT_SEMESTER = '1-1';
+
+const normalizeJsonCourseType = (value: unknown): Course['type'] => {
+  const raw = String(value ?? '').trim();
+  return JSON_COURSE_TYPES.includes(raw as Course['type'])
+    ? (raw as Course['type'])
+    : '必修';
 };
 
 export const DataManagementModal: React.FC<DataManagementModalProps> = ({
@@ -39,6 +55,9 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
   const [message, setMessage] = useState('');
   const [importMode, setImportMode] = useState<'replace' | 'merge'>('replace');
   const [isProcessing, setIsProcessing] = useState(false);
+  // OCR 识别结果的暂存区。非空时显示预览与「追加/取消」按钮，
+  // 确认前不写入任何数据——这是 P0 数据丢失问题的修复点。
+  const [ocrPreview, setOcrPreview] = useState<Course[]>([]);
   useBodyScrollLock(isOpen);
 
   useEffect(() => {
@@ -196,12 +215,39 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             const score = parseNumber(c?.score);
 
             if (!name) errors.push(`第 ${index + 1} 条：课程名为空`);
-            if (credits === null)
+            if (credits === null) {
               errors.push(`第 ${index + 1} 条：学分不是数字`);
-            if (score === null) errors.push(`第 ${index + 1} 条：成绩不是数字`);
+            } else if (credits < 0) {
+              errors.push(`第 ${index + 1} 条：学分不能小于 0`);
+            }
+            if (score === null) {
+              errors.push(`第 ${index + 1} 条：成绩不是数字`);
+            } else if (score < 0 || score > 100) {
+              errors.push(`第 ${index + 1} 条：成绩需在 0-100 之间`);
+            }
 
-            if (name && credits !== null && score !== null) {
-              validCourses.push(c);
+            if (
+              name &&
+              credits !== null &&
+              score !== null &&
+              credits >= 0 &&
+              score >= 0 &&
+              score <= 100
+            ) {
+              // 用解析后的值重建对象：直接 push 原始对象会把字符串学分、
+              // 数字学期等脏数据带进统计链路，导致 reduce 拼接或 localeCompare 抛错。
+              validCourses.push({
+                id: String(c?.id ?? ''),
+                name,
+                credits,
+                score,
+                semester:
+                  String(c?.semester ?? '').trim() || JSON_DEFAULT_SEMESTER,
+                type: normalizeJsonCourseType(c?.type),
+                isCore: Boolean(c?.isCore),
+                isActive: score > 0,
+                gpa: calculateCourseGpa(score, DEFAULT_CALCULATION_METHOD),
+              });
             }
           });
 
@@ -246,6 +292,16 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
+
+    if (file.size > MAX_EXCEL_FILE_BYTES) {
+      setMessage('');
+      setError(
+        `导入失败：文件大小 ${(file.size / 1024 / 1024).toFixed(
+          1
+        )} MB 超过 10 MB 上限，请拆分后再导入`
+      );
+      return;
+    }
 
     setIsProcessing(true);
     setError('');
@@ -409,7 +465,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           : `成功导入 ${validCourses.length} 行`
       );
     } catch (err) {
-      setError('导入失败：无法解析 Excel 文件（请确认是 .xlsx 且表头正确）');
+      setError('导入失败：文件无法解析，请确认是有效的 Excel 文件');
     } finally {
       setIsProcessing(false);
     }
@@ -559,10 +615,63 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             <div className="border-t border-primary/10 pt-4">
               <OcrScanner
                 onCoursesParsed={courses => {
-                  onImport(courses, importMode);
-                  setMessage(`通过OCR成功导入 ${courses.length} 门课程`);
+                  // OCR 结果不直接写入：先落到预览区，由用户确认后再导入。
+                  // 此前这里直接 onImport(courses, importMode)，而 importMode 默认 'replace'，
+                  // 用户只是试一下 OCR、识别出 1 门课，83 门课程就被覆盖清空，无确认无撤销。
+                  setOcrPreview(courses);
+                  setMessage(
+                    `识别到 ${courses.length} 门课程，请在下方确认后再导入`
+                  );
                 }}
               />
+
+              {ocrPreview.length > 0 ? (
+                <div
+                  className="mt-4 rounded-[var(--radius-control)] border border-primary/20 bg-[hsl(var(--surface-2))] p-4"
+                  role="region"
+                  aria-label="OCR 识别结果预览"
+                >
+                  <p className="text-sm font-semibold text-main">
+                    识别到 {ocrPreview.length} 门课程
+                  </p>
+                  <ul className="mt-2 max-h-40 overflow-auto text-xs text-muted">
+                    {ocrPreview.map((course, index) => (
+                      <li key={`${course.id}-${index}`} className="py-0.5">
+                        {course.name} · {course.credits} 学分 · {course.score}{' '}
+                        分
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 text-xs text-muted">
+                    默认追加到现有课程，不会覆盖你已有的数据。
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="primary-button"
+                      onClick={() => {
+                        // OCR 路径强制 merge：识别结果天然是「补充录入」，
+                        // 覆盖整个成绩单不是这里的合理操作。
+                        onImport(ocrPreview, 'merge');
+                        setMessage(`已追加 ${ocrPreview.length} 门课程`);
+                        setOcrPreview([]);
+                      }}
+                    >
+                      追加这 {ocrPreview.length} 门
+                    </button>
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() => {
+                        setOcrPreview([]);
+                        setMessage('');
+                      }}
+                    >
+                      取消
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="pb-1 text-center text-xs text-muted">
