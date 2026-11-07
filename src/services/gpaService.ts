@@ -337,10 +337,36 @@ export function calculateTargetGpa(input: TargetGpaInput): TargetGpaResult {
   };
 }
 
+/**
+ * 加权平均的安全除法：分母非正或非有限、分子非有限时一律返回 0，
+ * 避免 NaN / Infinity / 负值从统计结果里泄漏出去。
+ */
+function safeWeightedAverage(weightedTotal: number, credits: number): number {
+  if (!Number.isFinite(weightedTotal) || !Number.isFinite(credits)) return 0;
+  if (credits <= 0) return 0;
+  return weightedTotal / credits;
+}
+
+/**
+ * 把单个课程的绩点 / 成绩归一成可参与累加的非负值。
+ * 负值只可能来自历史脏数据（例如旧版 PKU_4_0 对 150 分算出的 -0.6875），
+ * 没有成绩语义，按 0 计；对合法数据是恒等变换。
+ */
+function nonNegative(value: number): number {
+  return value > 0 ? value : 0;
+}
+
 export function calculateSemesterTrends(courses: Course[]): SemesterTrend[] {
   const groups = new Map<string, Course[]>();
   courses
-    .filter(course => course.isActive && course.credits > 0)
+    .filter(
+      course =>
+        course.isActive &&
+        Number.isFinite(course.credits) &&
+        course.credits > 0 &&
+        Number.isFinite(course.score) &&
+        Number.isFinite(course.gpa)
+    )
     .forEach(course =>
       groups.set(course.semester, [
         ...(groups.get(course.semester) ?? []),
@@ -353,16 +379,18 @@ export function calculateSemesterTrends(courses: Course[]): SemesterTrend[] {
     )
     .map(([semester, items]) => {
       const credits = items.reduce((sum, course) => sum + course.credits, 0);
+      const weightedGpa = items.reduce(
+        (sum, course) => sum + nonNegative(course.gpa) * course.credits,
+        0
+      );
+      const weightedScore = items.reduce(
+        (sum, course) => sum + nonNegative(course.score) * course.credits,
+        0
+      );
       return {
         semester,
-        gpa:
-          items.reduce((sum, course) => sum + course.gpa * course.credits, 0) /
-          credits,
-        averageScore:
-          items.reduce(
-            (sum, course) => sum + course.score * course.credits,
-            0
-          ) / credits,
+        gpa: safeWeightedAverage(weightedGpa, credits),
+        averageScore: safeWeightedAverage(weightedScore, credits),
         credits,
         courseCount: items.length,
       };
@@ -373,66 +401,90 @@ export function calculateCourseGpa(
   score: number,
   method: CalculationMethod
 ): number {
-  if (score < 60) return 0;
+  // 非有限数（NaN / ±Infinity）没有可用的成绩语义，直接记 0，
+  // 否则 SUBTRACTIVE / LINEAR / PKU_4_0 会把它继续传下去。
+  if (!Number.isFinite(score)) return 0;
+
+  // 越界成绩（导入脏数据、手工录入、OCR 误识别）先钳制回 [0, 100] 的有效区间，
+  // 再走原有算法，保证结果不会超出该算法满分（如 150 分不再得到 10.0）。
+  const clampedScore = Math.min(100, Math.max(0, score));
+
+  if (clampedScore < 60) return 0;
 
   switch (method) {
     case CalculationMethod.SUBTRACTIVE: // DLUT 5.0
-      return (score - 50) / 10;
+      return (clampedScore - 50) / 10;
 
     case CalculationMethod.LINEAR: // 5.0
-      return score / 20;
+      return clampedScore / 20;
 
     case CalculationMethod.WES: // WES 4.0
-      if (score >= 85) return 4.0;
-      if (score >= 75) return 3.0;
-      if (score >= 60) return 2.0;
+      if (clampedScore >= 85) return 4.0;
+      if (clampedScore >= 75) return 3.0;
+      if (clampedScore >= 60) return 2.0;
       return 0;
 
     case CalculationMethod.STD_4_0: // Standard 4.0
-      if (score >= 90) return 4.0;
-      if (score >= 80) return 3.0;
-      if (score >= 70) return 2.0;
-      if (score >= 60) return 1.0;
+      if (clampedScore >= 90) return 4.0;
+      if (clampedScore >= 80) return 3.0;
+      if (clampedScore >= 70) return 2.0;
+      if (clampedScore >= 60) return 1.0;
       return 0;
 
     case CalculationMethod.PKU_4_0: // Peking University 4.0
-      return 4 - (3 * Math.pow(100 - score, 2)) / 1600;
+      return 4 - (3 * Math.pow(100 - clampedScore, 2)) / 1600;
 
     case CalculationMethod.SCALE_4_5: // 4.5 Scale
-      if (score >= 90) return 4.5;
-      if (score >= 85) return 4.0;
-      if (score >= 80) return 3.5;
-      if (score >= 75) return 3.0;
-      if (score >= 70) return 2.5;
-      if (score >= 65) return 2.0;
-      if (score >= 60) return 1.5;
+      if (clampedScore >= 90) return 4.5;
+      if (clampedScore >= 85) return 4.0;
+      if (clampedScore >= 80) return 3.5;
+      if (clampedScore >= 75) return 3.0;
+      if (clampedScore >= 70) return 2.5;
+      if (clampedScore >= 65) return 2.0;
+      if (clampedScore >= 60) return 1.5;
       return 0;
 
     default:
-      return (score - 50) / 10;
+      return (clampedScore - 50) / 10;
   }
 }
 
 export function calculateStats(courses: Course[]): GpaStats {
   const activeCourses = courses.filter(c => c.isActive);
 
-  const totalCredits = activeCourses.reduce((sum, c) => sum + c.credits, 0);
-  const totalWeightedGpa = activeCourses.reduce(
-    (sum, c) => sum + c.gpa * c.credits,
+  // 第二道过滤只校验「数据本身可用」：学分、成绩、绩点必须都是有限数，且学分不为负。
+  // 它不改 isActive 的纳入语义——0 学分课程仍然计入课程数与分布档位（与既有口径一致），
+  // 只是把 NaN / Infinity / 负学分这类脏数据挡在统计之外：一个 NaN 会顺着累加污染
+  // 整条统计链，NaN 成绩还会被误归进「<60」档。
+  const validCourses = activeCourses.filter(
+    c =>
+      Number.isFinite(c.credits) &&
+      c.credits >= 0 &&
+      Number.isFinite(c.score) &&
+      Number.isFinite(c.gpa)
+  );
+
+  // 累加口径再收紧一步：只有学分 > 0 的课程参与学分与加权求和，
+  // 否则负学分会让加权值突破满分、让分母归零（→ Infinity）或与其他课程正负抵消。
+  const countableCourses = validCourses.filter(c => c.credits > 0);
+
+  const totalCredits = countableCourses.reduce((sum, c) => sum + c.credits, 0);
+  const totalWeightedGpa = countableCourses.reduce(
+    (sum, c) => sum + nonNegative(c.gpa) * c.credits,
     0
   );
-  const totalWeightedScore = activeCourses.reduce(
-    (sum, c) => sum + c.score * c.credits,
+  const totalWeightedScore = countableCourses.reduce(
+    (sum, c) => sum + nonNegative(c.score) * c.credits,
     0
   );
 
-  const compulsoryCourses = activeCourses.filter(c => c.type === '必修');
+  const compulsoryCourses = countableCourses.filter(c => c.type === '必修');
   const compulsoryCredits = compulsoryCourses.reduce(
     (sum, c) => sum + c.credits,
     0
   );
   const compulsoryWeightedGpa = compulsoryCourses.reduce(
-    (sum, c) => sum + c.gpa * c.credits,
+    (sum, c) => sum + nonNegative(c.gpa) * c.credits,
     0
   );
 
@@ -445,7 +497,7 @@ export function calculateStats(courses: Course[]): GpaStats {
     { name: '<60', value: 0, credits: 0, percentage: 0 },
   ];
 
-  activeCourses.forEach(c => {
+  validCourses.forEach(c => {
     const bucket =
       c.score >= 90
         ? 0
@@ -461,20 +513,19 @@ export function calculateStats(courses: Course[]): GpaStats {
   });
   distribution.forEach(bucket => {
     bucket.percentage =
-      activeCourses.length > 0
-        ? (bucket.value / activeCourses.length) * 100
-        : 0;
+      validCourses.length > 0 ? (bucket.value / validCourses.length) * 100 : 0;
   });
 
   return {
     totalCredits,
-    weightedGpa: totalCredits > 0 ? totalWeightedGpa / totalCredits : 0,
-    weightedAverageScore:
-      totalCredits > 0 ? totalWeightedScore / totalCredits : 0,
-    courseCount: activeCourses.length,
+    weightedGpa: safeWeightedAverage(totalWeightedGpa, totalCredits),
+    weightedAverageScore: safeWeightedAverage(totalWeightedScore, totalCredits),
+    courseCount: validCourses.length,
     scoreDistribution: distribution,
     compulsoryCredits,
-    compulsoryWeightedGpa:
-      compulsoryCredits > 0 ? compulsoryWeightedGpa / compulsoryCredits : 0,
+    compulsoryWeightedGpa: safeWeightedAverage(
+      compulsoryWeightedGpa,
+      compulsoryCredits
+    ),
   };
 }
