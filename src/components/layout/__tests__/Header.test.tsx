@@ -366,21 +366,32 @@ describe('Header', () => {
       expect(document.documentElement).toHaveClass('light');
       expect(localStorage.getItem('dlut_gpa_theme')).toBe('light');
 
-      fireEvent.click(within(panel).getByRole('button', { name: 'zh' }));
+      // 移动端语言按钮此前只有裸 zh/en 两个字母作为可访问名，与桌面版不一致。
+      // 现在补了 title + aria-label，可访问名统一为「切换语言」，当前语言仍在文本里。
+      const languageButton = within(panel).getByRole('button', {
+        name: '切换语言',
+      });
+      expect(languageButton).toHaveAttribute('title', '切换语言');
+      expect(languageButton).toHaveTextContent('zh');
+
+      fireEvent.click(languageButton);
       expect(
         within(panel).getByRole('button', { name: 'Data Mgmt' })
       ).toBeInTheDocument();
+      // 可访问名随语言切换，当前语言由按钮文本体现。
       expect(
-        within(panel).getByRole('button', { name: 'en' })
-      ).toBeInTheDocument();
+        within(panel).getByRole('button', { name: 'Switch language' })
+      ).toHaveTextContent('en');
 
-      fireEvent.click(within(panel).getByRole('button', { name: 'en' }));
+      fireEvent.click(
+        within(panel).getByRole('button', { name: 'Switch language' })
+      );
       expect(
         within(panel).getByRole('button', { name: '数据管理' })
       ).toBeInTheDocument();
       expect(
-        within(panel).getByRole('button', { name: 'zh' })
-      ).toBeInTheDocument();
+        within(panel).getByRole('button', { name: '切换语言' })
+      ).toHaveTextContent('zh');
 
       fireEvent.click(toggle);
 

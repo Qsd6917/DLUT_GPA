@@ -348,6 +348,8 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               className="toolbar-button"
               onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+              title={t('language_toggle')}
+              aria-label={t('language_toggle')}
             >
               <Languages size={15} />
               {language}
