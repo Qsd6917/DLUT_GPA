@@ -216,7 +216,10 @@ export const useCourseData = () => {
         type,
         isCore,
         gpa: calculateCourseGpa(score, method),
-        isActive: true,
+        // 与 AGENTS.md 的领域规则一致：「通过与 0 分不计入 GPA」。
+        // 原先无条件 true，用户录入一门 0 分课（缓考、缺考）会让 GPA 从 4.000 掉到 2.000，
+        // 而按项目口径它本不该计入。用户仍可在课程列表里手动勾选纳入。
+        isActive: score > 0,
       };
       updateWorkingCourses(prev => [...prev, newCourse]);
     },

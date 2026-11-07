@@ -449,4 +449,33 @@ describe('useCourseData', () => {
       ).toHaveLength(83);
     });
   });
+
+  // 回归：AGENTS.md 的领域规则是「通过与 0 分不计入 GPA」。
+  // 原先 addCourse 无条件 isActive: true，录一门 0 分课会让 GPA 从 4.000 掉到 2.000。
+  describe('新增课程的计入状态', () => {
+    test('does not count a zero-score course toward GPA by default', async () => {
+      const { result } = renderHook(() => useCourseData());
+      await waitFor(() => expect(result.current.hydrated).toBe(true));
+
+      act(() => {
+        result.current.addCourse('缺考课程', 3, 0, '4-1', '必修', false);
+      });
+
+      const added = result.current.courses.find(c => c.name === '缺考课程');
+      expect(added).toBeDefined();
+      expect(added?.isActive).toBe(false);
+    });
+
+    test('counts a course with a positive score', async () => {
+      const { result } = renderHook(() => useCourseData());
+      await waitFor(() => expect(result.current.hydrated).toBe(true));
+
+      act(() => {
+        result.current.addCourse('正常课程', 3, 86, '4-1', '必修', false);
+      });
+
+      const added = result.current.courses.find(c => c.name === '正常课程');
+      expect(added?.isActive).toBe(true);
+    });
+  });
 });
