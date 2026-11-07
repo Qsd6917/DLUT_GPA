@@ -8,13 +8,29 @@ import {
 import { calculateCourseGpa } from '../services/gpaService';
 import { compareExperimentCourses } from '../services/experimentService';
 import { SAMPLE_COURSES, DEFAULT_CALCULATION_METHOD } from '../utils/constants';
+import {
+  readJSON,
+  readString,
+  remove,
+  writeJSON,
+  writeString,
+} from '../utils/safeStorage';
 
 const STORAGE_KEY = 'dlut_gpa_courses_transcript_20260704';
 const STORAGE_SEED_KEY = 'dlut_gpa_courses_seed';
-const CURRENT_SEED_ID = 'transcript-20260704-qian-dayu-v2';
+// seed 版本号只用于判断本地缓存是否属于当前内置数据集，不应携带任何个人信息。
+// 旧值 'transcript-20260704-qian-dayu-v2' 含真实姓名，会随仓库公开分发。
+// 改名后老用户的 seed 不匹配，会走一次「重新载入示例数据」——这与既有升级行为一致。
+const CURRENT_SEED_ID = 'transcript-20260704-sample-v3';
 const createCourseId = () =>
   globalThis.crypto?.randomUUID?.() ??
   `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+/**
+ * `readJSON` 的 fallback 哨兵：用于区分「JSON 损坏 / 读取失败」与「合法但
+ * 不是数组」两种情况。前者回退初始成绩单，后者保留空列表。
+ */
+const INVALID_JSON = Symbol('invalid-json');
 
 interface CourseDataState {
   officialCourses: Course[];
@@ -52,30 +68,47 @@ export const useCourseData = () => {
     experiment: null,
   });
   const [hydrated, setHydrated] = useState(false);
+  // 写入失败（配额满 / 存储被禁用）时置为 true，供 UI 提示用户
+  // 「改动没有保存到本地」。初始值 false 表示尚未观察到失败。
+  const [storageBlocked, setStorageBlocked] = useState(false);
   const [method, setMethod] = useState<CalculationMethod>(
     DEFAULT_CALCULATION_METHOD
   );
   const courses = data.experiment?.draftCourses ?? data.officialCourses;
   const isExperimentActive = data.experiment !== null;
 
+  // 当前展示的是否仍是内置示例数据（用户未做过任何改动）。
+  // 供界面显示「这不是你的成绩」的提示条——新用户首访看到的 83 门课、
+  // GPA 3.867 来自示例成绩单，此前完全没有标注。
+  const isSampleData =
+    hydrated &&
+    !isExperimentActive &&
+    isInitialTranscriptCourses(data.officialCourses);
+
   // Initialize data
   useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    const isCurrentSeed =
-      localStorage.getItem(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
-    const hasSavedData = savedData !== null && isCurrentSeed;
+    // 存储不可用（Safari 阻止所有 Cookie、机房策略）时 readString 返回 null，
+    // 相当于「首次访问」，直接回退到默认成绩单，而不是让整站崩掉。
+    const savedRaw = readString(STORAGE_KEY);
+    const isCurrentSeed = readString(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
+    const hasSavedData = savedRaw !== null && isCurrentSeed;
     let initialCourses: Course[] = getInitialTranscriptCourses(
       DEFAULT_CALCULATION_METHOD
     );
 
     if (hasSavedData) {
-      try {
-        const parsed = JSON.parse(savedData as string);
-        initialCourses = Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
+      // 用哨兵区分「JSON 损坏」与「合法但非数组」两种情况，保持与原有
+      // 迁移行为一致：损坏 → 回退初始成绩单；合法非数组 → 空列表。
+      const parsed = readJSON<Course[] | typeof INVALID_JSON>(
+        STORAGE_KEY,
+        INVALID_JSON
+      );
+      if (parsed === INVALID_JSON) {
         initialCourses = getInitialTranscriptCourses(
           DEFAULT_CALCULATION_METHOD
         );
+      } else {
+        initialCourses = Array.isArray(parsed) ? parsed : [];
       }
 
       if (initialCourses.length > 0) {
@@ -90,8 +123,12 @@ export const useCourseData = () => {
     }
 
     if (!hasSavedData) {
-      localStorage.setItem(STORAGE_SEED_KEY, CURRENT_SEED_ID);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialCourses));
+      // 写失败不阻断启动：用户仍能使用本次会话，只是下次打开需要重新初始化。
+      const wroteSeed = writeString(STORAGE_SEED_KEY, CURRENT_SEED_ID);
+      const wroteCourses = writeJSON(STORAGE_KEY, initialCourses);
+      if (!wroteSeed || !wroteCourses) {
+        setStorageBlocked(true);
+      }
     }
 
     setData({ officialCourses: initialCourses, experiment: null });
@@ -101,14 +138,17 @@ export const useCourseData = () => {
   // Persist courses
   useEffect(() => {
     if (hydrated && !data.experiment) {
-      const isCurrentSeed =
-        localStorage.getItem(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
+      const isCurrentSeed = readString(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
+      // 已知问题（P1-2，本次不改）：当 seed 不是当前版本、且数据也不是初始
+      // 成绩单时，这里直接 return，既不写入也不提示，导致该分支下用户的编辑
+      // 永远无法落盘。修复需要先明确「外部 seed」的语义，见 issue 追踪。
       if (!isCurrentSeed && !isInitialTranscriptCourses(data.officialCourses)) {
         return;
       }
 
-      localStorage.setItem(STORAGE_SEED_KEY, CURRENT_SEED_ID);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.officialCourses));
+      const wroteSeed = writeString(STORAGE_SEED_KEY, CURRENT_SEED_ID);
+      const wroteCourses = writeJSON(STORAGE_KEY, data.officialCourses);
+      setStorageBlocked(!wroteSeed || !wroteCourses);
     }
   }, [data.experiment, data.officialCourses, hydrated]);
 
@@ -270,8 +310,11 @@ export const useCourseData = () => {
 
   const resetData = useCallback(() => {
     if (!data.experiment) {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.setItem(STORAGE_SEED_KEY, CURRENT_SEED_ID);
+      remove(STORAGE_KEY);
+      const wroteSeed = writeString(STORAGE_SEED_KEY, CURRENT_SEED_ID);
+      if (!wroteSeed) {
+        setStorageBlocked(true);
+      }
     }
     updateWorkingCourses(() => getInitialTranscriptCourses(method));
   }, [data.experiment, method, updateWorkingCourses]);
@@ -407,6 +450,10 @@ export const useCourseData = () => {
   return {
     courses,
     hydrated,
+    isSampleData,
+    // 可选扩展字段：localStorage 写入失败（配额满 / 存储被禁用）时为 true。
+    // 新增而非替换既有字段，App.tsx 等调用方即使不读取也能编译。
+    storageBlocked,
     method,
     setMethod,
     experiment: data.experiment,

@@ -1,12 +1,16 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, test, beforeEach } from 'vitest';
+import { afterEach, describe, expect, test, beforeEach, vi } from 'vitest';
 import { useCourseData } from '../useCourseData';
 import { CalculationMethod, Course } from '../../types';
 import { compareExperimentCourses } from '../../services/experimentService';
+import {
+  resetSafeStorageState,
+  isStorageAvailable,
+} from '../../utils/safeStorage';
 
 const STORAGE_KEY = 'dlut_gpa_courses_transcript_20260704';
 const SEED_KEY = 'dlut_gpa_courses_seed';
-const CURRENT_SEED = 'transcript-20260704-qian-dayu-v2';
+const CURRENT_SEED = 'transcript-20260704-sample-v3';
 const LEGACY_STORAGE_KEY = 'dlut_gpa_courses_v3';
 
 const savedCourse: Course = {
@@ -23,7 +27,14 @@ const savedCourse: Course = {
 
 describe('useCourseData', () => {
   beforeEach(() => {
+    // safeStorage 的可用性探测结果是模块级缓存，用例之间必须重置
+    resetSafeStorageState();
     localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    resetSafeStorageState();
   });
 
   test('seeds the 83-course transcript on first load', async () => {
@@ -375,6 +386,67 @@ describe('useCourseData', () => {
       expect(reloaded.current.hydrated).toBe(true);
       expect(reloaded.current.courses).toHaveLength(0);
       expect(reloaded.current.method).toBe(CalculationMethod.SUBTRACTIVE);
+    });
+  });
+
+  describe('localStorage 不可用时的降级行为', () => {
+    test('首次加载读取抛 SecurityError 时仍回退到内置成绩单', async () => {
+      // Safari「阻止所有 Cookie」/ 机房策略：连读都不行，应用必须还能用。
+      vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
+        throw new DOMException('The operation is insecure.', 'SecurityError');
+      });
+
+      const { result } = renderHook(() => useCourseData());
+
+      await waitFor(() => expect(result.current.hydrated).toBe(true));
+      expect(result.current.courses).toHaveLength(83);
+    });
+
+    test('写入抛 QuotaExceededError 时把 storageBlocked 暴露给 UI', async () => {
+      // 先让探测通过，模拟「本来能用、后来配额满了」
+      expect(isStorageAvailable()).toBe(true);
+      vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+        throw new DOMException('quota exceeded', 'QuotaExceededError');
+      });
+
+      const { result } = renderHook(() => useCourseData());
+
+      await waitFor(() => expect(result.current.hydrated).toBe(true));
+      // 用户仍能看到数据（不因为存不下就白屏）
+      expect(result.current.courses).toHaveLength(83);
+      // 但失败必须可见，不能静默
+      await waitFor(() => expect(result.current.storageBlocked).toBe(true));
+    });
+
+    test('正常环境写入成功时 storageBlocked 保持 false', async () => {
+      const { result } = renderHook(() => useCourseData());
+
+      await waitFor(() => expect(result.current.hydrated).toBe(true));
+      expect(result.current.storageBlocked).toBe(false);
+    });
+
+    test('写入恢复后 storageBlocked 回到 false', async () => {
+      expect(isStorageAvailable()).toBe(true);
+      const setItemSpy = vi
+        .spyOn(localStorage, 'setItem')
+        .mockImplementation(() => {
+          throw new DOMException('quota exceeded', 'QuotaExceededError');
+        });
+
+      const { result } = renderHook(() => useCourseData());
+      await waitFor(() => expect(result.current.storageBlocked).toBe(true));
+
+      // 用户清理了浏览器存储。注意此处走 resetData：它会重写 seed，
+      // 从而让持久化 effect 重新进入可写入分支。
+      // （普通编辑走不到这里——seed 缺失 + 数据非初始的分支是已知 P1-2 问题，
+      //  本次任务明确不修。）
+      setItemSpy.mockRestore();
+      act(() => result.current.resetData());
+
+      await waitFor(() => expect(result.current.storageBlocked).toBe(false));
+      expect(
+        JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
+      ).toHaveLength(83);
     });
   });
 });
