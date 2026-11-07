@@ -191,8 +191,11 @@ storybook-static/
 .cache/
 
 # Gatsby
+# 注意：Gatsby 把 public/ 当构建输出，但本项目是 Vite，public/ 是静态资源源目录
+# （图标、favicon 等），必须入库。裸 `public/` 规则会连带忽略整个目录且 git status 看不见，
+# 导致 fresh clone 与 CI 构建出的 dist 缺图标、PWA manifest 全部 404。
+# 构建输出已由上面的 dist/ 覆盖，这里不再忽略 public/。
 .cache/
-public/
 
 # Vue
 .vuepress/dist
