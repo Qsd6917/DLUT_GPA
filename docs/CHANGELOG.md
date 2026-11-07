@@ -42,6 +42,10 @@
 
 ### 修复（2026-11-07）
 
+- `Header` 移动端工具面板的语言按钮原先只有裸 `zh` / `en` 两个字母作为可访问名，桌面版同一功能
+  却有 `title` 与 `aria-label`，屏幕阅读器在移动端读到的是无意义的语言代码。现补齐
+  `title` / `aria-label`，两处一致使用 `language_toggle` 文案。`Header` 测试同步改为按可访问名定位，
+  并断言按钮文本仍显示当前语言。
 - `ConfirmDialog` 修复三个并发缺陷，两个新增回归用例都验证过「旧实现失败、新实现通过」：
   - **焦点抢回**：焦点 effect 原先依赖 `[open, onCancel]`，而 `App.tsx` 传入的是内联箭头函数，
     父组件每次渲染都会换 `onCancel` 身份，effect 随之重跑并再次执行 `cancelRef.current?.focus()`，

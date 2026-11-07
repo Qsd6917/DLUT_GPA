@@ -27,7 +27,7 @@ npm run build
 - `npm run type-check`：通过
 - `npm run lint`：通过
 - `npm run format:check`：通过（2026-11-06 完成全仓格式化后；此前为 64 个文件不通过，现已纳入 CI）
-- `npm run test:run`：20 个测试文件、171 项测试通过
+- `npm run test:run`：24 个测试文件、215 项测试通过
 - `npm run test:coverage`：通过
 - `npm run build`：通过，转换 2461 个模块；本次串行快照用时 8.77 秒
 
@@ -63,6 +63,8 @@ npm run build
   `disabled`，这两条分支当前不可达，属防御性代码，不为覆盖率改动组件 API。
   两个新增用例都验证过「在旧实现上失败、在新实现上通过」，确属回归防护。
 - `All files` 89.92% → 89.94%，`branches` 80.03% → 80.07%。
+- `Header` 移动端工具面板的语言按钮补 `title` / `aria-label`，与桌面版一致；测试同步改为按可访问名
+  定位并断言按钮文本显示当前语言，用例数不变（15 例）。
 
 本轮不设置任意全局 80% CI 阈值。后续新增或重构时，优先守住以下关键逻辑：
 
