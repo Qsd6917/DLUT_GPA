@@ -16,7 +16,7 @@ const renderApp = () => renderWithProviders(<App />);
 
 const STORAGE_KEY = 'dlut_gpa_courses_transcript_20260704';
 const SEED_KEY = 'dlut_gpa_courses_seed';
-const CURRENT_SEED = 'transcript-20260704-qian-dayu-v2';
+const CURRENT_SEED = 'transcript-20260704-sample-v3';
 
 const expectBefore = (earlier: HTMLElement, later: HTMLElement) => {
   expect(

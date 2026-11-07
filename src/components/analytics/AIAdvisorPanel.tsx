@@ -80,10 +80,14 @@ const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({
           <div>
             <h2 className="type-section-title text-main">智能学业建议</h2>
             <p className="type-body-sm">
-              基于当前课程表现的本地规则分析，不会上传个人数据
+              演示功能：推荐课程与成功率来自内置示例数据，不是基于你的成绩计算
             </p>
           </div>
         </div>
+        <p className="type-body-sm mt-3 rounded-[var(--radius-control)] border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-main">
+          本面板使用的课程难度与成功率是固定的示例值，与你的实际成绩无关，
+          请勿据此选课。真正基于你数据的分析尚未实现。
+        </p>
       </div>
 
       <div className="border-b border-primary/10 px-5 py-2">
@@ -208,10 +212,11 @@ const RecommendationsTab: React.FC<{ recommendations: Recommendation[] }> = ({
                         : 'bg-red-500/10 text-red-700 dark:text-red-300'
                   }`}
                 >
-                  成功率 {(recommendation.successProbability * 100).toFixed(0)}%
+                  示例成功率{' '}
+                  {(recommendation.successProbability * 100).toFixed(0)}%
                 </span>
                 <div className="mt-1 text-xs text-muted">
-                  预计成绩{' '}
+                  示例预计成绩{' '}
                   <span className="num-inline text-main">
                     {recommendation.predictedGrade.toFixed(1)}
                   </span>

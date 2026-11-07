@@ -11,6 +11,8 @@ import { useTranslation } from '../contexts/LanguageContext';
 import { useCourseData } from '../hooks/useCourseData';
 import { useCourseFilter } from '../hooks/useCourseFilter';
 import { Layout } from '../components/layout/Layout';
+import { SampleDataBanner } from '../components/layout/SampleDataBanner';
+import { StorageBlockedBanner } from '../components/layout/StorageBlockedBanner';
 import { Header } from '../components/layout/Header';
 import { CourseFilterBar } from '../components/course/CourseFilterBar';
 import { AddCourseForm } from '../components/course/AddCourseForm';
@@ -78,10 +80,14 @@ const GraduationProgress = lazy(() =>
 
 type Section = 'overview' | 'courses' | 'analysis';
 function App() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  // 示例数据提示条被用户手动关闭后，本次会话不再显示。
+  const [isSampleBannerDismissed, setIsSampleBannerDismissed] = useState(false);
   const {
     courses,
     hydrated,
+    isSampleData,
+    storageBlocked,
     method,
     setMethod,
     experiment,
@@ -643,7 +649,9 @@ function App() {
             <AIAdvisorPanel
               courses={activeCourses}
               gpaStats={stats}
-              targetGPA={3.8}
+              // 目标线随算法满分推导：原先硬编码 3.8，在 DLUT 5.0（满分 5.0）或 4.5 口径下
+              // 目标进度永远是错的。取满分的 76% 作为「良好」的默认参照，4.0 口径下仍是 3.8。
+              targetGPA={Math.round(maximumGpa * 0.76 * 100) / 100}
               maximumGpa={maximumGpa}
             />
           </Suspense>
@@ -655,6 +663,16 @@ function App() {
   return (
     <Layout
       isExperimentActive={isExperimentActive}
+      banner={
+        <>
+          <StorageBlockedBanner visible={storageBlocked} language={language} />
+          <SampleDataBanner
+            visible={isSampleData && !isSampleBannerDismissed}
+            language={language}
+            onDismiss={() => setIsSampleBannerDismissed(true)}
+          />
+        </>
+      }
       header={
         <>
           <ReloadPrompt />
