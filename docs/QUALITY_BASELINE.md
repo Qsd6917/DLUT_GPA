@@ -39,11 +39,11 @@ npm run build
 
 | 范围                      | Statements | Branches | Functions |  Lines |
 | ------------------------- | ---------: | -------: | --------: | -----: |
-| All files                 |     89.92% |   80.03% |    74.55% | 89.92% |
+| All files                 |     89.94% |   80.07% |    74.55% | 89.94% |
 | `TargetGpaCalculator.tsx` |     99.13% |   96.15% |   100.00% | 99.13% |
 | `gpaService.ts`           |     92.50% |   92.98% |   100.00% | 92.50% |
 | `LanguageContext.tsx`     |    100.00% |  100.00% |   100.00% |   100% |
-| `ConfirmDialog.tsx`       |    100.00% |   93.10% |   100.00% |   100% |
+| `ConfirmDialog.tsx`       |    100.00% |   94.11% |   100.00% |   100% |
 | `ReloadPrompt.tsx`        |    100.00% |  100.00% |   100.00% |   100% |
 | `Header.tsx`              |    100.00% |   96.66% |   100.00% |   100% |
 | `LoadingContext.tsx`      |     56.92% |   50.00% |    20.00% | 56.92% |
@@ -56,13 +56,21 @@ npm run build
 - **`LoadingContext.tsx` 是当前唯一低于 80% 的模块**（56.92%），未覆盖行为 33、42-53（loading overlay JSX）
   与 60-65（`useLoading` 的 Provider 外抛错）。它是下一个应补测的目标。
 
+2026-11-07 修复说明：
+
+- `ConfirmDialog` 修复三个并发缺陷，测试 14 → 16 例（总数 213 → 215），分支覆盖率 93.10% → 94.11%。
+  剩余未覆盖的 58、60 两行是 `?? []` 空值兜底与「无可聚焦元素时提前返回」，两个按钮都不接受
+  `disabled`，这两条分支当前不可达，属防御性代码，不为覆盖率改动组件 API。
+  两个新增用例都验证过「在旧实现上失败、在新实现上通过」，确属回归防护。
+- `All files` 89.92% → 89.94%，`branches` 80.03% → 80.07%。
+
 本轮不设置任意全局 80% CI 阈值。后续新增或重构时，优先守住以下关键逻辑：
 
 - `useCourseData`：默认 seed、旧缓存迁移、空数组、损坏 JSON、重置、沙盒隔离
 - `gpaService`：课程绩点、统计口径、学期趋势、目标 GPA 结果类型
 - `ShareableReportModal`：页面与报告指标一致、导出失败可恢复、焦点恢复、滚动锁
 - `VirtualCourseList`：83 门课程窗口化渲染和编辑/删除/计入回调
-- `ConfirmDialog`：焦点进入/恢复、Tab 困焦、Escape 关闭、滚动锁保存与恢复
+- `ConfirmDialog`：焦点进入/恢复、Tab 困焦、Escape 关闭（不向 window 冒泡）、滚动锁引用计数
 - `Header`：分区切换、主题与语言切换、下拉 roving 键盘、移动端工具面板
 
 ## 生产包体基线

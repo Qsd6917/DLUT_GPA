@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -21,18 +22,32 @@ export function ConfirmDialog({
   const cancelRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const lastFocus = useRef<HTMLElement | null>(null);
+
+  // 滚动锁交给引用计数版本，与其它弹窗共享同一份计数，
+  // 避免并发弹窗时各自保存/恢复 overflow 导致顺序反转后残留锁定。
+  useBodyScrollLock(open);
+
+  // 焦点管理只依赖 open。若把 onCancel 也放进依赖，父组件每次渲染传入新的
+  // 内联回调都会让 effect 重跑，把用户用 Tab 移到的「确认」按钮弹回「取消」。
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
     lastFocus.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     cancelRef.current?.focus();
+    return () => {
+      lastFocus.current?.focus();
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
+        // 阻止继续冒泡到 window，避免与其它监听 keydown 的弹窗同时响应同一次 Escape。
+        event.stopPropagation();
         onCancel();
         return;
       }
@@ -56,9 +71,7 @@ export function ConfirmDialog({
     };
     document.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = previous;
       document.removeEventListener('keydown', onKey);
-      lastFocus.current?.focus();
     };
   }, [open, onCancel]);
   if (!open) return null;

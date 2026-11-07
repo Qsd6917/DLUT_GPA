@@ -40,6 +40,20 @@
 - 全项目覆盖率：88.29% → 89.92% statements，78.48% → 80.03% branches，69.33% → 74.55% functions。
 - `LoadingContext.tsx` 仍为 56.92%，是当前唯一低于 80% 的模块，列为后续补测目标。
 
+### 修复（2026-11-07）
+
+- `ConfirmDialog` 修复三个并发缺陷，两个新增回归用例都验证过「旧实现失败、新实现通过」：
+  - **焦点抢回**：焦点 effect 原先依赖 `[open, onCancel]`，而 `App.tsx` 传入的是内联箭头函数，
+    父组件每次渲染都会换 `onCancel` 身份，effect 随之重跑并再次执行 `cancelRef.current?.focus()`，
+    用户 Tab 到「确认重置」后会被弹回「取消」，该按钮实际不可达。现拆成两个 effect：
+    焦点管理只依赖 `[open]`，键盘监听保留 `[open, onCancel]` 以取到最新回调。
+  - **滚动锁口径不一致**：原先手写 `overflow` 保存/恢复，不参与 `useBodyScrollLock` 的引用计数，
+    与其它弹窗并发时顺序反转会残留锁定或提前解锁。现改用 `useBodyScrollLock(open)`。
+  - **Escape 未阻止冒泡**：原先只 `preventDefault`，与 `App.tsx:152` 等 window 级监听同时打开时，
+    一次 Escape 会关闭多个弹层。现补 `stopPropagation()`。
+- `ConfirmDialog` 测试 14 → 16 例，全项目 213 → 215 例；分支覆盖率 93.10% → 94.11%，
+  All files 89.92% → 89.94%（branches 80.03% → 80.07%）。
+
 ### 工具链与运行时契约（2026-11-07）
 
 - CI 的 `actions/checkout` 与 `actions/setup-node` 从 `v4` 升到 `v5`。v4 目标 Node 20 运行时，

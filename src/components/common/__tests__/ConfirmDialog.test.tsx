@@ -295,4 +295,40 @@ describe('ConfirmDialog', () => {
 
     expect(document.body.style.overflow).toBe('');
   });
+
+  test('does not let Escape reach window-level listeners of other dialogs', () => {
+    // 回归用例：App 里另有一个 window 级 Escape 监听（关闭课程录入面板）。
+    // ConfirmDialog 若只 preventDefault 不 stopPropagation，一次 Escape 会关掉两个弹层。
+    const onWindowEscape = vi.fn();
+    window.addEventListener('keydown', onWindowEscape);
+
+    const onCancel = vi.fn();
+    renderDialog({ onCancel });
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onWindowEscape).not.toHaveBeenCalled();
+
+    window.removeEventListener('keydown', onWindowEscape);
+  });
+
+  test('keeps focus where the user moved it when the parent re-renders', () => {
+    // 回归用例：App 传的是内联箭头函数，父组件每次渲染都会换 onCancel 身份。
+    // 早期实现把 onCancel 放进焦点 effect 的依赖，导致 effect 重跑、焦点被弹回「取消」，
+    // 用户永远 Tab 不到「确认重置」。
+    const { rerender } = renderDialog({ onCancel: () => {} });
+
+    const cancel = screen.getByRole('button', { name: '取消' });
+    const confirm = screen.getByRole('button', { name: '确认重置' });
+
+    fireEvent.keyDown(document, { key: 'Tab' });
+    expect(confirm).toHaveFocus();
+
+    // 模拟父组件因任意原因重渲染，并传入新的内联回调。
+    rerender(<ConfirmDialog {...defaultProps} onCancel={() => {}} />);
+
+    expect(confirm).toHaveFocus();
+    expect(cancel).not.toHaveFocus();
+  });
 });
