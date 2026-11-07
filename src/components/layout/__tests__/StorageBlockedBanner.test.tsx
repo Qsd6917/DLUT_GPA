@@ -28,4 +28,28 @@ describe('StorageBlockedBanner', () => {
     expect(alert).toHaveTextContent('will be lost');
     expect(alert).toHaveTextContent('Export a JSON backup');
   });
+
+  // P1-2 回归：存储里的 seed 属于外部来源时，应用刻意不写入（避免覆盖对方数据），
+  // 此前这个分支完全静默——用户改一晚上课程，关掉标签页全丢，界面无任何提示。
+  test('explains the external-seed case differently from a storage failure', () => {
+    render(
+      <StorageBlockedBanner
+        visible={true}
+        language="zh"
+        reason="externalSeed"
+      />
+    );
+
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('来自其他版本或其他工具');
+    expect(alert).toHaveTextContent('不会被保存');
+    // 这条分支的成因不同，不该复用「浏览器不允许」的措辞
+    expect(alert).not.toHaveTextContent('浏览器不允许');
+  });
+
+  test('uses the storage-failure wording by default', () => {
+    render(<StorageBlockedBanner visible={true} language="zh" />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('浏览器不允许');
+  });
 });

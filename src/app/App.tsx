@@ -88,6 +88,7 @@ function App() {
     hydrated,
     isSampleData,
     storageBlocked,
+    persistenceBlocked,
     method,
     setMethod,
     experiment,
@@ -665,7 +666,11 @@ function App() {
       isExperimentActive={isExperimentActive}
       banner={
         <>
-          <StorageBlockedBanner visible={storageBlocked} language={language} />
+          <StorageBlockedBanner
+            visible={storageBlocked || persistenceBlocked}
+            language={language}
+            reason={persistenceBlocked ? 'externalSeed' : 'unavailable'}
+          />
           <SampleDataBanner
             visible={isSampleData && !isSampleBannerDismissed}
             language={language}

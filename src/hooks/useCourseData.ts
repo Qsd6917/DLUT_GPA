@@ -71,6 +71,9 @@ export const useCourseData = () => {
   // 写入失败（配额满 / 存储被禁用）时置为 true，供 UI 提示用户
   // 「改动没有保存到本地」。初始值 false 表示尚未观察到失败。
   const [storageBlocked, setStorageBlocked] = useState(false);
+  // 存储里的 seed 属于外部来源时，本应用刻意不写入（避免覆盖对方数据），
+  // 但这意味着本次编辑不会保存。这个状态让界面能明确告诉用户。
+  const [persistenceBlocked, setPersistenceBlocked] = useState(false);
   const [method, setMethod] = useState<CalculationMethod>(
     DEFAULT_CALCULATION_METHOD
   );
@@ -139,16 +142,22 @@ export const useCourseData = () => {
   useEffect(() => {
     if (hydrated && !data.experiment) {
       const isCurrentSeed = readString(STORAGE_SEED_KEY) === CURRENT_SEED_ID;
-      // 已知问题（P1-2，本次不改）：当 seed 不是当前版本、且数据也不是初始
-      // 成绩单时，这里直接 return，既不写入也不提示，导致该分支下用户的编辑
-      // 永远无法落盘。修复需要先明确「外部 seed」的语义，见 issue 追踪。
+
       if (!isCurrentSeed && !isInitialTranscriptCourses(data.officialCourses)) {
+        // 该分支的真实意图：存储里的 seed 属于别的版本/外部来源时，不单方面改写它，
+        // 避免本应用覆盖掉对方的数据。
+        //
+        // 但原来的实现只是静默 return —— 用户在这个分支下改了一晚上课程，
+        // 关掉标签页全部丢失，界面上没有任何提示。这里保持「不写入」的语义不变，
+        // 改为把状态暴露给界面，让用户至少知道「本次修改不会保存」。
+        setPersistenceBlocked(true);
         return;
       }
 
       const wroteSeed = writeString(STORAGE_SEED_KEY, CURRENT_SEED_ID);
       const wroteCourses = writeJSON(STORAGE_KEY, data.officialCourses);
       setStorageBlocked(!wroteSeed || !wroteCourses);
+      setPersistenceBlocked(false);
     }
   }, [data.experiment, data.officialCourses, hydrated]);
 
@@ -454,6 +463,7 @@ export const useCourseData = () => {
     // 可选扩展字段：localStorage 写入失败（配额满 / 存储被禁用）时为 true。
     // 新增而非替换既有字段，App.tsx 等调用方即使不读取也能编译。
     storageBlocked,
+    persistenceBlocked,
     method,
     setMethod,
     experiment: data.experiment,
